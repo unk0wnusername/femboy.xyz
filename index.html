@@ -3,132 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="look at my website">
-    <meta name="keywords" content="Discord, Profile, Showcase, HTML, Web Design">
-    <meta name="author" content="made by simon">
-    <meta property="og:title" content="My Discord Profile">
-    <meta property="og:description" content="A cool webpage showcasing my Discord profile with some fun effects!">
-    <meta property="og:image" content="https://cdn.discordapp.com/avatars/791159616007962644/5851d60fef6bd91618e8e41676df9cd8.webp?size=1024&format=webp&width=467&height=467">
-    <meta property="og:url" content="https://discord.com/users/791159616007962644">
-    <title>My Discord Profile</title>
+    <title>femboy-lover.xyz</title>
+
+    <meta property="og:title" content="femboy-lover.xyz">
+    <meta property="og:description" content="the official website of shadowSEC">
+    <meta property="og:image" content="https://media.discordapp.net/attachments/1325492641407959041/1345651362289025024/meow.jpg?ex=67c552fd&is=67c4017d&hm=a731072455c370180fee8b74e40355b10340d90f0d82a9c4fabaf65d888e9546&=&format=webp&width=498&height=456">
+    <meta property="og:url" content="https://femboy-lover.xyz">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#ff0000">
+
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
         body {
-            font-family: 'Arial', sans-serif;
-            background: #2C2F33;
-            color: #fff;
+            background-color: #000000;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
-            padding: 0;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            overflow: hidden;
         }
 
-        .container {
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        .text-container {
+            background: linear-gradient(145deg, #1a0000, #300);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255,0,0,0.2);
             text-align: center;
-            background: #23272A;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
-            width: 90%;
-            max-width: 600px;
+            border: 2px solid #ff0000;
+            max-width: 800px;
+            animation: fadeIn 1s ease-in;
         }
 
-        .profile-header {
+        .donate-container {
+            background: linear-gradient(145deg, #1a0000, #300);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255,0,0,0.2);
+            text-align: center;
+            border: 2px solid #ff0000;
+            max-width: 800px;
+            animation: fadeIn 1.2s ease-in;
+        }
+
+        h1 {
+            color: #ff0000;
+            margin-bottom: 1.5rem;
             font-size: 2.5rem;
-            color: #7289DA;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            animation: fadeIn 2s ease-in-out;
+            text-shadow: 2px 2px 4px rgba(255,0,0,0.5);
         }
 
-        .profile-info {
-            margin: 20px 0;
-        }
-
-        .profile-info p {
+        p {
+            color: #ff6666;
+            line-height: 1.8;
             font-size: 1.1rem;
-            color: #99AAB5;
-            margin: 10px 0;
+            margin: 0;
         }
 
-        .profile-info span {
-            font-weight: bold;
-            color: #ffffff;
-        }
-
-        .avatar {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.6);
-            margin-bottom: 20px;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .avatar:hover {
-            transform: scale(1.1);
-        }
-
-        .btn {
-            background-color: #7289DA;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
+        .donate-box {
+            background: rgba(255, 0, 0, 0.1);
+            border: 2px solid #ff0000;
+            border-radius: 10px;
+            padding: 1.5rem;
+            color: #ff6666;
+            font-size: 1.2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            user-select: all;
             cursor: pointer;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 20px;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
         }
 
-        .btn:hover {
-            background-color: #99AAB5;
+        .donate-box:hover {
+            background: rgba(255, 0, 0, 0.2);
+            transform: scale(1.02);
         }
 
         @keyframes fadeIn {
-            0% {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <style>
+        /* Add this to your existing styles */
+        .discord-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(145deg, #ff0000, #cc0000);
+            padding: 12px 24px;
+            border-radius: 50px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(255,0,0,0.3);
+            transition: all 0.3s ease;
+            border: 2px solid #ff0000;
+            z-index: 1000;
+        }
+
+        .discord-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255,0,0,0.5);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="profile-header">
-            My Discord Profile
+    <a href="https://discord.gg/HYngQpqG" class="discord-button" target="_blank">Join Discord</a>
+    <div class="main-container">
+        <div class="text-container">
+            <h1>Welcome to shadowSEC</h1>
+            <p>Listen up, normies. You've stumbled into my digital domain, and I don't care if you like what you see. This is my world, my rules, and I'm here to shake things up. If you're triggered by raw authenticity and unfiltered truth, there's the virtual door. Still here? Then buckle up - this vlog isn't for the faint of heart. We're about to get real, and I won't sugar-coat anything for your comfort. Deal with it or scroll away.</p>
         </div>
-        <img src="https://cdn.discordapp.com/avatars/791159616007962644/5851d60fef6bd91618e8e41676df9cd8.webp?size=1024&format=webp&width=467&height=467" alt="Discord Avatar" class="avatar">
-        <div class="profile-info">
-            <p><span>Username:</span> YourDiscordUsername</p>
-            <p><span>Tag:</span> #1234</p>
-            <p><span>Status:</span> Online</p>
-            <p><span>Server:</span> Cool Server Name</p>
+        
+        <div class="donate-container">
+            <h2 style="color: #ff0000; margin-bottom: 1rem;">Support Us</h2>
+            <p style="margin-bottom: 1rem;">Help us maintain and grow our community!</p>
+            <div class="donate-box">
+                BTC: 1234567890abcdefghijk
+            </div>
         </div>
-        <a href="https://discord.com/users/791159616007962644" target="_blank">
-            <button class="btn">View Profile</button>
-        </a>
     </div>
-
-    <script>
-        // Optional effect: Bounce animation for the button on hover
-        const button = document.querySelector('.btn');
-        button.addEventListener('mouseover', function () {
-            button.style.transform = 'scale(1.1)';
-        });
-        button.addEventListener('mouseout', function () {
-            button.style.transform = 'scale(1)';
-        });
-    </script>
 </body>
 </html>
