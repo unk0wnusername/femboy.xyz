@@ -3,64 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Awesome Website</title>
+    <meta name="description" content="look at my website">
+    <meta name="keywords" content="Discord, Profile, Showcase, HTML, Web Design">
+    <meta name="author" content="made by simon">
+    <meta property="og:title" content="My Discord Profile">
+    <meta property="og:description" content="A cool webpage showcasing my Discord profile with some fun effects!">
+    <meta property="og:image" content="https://cdn.discordapp.com/avatars/791159616007962644/5851d60fef6bd91618e8e41676df9cd8.webp?size=1024&format=webp&width=467&height=467">
+    <meta property="og:url" content="https://discord.com/users/791159616007962644">
+    <title>My Discord Profile</title>
     <style>
-        * {
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #2C2F33;
+            color: #fff;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-        body {
-            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
-            color: #fff;
-            text-align: center;
-        }
-        .container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             height: 100vh;
+            overflow: hidden;
         }
-        h1 {
-            font-size: 3rem;
+
+        .container {
+            text-align: center;
+            background: #23272A;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .profile-header {
+            font-size: 2.5rem;
+            color: #7289DA;
+            text-transform: uppercase;
+            letter-spacing: 2px;
             margin-bottom: 20px;
             animation: fadeIn 2s ease-in-out;
         }
-        p {
-            font-size: 1.2rem;
-            margin-bottom: 30px;
+
+        .profile-info {
+            margin: 20px 0;
         }
-        button {
-            padding: 12px 24px;
-            font-size: 1rem;
+
+        .profile-info p {
+            font-size: 1.1rem;
+            color: #99AAB5;
+            margin: 10px 0;
+        }
+
+        .profile-info span {
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.6);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .avatar:hover {
+            transform: scale(1.1);
+        }
+
+        .btn {
+            background-color: #7289DA;
+            color: #fff;
+            padding: 10px 20px;
             border: none;
-            background: #ff758c;
-            color: white;
+            border-radius: 5px;
             cursor: pointer;
-            border-radius: 8px;
-            transition: 0.3s;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
         }
-        button:hover {
-            background: #ff3e66;
+
+        .btn:hover {
+            background-color: #99AAB5;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to My Cool Website</h1>
-        <p>A simple and stylish landing page with smooth animations.</p>
-        <button onclick="showAlert()">Click Me!</button>
+        <div class="profile-header">
+            My Discord Profile
+        </div>
+        <img src="https://cdn.discordapp.com/avatars/791159616007962644/5851d60fef6bd91618e8e41676df9cd8.webp?size=1024&format=webp&width=467&height=467" alt="Discord Avatar" class="avatar">
+        <div class="profile-info">
+            <p><span>Username:</span> YourDiscordUsername</p>
+            <p><span>Tag:</span> #1234</p>
+            <p><span>Status:</span> Online</p>
+            <p><span>Server:</span> Cool Server Name</p>
+        </div>
+        <a href="https://discord.com/users/791159616007962644" target="_blank">
+            <button class="btn">View Profile</button>
+        </a>
     </div>
+
     <script>
-        function showAlert() {
-            alert('Thanks for visiting! 🚀');
-        }
+        // Optional effect: Bounce animation for the button on hover
+        const button = document.querySelector('.btn');
+        button.addEventListener('mouseover', function () {
+            button.style.transform = 'scale(1.1)';
+        });
+        button.addEventListener('mouseout', function () {
+            button.style.transform = 'scale(1)';
+        });
     </script>
 </body>
 </html>
