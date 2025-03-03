@@ -4,87 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>femboy-lover.xyz</title>
-
+    
     <meta property="og:title" content="femboy-lover.xyz">
     <meta property="og:description" content="the official website of shadowSEC">
-    <meta property="og:image" content="https://media.discordapp.net/attachments/1325492641407959041/1345651362289025024/meow.jpg?ex=67c552fd&is=67c4017d&hm=a731072455c370180fee8b74e40355b10340d90f0d82a9c4fabaf65d888e9546&=&format=webp&width=498&height=456">
+    <meta property="og:image" content="https://media.discordapp.net/attachments/1325492641407959041/1345651362289025024/meow.jpg">
     <meta property="og:url" content="https://femboy-lover.xyz">
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#ff0000">
 
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
-            background-color: #000000;
+            background-color: #0d0d0d;
             font-family: 'Poppins', sans-serif;
-            margin: 0;
-            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            color: white;
+            overflow-x: hidden;
         }
 
         .main-container {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            padding: 2rem;
-        }
-
-        .text-container {
-            background: linear-gradient(145deg, #1a0000, #300);
-            padding: 3rem;
-            border-radius: 20px;
-            box-shadow: 0 0 30px rgba(255,0,0,0.2);
             text-align: center;
-            border: 2px solid #ff0000;
-            max-width: 800px;
-            animation: fadeIn 1s ease-in;
-        }
-
-        .donate-container {
-            background: linear-gradient(145deg, #1a0000, #300);
+            max-width: 900px;
             padding: 2rem;
+            background: rgba(255, 0, 0, 0.1);
             border-radius: 20px;
-            box-shadow: 0 0 30px rgba(255,0,0,0.2);
-            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);
             border: 2px solid #ff0000;
-            max-width: 800px;
-            animation: fadeIn 1.2s ease-in;
+            animation: fadeIn 1s ease-in-out;
         }
 
         h1 {
-            color: #ff0000;
-            margin-bottom: 1.5rem;
-            font-size: 2.5rem;
-            text-shadow: 2px 2px 4px rgba(255,0,0,0.5);
+            font-size: 3rem;
+            color: #ff4444;
+            text-shadow: 2px 2px 10px rgba(255, 0, 0, 0.6);
+            margin-bottom: 1rem;
         }
 
         p {
-            color: #ff6666;
+            font-size: 1.2rem;
             line-height: 1.8;
-            font-size: 1.1rem;
-            margin: 0;
+            color: #ffaaaa;
+        }
+
+        .donate-container {
+            margin-top: 2rem;
+            padding: 2rem;
+            border-radius: 20px;
+            background: rgba(255, 0, 0, 0.15);
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.3);
+            border: 2px solid #ff0000;
         }
 
         .donate-box {
-            background: rgba(255, 0, 0, 0.1);
-            border: 2px solid #ff0000;
+            background: #220000;
+            padding: 1rem;
             border-radius: 10px;
-            padding: 1.5rem;
-            color: #ff6666;
             font-size: 1.2rem;
-            margin: 1.5rem 0;
-            text-align: center;
+            color: #ff8888;
+            border: 2px solid #ff0000;
             user-select: all;
+            transition: all 0.3s;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
 
         .donate-box:hover {
-            background: rgba(255, 0, 0, 0.2);
-            transform: scale(1.02);
+            transform: scale(1.05);
+            background: #330000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+
+        .discord-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(145deg, #ff2222, #cc0000);
+            padding: 14px 28px;
+            border-radius: 50px;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            transition: all 0.3s;
+            border: 2px solid #ff0000;
+        }
+
+        .discord-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.7);
         }
 
         @keyframes fadeIn {
@@ -92,45 +109,18 @@
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
-    <style>
-        /* Add this to your existing styles */
-        .discord-button {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(145deg, #ff0000, #cc0000);
-            padding: 12px 24px;
-            border-radius: 50px;
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            box-shadow: 0 0 20px rgba(255,0,0,0.3);
-            transition: all 0.3s ease;
-            border: 2px solid #ff0000;
-            z-index: 1000;
-        }
-
-        .discord-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(255,0,0,0.5);
-        }
-    </style>
 </head>
 <body>
     <a href="https://discord.gg/HYngQpqG" class="discord-button" target="_blank">Join Discord</a>
     <div class="main-container">
-        <div class="text-container">
-            <h1>Welcome to shadowSEC</h1>
-            <p>Listen up, normies. You've stumbled into my digital domain, and I don't care if you like what you see. This is my world, my rules, and I'm here to shake things up. If you're triggered by raw authenticity and unfiltered truth, there's the virtual door. Still here? Then buckle up - this vlog isn't for the faint of heart. We're about to get real, and I won't sugar-coat anything for your comfort. Deal with it or scroll away.</p>
-        </div>
-        
-        <div class="donate-container">
-            <h2 style="color: #ff0000; margin-bottom: 1rem;">Support Us</h2>
-            <p style="margin-bottom: 1rem;">Help us maintain and grow our community!</p>
-            <div class="donate-box">
-                BTC: bc1q56hsatg5yuedzu52vlw7qknf42ty7x3q7tnhu6
-            </div>
-        </div>
+        <h1>Welcome to shadowSEC</h1>
+        <p>If you're looking for the real deal, you've found it. No filters, no apologies, just raw energy. Stay if you dare.</p>
+    </div>
+    
+    <div class="donate-container">
+        <h2 style="color: #ff4444;">Support Us</h2>
+        <p>Your contribution helps us keep this movement alive.</p>
+        <div class="donate-box">BTC: bc1q56hsatg5yuedzu52vlw7qknf42ty7x3q7tnhu6</div>
     </div>
 </body>
 </html>
