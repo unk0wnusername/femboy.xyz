@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>femboy-lover.xyz</title>
-
-    <meta property="og:title" content="femboy-lover.xyz">
-    <meta property="og:description" content="the official website of shadowSEC">
-    <meta property="og:image" content="https://media.discordapp.net/attachments/1325492641407959041/1345651362289025024/meow.jpg?ex=67c552fd&is=67c4017d&hm=a731072455c370180fee8b74e40355b10340d90f0d82a9c4fabaf65d888e9546&=&format=webp&width=498&height=456">
+    <title>shadowSEC - Official Website</title>
+    <meta name="description" content="shadowSEC - Explore tools, watch videos, and learn more about cybersecurity.">
+    <meta property="og:title" content="shadowSEC - Official Website">
+    <meta property="og:description" content="Explore tools, watch videos, and learn more about cybersecurity.">
+    <meta property="og:image" content="https://example.com/preview.jpg">
     <meta property="og:url" content="https://femboy-lover.xyz">
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#ff0000">
@@ -34,19 +34,24 @@
             top: 10px;
             display: flex;
             gap: 20px;
-            background: #300;
-            padding: 10px 20px;
+            background: linear-gradient(145deg, #300, #500);
+            padding: 12px 24px;
             border-radius: 50px;
-            box-shadow: 0 0 20px rgba(255,0,0,0.5);
+            box-shadow: 0 0 20px rgba(255,0,0,0.7);
+            transition: all 0.3s;
+        }
+        .nav:hover {
+            transform: scale(1.05);
         }
         .nav a {
             text-decoration: none;
-            color: #ff6666;
+            color: #ff9999;
             font-weight: bold;
             transition: 0.3s;
         }
         .nav a:hover {
             color: #ff0000;
+            text-shadow: 0 0 10px rgba(255,0,0,0.8);
         }
         .container {
             text-align: center;
@@ -54,17 +59,23 @@
             animation: fadeIn 1s ease-in;
         }
         h1 {
-            font-size: 2.5rem;
+            font-size: 3rem;
             color: #ff0000;
-            text-shadow: 2px 2px 5px rgba(255,0,0,0.5);
+            text-shadow: 3px 3px 8px rgba(255,0,0,0.7);
+            animation: pulse 2s infinite alternate;
         }
         p {
             font-size: 1.2rem;
-            color: #ff6666;
+            color: #ff9999;
+            opacity: 0.8;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
         }
     </style>
 </head>
