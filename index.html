@@ -91,6 +91,43 @@
             from { transform: scale(1); }
             to { transform: scale(1.05); }
         }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 20px;
+        }
+        
+        .video-card {
+            background: linear-gradient(145deg, #300, #500);
+            border-radius: 15px;
+            padding: 20px;
+            transition: transform 0.3s;
+            box-shadow: 0 0 15px rgba(255,0,0,0.3);
+        }
+        
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 25px rgba(255,0,0,0.5);
+        }
+        
+        .video-title {
+            color: #ff9999;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .view-counter {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(145deg, #300, #500);
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: #ff9999;
+            box-shadow: 0 0 15px rgba(255,0,0,0.3);
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -107,25 +144,32 @@
         function loadPage(page) {
             let content = document.getElementById('content');
             content.style.opacity = 0;
+            
+            if (!localStorage.getItem('pageViews')) {
+                localStorage.setItem('pageViews', '0');
+            }
+            
             setTimeout(() => {
                 if (page === 'home') {
                     content.innerHTML = `<h1>Welcome to shadowSEC</h1><p>Our website is still in development, sorry ):</p>`;
                 } else if (page === 'tools') {
-                    content.innerHTML = `<h1>Tool Downloads</h1><p>Here you can find useful security tools.</p>`;
+                    content.innerHTML = `<h1>COMING SOON</h1><p>ich leib die.</p>`;
                 } else if (page === 'videos') {
+                    let views = parseInt(localStorage.getItem('pageViews')) + 1;
+                    localStorage.setItem('pageViews', views.toString());
+                    
                     content.innerHTML = `
                         <h1>Videos</h1>
-                        <p>Watch our latest tutorials and security-related content.</p>
-                        <div class="video-container">
-                            <div>
-                                <h3>Video Title 1</h3>
+                        <p>check out and play around with some of the shit i made</p>
+                        <div class="video-grid">
+                            <div class="video-card">
+                                <h3 class="video-title">the god nuker</h3>
                                 <iframe class="video" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
                             </div>
-                            <div>
-                                <h3>Video Title 2</h3>
-                                <iframe class="video" src="https://www.youtube.com/embed/3JZ_D3ELwOQ" frameborder="0" allowfullscreen></iframe>
-                            </div>
-                        </div>
+                            <div class="video-card">
+                                <h3 class="video-title">the crimebot selfbot</h3>
+                                <iframe class="video" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
+
                     `;
                 }
                 content.style.opacity = 1;
