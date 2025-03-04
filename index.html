@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>shadowSEC - Official Website</title>
-    <meta name="description" content="shadowSEC - lets burn the world">
+    <meta name="description" content="shadowSEC - Explore tools, watch videos, and learn more about cybersecurity.">
     <meta property="og:title" content="shadowSEC - Official Website">
-    <meta property="og:description" content="why dont you come fuck around with us :3">
-    <meta property="og:image" content="https://media.discordapp.net/attachments/1325492641407959041/1346341093364596776/meow.jpg?ex=67c7d55a&is=67c683da&hm=4d8706f0d9df5b7d5142876095de2d559fbe7a86ab64dc5b2684fb3fbd1ea839&=&format=webp&width=498&height=456">
+    <meta property="og:description" content="Explore tools, watch videos, and learn more about cybersecurity.">
+    <meta property="og:image" content="https://example.com/preview.jpg">
     <meta property="og:url" content="https://femboy-lover.xyz">
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#ff0000">
@@ -69,11 +69,27 @@
             color: #ff9999;
             opacity: 0.8;
         }
+        .video-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .video {
+            width: 80%;
+            max-width: 600px;
+            border: 3px solid #ff0000;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255,0,0,0.5);
+        }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
         }
     </style>
 </head>
@@ -97,7 +113,20 @@
                 } else if (page === 'tools') {
                     content.innerHTML = `<h1>Tool Downloads</h1><p>Here you can find useful security tools.</p>`;
                 } else if (page === 'videos') {
-                    content.innerHTML = `<h1>Videos</h1><p>Watch our latest tutorials and security-related content.</p>`;
+                    content.innerHTML = `
+                        <h1>Videos</h1>
+                        <p>Watch our latest tutorials and security-related content.</p>
+                        <div class="video-container">
+                            <div>
+                                <h3>Video Title 1</h3>
+                                <iframe class="video" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
+                            </div>
+                            <div>
+                                <h3>Video Title 2</h3>
+                                <iframe class="video" src="https://www.youtube.com/embed/3JZ_D3ELwOQ" frameborder="0" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                    `;
                 }
                 content.style.opacity = 1;
             }, 300);
