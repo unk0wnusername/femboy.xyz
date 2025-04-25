@@ -1,77 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coming Soon</title>
   <style>
     body {
-      background-color: #ff69b4;
-      background-image: url('https://www.furaffinity.net/view/59952168/');
-      background-size: 100px;
-      background-repeat: repeat;
-      color: #fff;
-      font-family: 'Comic Sans MS', cursive, sans-serif;
-      text-align: center;
       margin: 0;
       padding: 0;
+      height: 100vh;
+      background: url('https://cdn.discordapp.com/attachments/1364739553608470694/1365364479671668786/image0.gif?ex=680d0a43&is=680bb8c3&hm=f53c12de579386ab1e26ed61fadbba75d28bc1e0ca74585d4d486f179441a339&') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       overflow: hidden;
-    }
+    }.typing {
+  font-size: 3rem;
+  color: white;
+  text-shadow: 2px 2px 4px #000;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 4px solid white;
+  animation: typing 4s steps(40, end), blink-caret 0.75s step-end infinite;
+}
 
-    h1 {
-      font-size: 5rem;
-      text-shadow: 2px 2px #000;
-      margin-top: 15%;
-      animation: blink 1.2s infinite alternate;
-    }
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
 
-    @keyframes blink {
-      from { opacity: 1; }
-      to { opacity: 0.6; }
-    }
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: white; }
+}
 
-    .video-container {
-      position: fixed;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    iframe {
-      width: 0;
-      height: 0;
-      visibility: hidden;
-    }
-
-    .click-to-play {
-      margin-top: 20px;
-      font-size: 1.5rem;
-      background: #fff;
-      color: #ff69b4;
-      padding: 10px 20px;
-      border-radius: 10px;
-      cursor: pointer;
-      box-shadow: 0 0 10px #000;
-      display: inline-block;
-    }
   </style>
 </head>
 <body>
-  <h1>Coming Soon</h1>
-  <div class="click-to-play" onclick="unmuteVideo()">Click to Blast the Song</div>
-
-  <div class="video-container">
-    <iframe id="ytplayer"
-      src="https://www.youtube.com/embed/3DhIrgwN8oU?autoplay=1&mute=1&loop=1&playlist=3DhIrgwN8oU"
-      allow="autoplay; encrypted-media"
-      allowfullscreen>
-    </iframe>
-  </div>
-
-  <script>
-    function unmuteVideo() {
-      const player = document.getElementById("ytplayer");
-      player.src = "https://www.youtube.com/embed/3DhIrgwN8oU?autoplay=1&mute=0&loop=1&playlist=3DhIrgwN8oU";
-    }
-  </script>
+  <div class="typing">Coming Soon... More Info Soon!</div>
+  <audio autoplay loop>
+    <source src="https://music.youtube.com/watch?v=alu-LFbSsDw&si=LxbZtmaYrjMYpZXE" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
 </body>
 </html>
