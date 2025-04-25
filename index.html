@@ -2,62 +2,76 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Hacked by shadowSEC</title>
+  <title>Coming Soon</title>
   <style>
     body {
-      background-color: black;
-      color: lime;
-      font-family: monospace;
+      background-color: #ff69b4;
+      background-image: url('https://media.tenor.com/rFfM1iVybRMAAAAd/boykisser.gif');
+      background-size: 100px;
+      background-repeat: repeat;
+      color: #fff;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
       text-align: center;
-      padding-top: 50px;
-    }
-    #ascii {
-      white-space: pre;
-      font-size: 14px;
-      line-height: 1.1;
-    }
-    h1 {
-      color: red;
-      font-size: 2em;
-      margin-bottom: 30px;
-      animation: flicker 1s infinite;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
     }
 
-    @keyframes flicker {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
+    h1 {
+      font-size: 5rem;
+      text-shadow: 2px 2px #000;
+      margin-top: 15%;
+      animation: blink 1.2s infinite alternate;
+    }
+
+    @keyframes blink {
+      from { opacity: 1; }
+      to { opacity: 0.6; }
+    }
+
+    .video-container {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    iframe {
+      width: 0;
+      height: 0;
+      visibility: hidden;
+    }
+
+    .click-to-play {
+      margin-top: 20px;
+      font-size: 1.5rem;
+      background: #fff;
+      color: #ff69b4;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #000;
+      display: inline-block;
     }
   </style>
 </head>
 <body>
-  <h1>Hacked by shadowSEC</h1>
-  <div id="ascii"></div>
+  <h1>Coming Soon</h1>
+  <div class="click-to-play" onclick="unmuteVideo()">Click to Blast the Song</div>
+
+  <div class="video-container">
+    <iframe id="ytplayer"
+      src="https://www.youtube.com/embed/3DhIrgwN8oU?autoplay=1&mute=1&loop=1&playlist=3DhIrgwN8oU"
+      allow="autoplay; encrypted-media"
+      allowfullscreen>
+    </iframe>
+  </div>
 
   <script>
-    const frames = [
-`(⌐■_■)
-  \\
-   \\   Trollface`,
-`( ͡° ͜ʖ ͡°)
-   /|
-  / |  Trollface`,
-`(ಠ_ಠ)
-  <)   Trollface
-  / \\`,
-`(¬‿¬)
-  /\\   Trollface
- /  \\`
-    ];
-
-    let i = 0;
-    const asciiDiv = document.getElementById('ascii');
-
-    function animate() {
-      asciiDiv.textContent = frames[i];
-      i = (i + 1) % frames.length;
+    function unmuteVideo() {
+      const player = document.getElementById("ytplayer");
+      player.src = "https://www.youtube.com/embed/3DhIrgwN8oU?autoplay=1&mute=0&loop=1&playlist=3DhIrgwN8oU";
     }
-
-    setInterval(animate, 400);
   </script>
 </body>
 </html>
