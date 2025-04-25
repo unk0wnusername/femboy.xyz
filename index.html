@@ -1,42 +1,63 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Update Soon</title>
+  <meta charset="UTF-8">
+  <title>Hacked by shadowSEC</title>
   <style>
     body {
       background-color: black;
-      color: white;
-      font-family: Arial, sans-serif;
-      height: 100vh;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      color: lime;
+      font-family: monospace;
       text-align: center;
+      padding-top: 50px;
     }
-    .spinner {
-      animation: spin 4s linear infinite;
-      width: 300px;
-      height: 300px;
-      margin-bottom: 20px;
-    }
-    @keyframes spin {
-      from {
-        transform: rotate(0deg);
-      }
-      to {
-        transform: rotate(360deg);
-      }
+    #ascii {
+      white-space: pre;
+      font-size: 14px;
+      line-height: 1.1;
     }
     h1 {
-      font-size: 2rem;
+      color: red;
+      font-size: 2em;
+      margin-bottom: 30px;
+      animation: flicker 1s infinite;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
     }
   </style>
 </head>
 <body>
-  <img src="https://cdn.discordapp.com/attachments/1364739553608470694/1365295501771014225/output-onlinegiftools.gif?ex=680cca05&is=680b7885&hm=72e87b1f109276da7f42a80d84d7e8f155838f6004daf104c07f108fbbd5db14&" alt="Boykisser spinning" class="spinner" />
-  <h1>Update Soon</h1>
+  <h1>Hacked by shadowSEC</h1>
+  <div id="ascii"></div>
+
+  <script>
+    const frames = [
+`(⌐■_■)
+  \\
+   \\   Trollface`,
+`( ͡° ͜ʖ ͡°)
+   /|
+  / |  Trollface`,
+`(ಠ_ಠ)
+  <)   Trollface
+  / \\`,
+`(¬‿¬)
+  /\\   Trollface
+ /  \\`
+    ];
+
+    let i = 0;
+    const asciiDiv = document.getElementById('ascii');
+
+    function animate() {
+      asciiDiv.textContent = frames[i];
+      i = (i + 1) % frames.length;
+    }
+
+    setInterval(animate, 400);
+  </script>
 </body>
 </html>
