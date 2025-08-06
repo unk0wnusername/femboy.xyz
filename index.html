@@ -1,73 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>femboy.systems - Diagnostic</title>
   <style>
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; }html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #0b0b0b;
+  font-family: 'Courier New', monospace;
+  color: #f0aaff;
+  height: 100%;
+  overflow: hidden;
+}
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      background-color: #0b0b0b;
-      font-family: 'Courier New', monospace;
-      color: #f0aaff;
-      height: 100%;
-      overflow: hidden;
-    }
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 20px;
+}
 
-    .container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-      padding: 20px;
-    }
+.terminal {
+  background-color: #111;
+  border: 2px solid #ff66cc;
+  border-radius: 12px;
+  padding: 30px;
+  max-width: 850px;
+  width: 100%;
+  height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 0 20px #ff66cc80;
+  font-size: 18px;
+  line-height: 1.6;
+  transition: font-size 0.3s ease;
+}
 
-    .terminal {
-      background-color: #111;
-      border: 2px solid #ff66cc;
-      border-radius: 12px;
-      padding: 30px;
-      max-width: 850px;
-      width: 100%;
-      height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 0 20px #ff66cc80;
-      font-size: 18px;
-      line-height: 1.6;
-      transition: font-size 0.3s ease;
-    }
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #ff80ff;
+  font-size: 26px;
+  text-shadow: 0 0 5px #ff99ff;
+}
 
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #ff80ff;
-      font-size: 26px;
-      text-shadow: 0 0 5px #ff99ff;
-    }
+audio {
+  position: fixed;
+  bottom: 15px;
+  left: 15px;
+  width: 260px;
+  opacity: 0.6;
+  z-index: 10;
+}
 
-    audio {
-      position: fixed;
-      bottom: 15px;
-      left: 15px;
-      width: 260px;
-      opacity: 0.6;
-      z-index: 10;
-    }
+@media (max-width: 600px) {
+  .terminal { font-size: 14px; }
+  audio { width: 200px; }
+}
 
-    @media (max-width: 600px) {
-      .terminal { font-size: 14px; }
-      audio { width: 200px; }
-    }
+::selection { background-color: #ff66cc66; }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-thumb {
+  background: #ff66cc;
+  border-radius: 10px;
+}
 
-    ::selection { background-color: #ff66cc66; }
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-thumb {
-      background: #ff66cc;
-      border-radius: 10px;
-    }
   </style>
 </head>
 <body>
@@ -76,14 +74,10 @@
       <h1>femboy.systems - diagnostic mode</h1>
       <pre id="output">Initiating system scan...</pre>
     </div>
-  </div>
-
-  <audio autoplay loop>
+  </div>  <audio autoplay loop>
     <source src="https://cdn.discordapp.com/attachments/1373066456937533580/1402746841161924648/Seven_Minutes_in_Heaven.mp3" type="audio/mpeg">
     Your browser does not support audio.
-  </audio>
-
-  <script>
+  </audio>  <script>
     const output = document.getElementById("output")
     const terminal = document.querySelector(".terminal")
     const sleep = ms => new Promise(r => setTimeout(r, ms))
@@ -229,6 +223,5 @@
       const info = await getSystemInfo()
       await typeLines(info)
     })()
-  </script>
-</body>
+  </script></body>
 </html>
