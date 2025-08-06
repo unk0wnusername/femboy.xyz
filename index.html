@@ -12,58 +12,53 @@
     }
 
     html, body {
+      width: 100%;
       height: 100%;
-      background: url('https://files.catbox.moe/yfakne.png') center center fixed no-repeat;
-      background-size: cover;
       font-family: 'Courier New', monospace;
       color: #ffeaff;
+      background: url('https://files.catbox.moe/yfakne.png') center center fixed no-repeat;
+      background-size: cover;
       overflow: hidden;
     }
 
     .overlay {
-      background-color: rgba(0, 0, 0, 0.8);
+      background-color: rgba(0, 0, 0, 0.85);
       width: 100%;
       height: 100%;
       display: flex;
-      align-items: center;
+      flex-direction: column;
       justify-content: center;
+      align-items: center;
       padding: 20px;
-      position: relative;
     }
 
     .terminal {
-      background-color: rgba(26, 26, 26, 0.95);
+      background-color: #121212;
       border: 2px solid #ff66cc;
-      border-radius: 20px;
-      padding: 40px;
+      border-radius: 15px;
+      padding: 30px;
       width: 100%;
       max-width: 900px;
-      height: 80vh;
+      max-height: 80vh;
       overflow-y: auto;
       box-shadow: 0 0 30px #ff66cc;
-      font-size: 17px;
-      line-height: 1.6;
+      font-size: 16px;
+      line-height: 1.5;
       white-space: pre-wrap;
-      transition: transform 0.2s ease-in-out;
-      cursor: pointer;
-    }
-
-    .terminal:hover {
-      transform: scale(1.01);
-      box-shadow: 0 0 40px #ff66cc;
+      position: relative;
     }
 
     h1 {
       color: #ff99dd;
-      font-size: 26px;
+      font-size: 24px;
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       text-shadow: 0 0 10px #ffccff;
     }
 
     .click-prompt {
       text-align: center;
-      font-size: 18px;
+      font-size: 16px;
       color: #ffccff;
       margin-top: 15px;
       animation: blink 1.2s infinite alternate;
@@ -74,12 +69,26 @@
       to { opacity: 0.4; }
     }
 
+    .yt-container {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 640px;
+      aspect-ratio: 16 / 9;
+      position: relative;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 0 15px #ff66cc;
+    }
+
     .music-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
+      margin-top: 20px;
       padding: 10px 20px;
-      background: rgba(255, 105, 180, 0.8);
+      background: rgba(255, 105, 180, 0.85);
       color: white;
       border: none;
       border-radius: 8px;
@@ -100,7 +109,7 @@
     }
 
     ::-webkit-scrollbar {
-      width: 8px;
+      width: 6px;
     }
 
     ::-webkit-scrollbar-thumb {
@@ -110,7 +119,8 @@
 
     @media (max-width: 768px) {
       .terminal {
-        font-size: 15px;
+        font-size: 14px;
+        padding: 20px;
       }
 
       .music-btn {
@@ -122,24 +132,41 @@
 </head>
 <body>
   <div class="overlay">
-    <div class="terminal" onclick="revealInfo()">
+    <div class="terminal" id="terminal">
       <h1>femboy.systems — diagnostic mode</h1>
-      <pre id="output">Click me</pre>
-      <div class="click-prompt">▸ Click me ▸</div>
+      <pre id="output">Click to begin system scan...</pre>
+      <div class="click-prompt">▸ Click anywhere to begin ▸</div>
+    </div>
+
+    <button class="music-btn" onclick="playYouTube()">▶ Enable Music</button>
+    
+    <div class="yt-container">
+      <iframe
+        id="ytplayer"
+        src="https://www.youtube.com/embed/x0jrUwxUFLU?enablejsapi=1&rel=0&autoplay=0&mute=1"
+        allow="autoplay"
+        allowfullscreen
+      ></iframe>
     </div>
   </div>
 
-  <button class="music-btn" onclick="window.open('https://www.youtube.com/watch?v=x0jrUwxUFLU', '_blank')">
-    ▶ Play Music
-  </button>
-
   <script>
-    const output = document.getElementById('output');
-    const prompt = document.querySelector('.click-prompt');
+    const output = document.getElementById("output");
+    const prompt = document.querySelector(".click-prompt");
+    const terminal = document.getElementById("terminal");
+    let hasRun = false;
+
+    terminal.addEventListener("click", () => {
+      if (!hasRun) {
+        prompt.style.display = "none";
+        revealInfo();
+        hasRun = true;
+      }
+    });
 
     async function fetchIP() {
       try {
-        const resp = await fetch('https://ipapi.co/json/');
+        const resp = await fetch("https://ipapi.co/json/");
         return resp.ok ? await resp.json() : null;
       } catch {
         return null;
@@ -148,32 +175,60 @@
 
     async function getSystemInfo() {
       const ip = await fetchIP();
-      let text = '';
+      const lines = [];
 
       if (ip) {
-        text += `IP Address: ${ip.ip}\n`;
-        text += `Location: ${ip.city}, ${ip.region}, ${ip.country_name}\n`;
-        text += `Org: ${ip.org}\n`;
-        text += `Timezone: ${ip.timezone}\n`;
+        lines.push(`IP Address: ${ip.ip}`);
+        lines.push(`Location: ${ip.city}, ${ip.region}, ${ip.country_name}`);
+        lines.push(`Org: ${ip.org}`);
+        lines.push(`Timezone: ${ip.timezone}`);
       } else {
-        text += 'IP info unavailable.\n';
+        lines.push("IP info unavailable.");
       }
 
-      text += `User Agent: ${navigator.userAgent}\n`;
-      text += `Platform: ${navigator.platform}\n`;
-      text += `Language: ${navigator.language}\n`;
-      text += `Resolution: ${screen.width}×${screen.height}\n`;
-      text += `Online: ${navigator.onLine ? 'Yes' : 'No'}\n`;
-      text += `RAM: ${navigator.deviceMemory || 'Unknown'} GB\n`;
-      text += `Cores: ${navigator.hardwareConcurrency || 'Unknown'}\n`;
+      lines.push(`User Agent: ${navigator.userAgent}`);
+      lines.push(`Platform: ${navigator.platform}`);
+      lines.push(`Language: ${navigator.language}`);
+      lines.push(`Resolution: ${screen.width}×${screen.height}`);
+      lines.push(`Online: ${navigator.onLine ? "Yes" : "No"}`);
+      lines.push(`RAM: ${navigator.deviceMemory || "Unknown"} GB`);
+      lines.push(`Cores: ${navigator.hardwareConcurrency || "Unknown"}`);
 
-      return text;
+      return lines;
     }
 
     async function revealInfo() {
-      const info = await getSystemInfo();
-      output.textContent = info;
-      prompt.style.display = 'none';
+      const lines = await getSystemInfo();
+      output.textContent = "";
+      for (let line of lines) {
+        await typeLine(line);
+      }
+    }
+
+    function typeLine(text) {
+      return new Promise((resolve) => {
+        let i = 0;
+        const interval = setInterval(() => {
+          output.textContent += text[i++];
+          if (i === text.length) {
+            clearInterval(interval);
+            output.textContent += "\n";
+            setTimeout(resolve, 100);
+          }
+        }, 25); // Typing speed
+      });
+    }
+
+    function playYouTube() {
+      const player = document.getElementById("ytplayer");
+      player.contentWindow.postMessage(
+        '{"event":"command","func":"unMute","args":""}',
+        "*"
+      );
+      player.contentWindow.postMessage(
+        '{"event":"command","func":"playVideo","args":""}',
+        "*"
+      );
     }
   </script>
 </body>
