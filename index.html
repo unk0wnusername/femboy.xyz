@@ -3,101 +3,149 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Your Info</title>
+  <title>Power Info Panel</title>
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background: url('https://media.tenor.com/6p-NO4dUXsMAAAAd/boykisser.gif') center center / cover no-repeat fixed;
-      color: white;
+      color: #fff;
     }
     .overlay {
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
       min-height: 100vh;
+      padding: 40px 20px;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px;
     }
     .card {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.05);
       border-radius: 16px;
       padding: 30px;
-      max-width: 700px;
+      max-width: 800px;
       width: 100%;
-      text-align: center;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      text-align: left;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
     }
     h1 {
-      margin-bottom: 24px;
-      font-size: 28px;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 32px;
+      color: #00f5ff;
     }
     .info {
-      font-size: 16px;
-      margin: 10px 0;
+      font-size: 15px;
+      margin: 8px 0;
       word-break: break-word;
     }
     hr {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.2);
       margin: 20px 0;
-      border-color: rgba(255,255,255,0.2);
     }
   </style>
 </head>
 <body>
   <div class="overlay">
     <div class="card">
-      <h1>Your IP & Device Info</h1>
-      <div id="ip" class="info">Fetching info...</div>
-      <div id="city" class="info"></div>
-      <div id="region" class="info"></div>
-      <div id="country" class="info"></div>
-      <div id="org" class="info"></div>
-      <div id="loc" class="info"></div>
-      <div id="vpn" class="info"></div>
-      <hr>
-      <div id="userAgent" class="info"></div>
-      <div id="platform" class="info"></div>
-      <div id="screen" class="info"></div>
-      <div id="language" class="info"></div>
-      <div id="timezone" class="info"></div>
+      <h1>Your Device & Network Info</h1>
+      <div id="ipInfo"></div>
+      <hr />
+      <div id="deviceInfo"></div>
     </div>
   </div>
 
   <script>
-    fetch("https://ip-api.com/json/")
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("ip").textContent = `IP Address: ${data.query}`;
-        document.getElementById("city").textContent = `City: ${data.city}`;
-        document.getElementById("region").textContent = `Region: ${data.regionName}`;
-        document.getElementById("country").textContent = `Country: ${data.country}`;
-        document.getElementById("org").textContent = `ISP: ${data.org}`;
-        document.getElementById("loc").textContent = `Location: ${data.lat}, ${data.lon}`;
+    const ipDiv = document.getElementById('ipInfo');
+    const deviceDiv = document.getElementById('deviceInfo');
 
-        fetch(`https://proxycheck.io/v2/${data.query}?vpn=1`)
-          .then(r => r.json())
-          .then(proxyData => {
-            const info = proxyData[data.query];
-            if (info && info.proxy === "yes") {
-              document.getElementById("vpn").textContent = `VPN/Proxy: Detected`;
-            } else {
-              document.getElementById("vpn").textContent = `VPN/Proxy: Not Detected`;
-            }
-          })
-          .catch(() => {
-            document.getElementById("vpn").textContent = `VPN/Proxy: Unknown`;
-          });
-      })
-      .catch(() => {
-        document.getElementById("ip").textContent = "Could not fetch IP info.";
-      });
+    async function getIPInfo() {
+      try {
+        const res = await fetch("https://ip-api.com/json/");
+        const data = await res.json();
+        ipDiv.innerHTML = `
+          <div class="info">IP Address: ${data.query}</div>
+          <div class="info">City: ${data.city}</div>
+          <div class="info">Region: ${data.regionName}</div>
+          <div class="info">Country: ${data.country}</div>
+          <div class="info">Location: ${data.lat}, ${data.lon}</div>
+          <div class="info">ISP: ${data.org}</div>
+        `;
 
-    document.getElementById("userAgent").textContent = `User Agent: ${navigator.userAgent}`;
-    document.getElementById("platform").textContent = `Platform: ${navigator.platform}`;
-    document.getElementById("screen").textContent = `Screen: ${window.screen.width}x${window.screen.height}`;
-    document.getElementById("language").textContent = `Language: ${navigator.language}`;
-    document.getElementById("timezone").textContent = `Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
+        const vpnCheck = await fetch(`https://proxycheck.io/v2/${data.query}?vpn=1&asn=1`);
+        const vpnData = await vpnCheck.json();
+        const result = vpnData[data.query];
+        let vpnStatus = result.proxy === 'yes' ? '🛑 VPN/Proxy Detected' : '✅ No VPN/Proxy Detected';
+
+        ipDiv.innerHTML += `<div class="info">VPN Check: ${vpnStatus}</div>`;
+      } catch (err) {
+        ipDiv.innerHTML = "<div class='info'>Failed to retrieve IP info.</div>";
+      }
+    }
+
+    function getCanvasFingerprint() {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.textBaseline = "top";
+      ctx.font = "14px 'Arial'";
+      ctx.fillText("Fingerprint!", 2, 2);
+      return canvas.toDataURL();
+    }
+
+    async function getAudioFingerprint() {
+      try {
+        const ctx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 44100, 44100);
+        const osc = ctx.createOscillator();
+        const compressor = ctx.createDynamicsCompressor();
+        osc.type = 'triangle';
+        osc.frequency.value = 10000;
+        osc.connect(compressor);
+        compressor.connect(ctx.destination);
+        osc.start(0);
+        const buffer = await ctx.startRendering();
+        let sum = 0;
+        for (let i = 0; i < buffer.length; i++) {
+          sum += Math.abs(buffer.getChannelData(0)[i]);
+        }
+        return sum.toString().slice(0, 10);
+      } catch {
+        return 'Unavailable';
+      }
+    }
+
+    async function getDeviceInfo() {
+      const canvasHash = getCanvasFingerprint();
+      const audioHash = await getAudioFingerprint();
+
+      deviceDiv.innerHTML = `
+        <div class="info">User Agent: ${navigator.userAgent}</div>
+        <div class="info">Platform: ${navigator.platform}</div>
+        <div class="info">Language: ${navigator.language}</div>
+        <div class="info">Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}</div>
+        <div class="info">Screen: ${screen.width}x${screen.height} @${screen.colorDepth}bit</div>
+        <div class="info">CPU Threads: ${navigator.hardwareConcurrency || 'Unknown'}</div>
+        <div class="info">Touch Support: ${'ontouchstart' in window ? 'Yes' : 'No'}</div>
+        <div class="info">WebGL Renderer: ${getWebGLRenderer()}</div>
+        <div class="info">Canvas Hash: ${canvasHash.slice(-16)}</div>
+        <div class="info">Audio Hash: ${audioHash}</div>
+      `;
+    }
+
+    function getWebGLRenderer() {
+      try {
+        const canvas = document.createElement("canvas");
+        const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+        return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+      } catch {
+        return "Unavailable";
+      }
+    }
+
+    getIPInfo();
+    getDeviceInfo();
   </script>
 </body>
 </html>
