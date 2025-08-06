@@ -3,18 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Intelligence Report<title>
+  <title>femboy.systems - Diagnostic</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html, body {
       margin: 0;
       padding: 0;
-      background-color: #0d0d0d;
-      color: #00ffcc;
-      font-family: 'Courier New', Courier, monospace;
+      background-color: #0b0b0b;
+      font-family: 'Courier New', monospace;
+      color: #f0aaff;
       height: 100%;
       overflow: hidden;
     }
@@ -29,227 +27,208 @@
 
     .terminal {
       background-color: #111;
-      border: 1px solid #00ffcc55;
-      border-radius: 8px;
+      border: 2px solid #ff66cc;
+      border-radius: 12px;
       padding: 30px;
-      max-width: 800px;
+      max-width: 850px;
       width: 100%;
       height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 0 25px rgba(0, 255, 200, 0.2);
+      box-shadow: 0 0 20px #ff66cc80;
       font-size: 18px;
-      line-height: 1.5;
+      line-height: 1.6;
       transition: font-size 0.3s ease;
     }
 
     h1 {
       text-align: center;
-      color: #00ffff;
-      font-size: 24px;
       margin-bottom: 20px;
+      color: #ff80ff;
+      font-size: 26px;
+      text-shadow: 0 0 5px #ff99ff;
     }
 
     audio {
       position: fixed;
       bottom: 15px;
       left: 15px;
-      width: 250px;
+      width: 260px;
       opacity: 0.6;
+      z-index: 10;
     }
 
     @media (max-width: 600px) {
-      .terminal {
-        font-size: 14px;
-      }
+      .terminal { font-size: 14px; }
+      audio { width: 200px; }
+    }
 
-      audio {
-        width: 180px;
-      }
+    ::selection { background-color: #ff66cc66; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-thumb {
+      background: #ff66cc;
+      border-radius: 10px;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="terminal">
-      <h1>lol kinda gay bro</h1>
-      <pre id="output">Gathering data...</pre>
+      <h1>femboy.systems - diagnostic mode</h1>
+      <pre id="output">Initiating system scan...</pre>
     </div>
   </div>
 
   <audio autoplay loop>
-    <source src="https://cdn.pixabay.com/download/audio/2022/02/20/audio_3b1e61a8e7.mp3?filename=relaxing-music-1233.mp3" type="audio/mpeg">
+    <source src="https://cdn.discordapp.com/attachments/1373066456937533580/1402746841161924648/Seven_Minutes_in_Heaven.mp3" type="audio/mpeg">
+    Your browser does not support audio.
   </audio>
 
   <script>
-    const output = document.getElementById("output");
-    const terminal = document.querySelector(".terminal");
+    const output = document.getElementById("output")
+    const terminal = document.querySelector(".terminal")
+    const sleep = ms => new Promise(r => setTimeout(r, ms))
 
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-    async function typeLine(text, delay = 15) {
+    async function typeLine(text, delay=15) {
       for (const char of text) {
-        output.textContent += char;
-        terminal.scrollTop = terminal.scrollHeight;
-        adjustFontSize();
-        await sleep(delay);
+        output.textContent += char
+        terminal.scrollTop = terminal.scrollHeight
+        adjustFontSize()
+        await sleep(delay)
       }
-      output.textContent += "\n";
+      output.textContent += "\n"
     }
 
-    async function typeLines(lines, delayBetween = 80) {
-      for (const line of lines) {
-        await typeLine(line);
-        await sleep(delayBetween);
+    async function typeLines(lines, delayBetween=90) {
+      for (const l of lines) {
+        await typeLine(l)
+        await sleep(delayBetween)
       }
     }
 
     function adjustFontSize() {
-      const maxHeight = terminal.clientHeight;
-      const contentHeight = output.scrollHeight;
-      const baseFont = 18;
-      let fontSize = baseFont;
-
-      if (contentHeight > maxHeight * 0.95) {
-        fontSize = Math.max(12, baseFont - ((contentHeight - maxHeight) / 40));
+      const max = terminal.clientHeight
+      const content = output.scrollHeight
+      const base = 18
+      let size = base
+      if (content > max * 0.95) {
+        size = Math.max(12, base - (content - max)/50)
       }
-
-      terminal.style.fontSize = fontSize + "px";
+      terminal.style.fontSize = size + "px"
     }
 
     async function fetchIPInfo() {
       try {
-        const res = await fetch("https://ipapi.co/json/");
-        return await res.json();
-      } catch {
-        return null;
-      }
+        const res = await fetch("https://ipapi.co/json/")
+        return res.ok ? res.json() : null
+      } catch { return null }
     }
 
     async function fetchVPNStatus(ip) {
       try {
-        const res = await fetch(`https://proxycheck.io/v2/${ip}?vpn=1`);
-        const data = await res.json();
-        return data[ip]?.proxy === "yes" ? "VPN/Proxy: YES" : "VPN/Proxy: NO";
-      } catch {
-        return "VPN/Proxy: UNKNOWN";
-      }
+        const res = await fetch(`https://proxycheck.io/v2/${ip}?vpn=1`)
+        const d = await res.json()
+        return d[ip]?.proxy === "yes" ? "VPN/Proxy: YES" : "VPN/Proxy: NO"
+      } catch { return "VPN/Proxy: Unknown" }
     }
 
     function getCanvasFingerprint() {
       try {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        ctx.font = "14px Arial";
-        ctx.fillText("Fingerprint!", 2, 2);
-        return canvas.toDataURL().slice(-16);
-      } catch {
-        return "Unavailable";
-      }
+        const c = document.createElement("canvas")
+        const ctx = c.getContext("2d")
+        ctx.font = "14px Arial"
+        ctx.fillText("Fingerprint!", 2, 2)
+        return c.toDataURL().slice(-16)
+      } catch { return "Unavailable" }
     }
 
     async function getAudioFingerprint() {
       try {
-        const ctx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 44100, 44100);
-        const osc = ctx.createOscillator();
-        const comp = ctx.createDynamicsCompressor();
-        osc.type = "triangle";
-        osc.frequency.value = 10000;
-        osc.connect(comp);
-        comp.connect(ctx.destination);
-        osc.start(0);
-        const buffer = await ctx.startRendering();
-        const data = buffer.getChannelData(0);
-        const hash = data.reduce((a, b) => a + Math.abs(b), 0);
-        return hash.toString().slice(0, 10);
-      } catch {
-        return "Unavailable";
-      }
+        const ctx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1,44100,44100)
+        const osc = ctx.createOscillator(), comp = ctx.createDynamicsCompressor()
+        osc.type="triangle"; osc.frequency.value=10000
+        osc.connect(comp); comp.connect(ctx.destination); osc.start(0)
+        const buf = await ctx.startRendering()
+        const data = buf.getChannelData(0)
+        const sum = data.reduce((a,b) => a + Math.abs(b), 0)
+        return sum.toString().slice(0,10)
+      } catch { return "Unavailable" }
     }
 
     function getWebGLInfo() {
       try {
-        const canvas = document.createElement("canvas");
-        const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-        const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+        const c = document.createElement("canvas")
+        const gl = c.getContext("webgl") || c.getContext("experimental-webgl")
+        const dbg = gl.getExtension("WEBGL_debug_renderer_info")
         return {
-          vendor: debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : "Unknown",
-          renderer: debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "Unknown"
-        };
-      } catch {
-        return { vendor: "Unavailable", renderer: "Unavailable" };
-      }
+          vendor: dbg ? gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) : "Unknown",
+          renderer: dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : "Unknown"
+        }
+      } catch { return {vendor:"Unavailable", renderer:"Unavailable"} }
     }
 
     async function getBatteryStatus() {
       if (navigator.getBattery) {
         try {
-          const battery = await navigator.getBattery();
-          return `${Math.round(battery.level * 100)}% (${battery.charging ? "Charging" : "Not Charging"})`;
-        } catch {
-          return "Unavailable";
-        }
+          const b = await navigator.getBattery()
+          return `${Math.round(b.level*100)}% (${b.charging ? "Charging":"Not Charging"})`
+        } catch { return "Unavailable" }
       }
-      return "Not Supported";
+      return "Not Supported"
     }
 
     async function getSystemInfo() {
-      const ipData = await fetchIPInfo();
-      const vpnStatus = ipData ? await fetchVPNStatus(ipData.ip) : "VPN/Proxy: Unknown";
-      const canvasHash = getCanvasFingerprint();
-      const audioHash = await getAudioFingerprint();
-      const webgl = getWebGLInfo();
-      const battery = await getBatteryStatus();
+      const ip = await fetchIPInfo()
+      const vpn = ip ? await fetchVPNStatus(ip.ip) : "VPN/Proxy: Unknown"
+      const canvasHash = getCanvasFingerprint()
+      const audioHash = await getAudioFingerprint()
+      const webgl = getWebGLInfo()
+      const battery = await getBatteryStatus()
 
-      const lines = [];
-
-      if (ipData) {
-        lines.push(`IP Address: ${ipData.ip}`);
-        lines.push(`ISP: ${ipData.org}`);
-        lines.push(`City: ${ipData.city}`);
-        lines.push(`Region: ${ipData.region}`);
-        lines.push(`Country: ${ipData.country_name}`);
-        lines.push(`Coordinates: ${ipData.latitude}, ${ipData.longitude}`);
-        lines.push(`Timezone: ${ipData.timezone}`);
-        lines.push(vpnStatus);
+      const lines = []
+      if (ip) {
+        lines.push(`IP Address: ${ip.ip}`)
+        lines.push(`ISP: ${ip.org}`)
+        lines.push(`Location: ${ip.city}, ${ip.region}, ${ip.country_name}`)
+        lines.push(`Coordinates: ${ip.latitude}, ${ip.longitude}`)
+        lines.push(`Timezone: ${ip.timezone}`)
+        lines.push(vpn)
       } else {
-        lines.push("IP info not available.");
+        lines.push("IP / Geo info not available.")
       }
 
-      lines.push(`User Agent: ${navigator.userAgent}`);
-      lines.push(`Platform: ${navigator.platform}`);
-      lines.push(`Language: ${navigator.language}`);
-      lines.push(`Screen: ${screen.width}x${screen.height}`);
-      lines.push(`Color Depth: ${screen.colorDepth}`);
-      lines.push(`CPU Threads: ${navigator.hardwareConcurrency ?? "Unknown"}`);
-      lines.push(`RAM: ${navigator.deviceMemory ?? "Unknown"} GB`);
-      lines.push(`Battery: ${battery}`);
-      lines.push(`Online: ${navigator.onLine ? "Yes" : "No"}`);
-      lines.push(`Touch Support: ${'ontouchstart' in window ? "Yes" : "No"}`);
-
-      lines.push(`WebGL Vendor: ${webgl.vendor}`);
-      lines.push(`WebGL Renderer: ${webgl.renderer}`);
-      lines.push(`Canvas Fingerprint: ${canvasHash}`);
-      lines.push(`Audio Fingerprint: ${audioHash}`);
+      lines.push(`User Agent: ${navigator.userAgent}`)
+      lines.push(`Platform: ${navigator.platform}`)
+      lines.push(`Language: ${navigator.language}`)
+      lines.push(`Screen: ${screen.width}x${screen.height}`)
+      lines.push(`Color Depth: ${screen.colorDepth}`)
+      lines.push(`CPU Threads: ${navigator.hardwareConcurrency ?? "Unknown"}`)
+      lines.push(`RAM: ${navigator.deviceMemory ?? "Unknown"} GB`)
+      lines.push(`Battery: ${battery}`)
+      lines.push(`Online: ${navigator.onLine ? "Yes" : "No"}`)
+      lines.push(`Touch Capable: ${'ontouchstart' in window ? "Yes" : "No"}`)
+      lines.push(`WebGL Vendor: ${webgl.vendor}`)
+      lines.push(`WebGL Renderer: ${webgl.renderer}`)
+      lines.push(`Canvas Fingerprint: ${canvasHash}`)
+      lines.push(`Audio Fingerprint: ${audioHash}`)
 
       if (navigator.connection) {
-        lines.push(`Connection: ${navigator.connection.effectiveType}`);
-        lines.push(`Downlink: ${navigator.connection.downlink} Mbps`);
-        lines.push(`RTT: ${navigator.connection.rtt} ms`);
+        lines.push(`Connection Type: ${navigator.connection.effectiveType}`)
+        lines.push(`Downlink: ${navigator.connection.downlink} Mbps`)
+        lines.push(`RTT: ${navigator.connection.rtt} ms`)
       }
 
-      lines.push(`Cookies Enabled: ${navigator.cookieEnabled ? "Yes" : "No"}`);
-      lines.push(`LocalStorage: ${typeof localStorage !== "undefined" ? "Yes" : "No"}`);
-      lines.push(`Clipboard API: ${"clipboard" in navigator ? "Yes" : "No"}`);
-      lines.push(`Vibration API: ${"vibrate" in navigator ? "Yes" : "No"}`);
-
-      return lines;
+      lines.push(`Cookies Enabled: ${navigator.cookieEnabled ? "Yes" : "No"}`)
+      lines.push(`LocalStorage: ${typeof localStorage !== "undefined" ? "Yes" : "No"}`)
+      lines.push(`Clipboard API: ${"clipboard" in navigator ? "Yes" : "No"}`)
+      lines.push(`Vibration API: ${"vibrate" in navigator ? "Yes" : "No"}`)
+      return lines
     }
 
     (async () => {
-      output.textContent = "";
-      const infoLines = await getSystemInfo();
-      await typeLines(infoLines);
-    })();
+      output.textContent = ""
+      const info = await getSystemInfo()
+      await typeLines(info)
+    })()
   </script>
 </body>
 </html>
