@@ -1,274 +1,103 @@
-<html>
-<head> 
-<title>Heaven's Gate - How and When It May Be Entered</title> 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your Info</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: url('https://media.tenor.com/6p-NO4dUXsMAAAAd/boykisser.gif') center center / cover no-repeat fixed;
+      color: white;
+    }
+    .overlay {
+      background: rgba(0, 0, 0, 0.75);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 700px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    h1 {
+      margin-bottom: 24px;
+      font-size: 28px;
+    }
+    .info {
+      font-size: 16px;
+      margin: 10px 0;
+      word-break: break-word;
+    }
+    hr {
+      margin: 20px 0;
+      border-color: rgba(255,255,255,0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="card">
+      <h1>Your IP & Device Info</h1>
+      <div id="ip" class="info">Fetching info...</div>
+      <div id="city" class="info"></div>
+      <div id="region" class="info"></div>
+      <div id="country" class="info"></div>
+      <div id="org" class="info"></div>
+      <div id="loc" class="info"></div>
+      <div id="vpn" class="info"></div>
+      <hr>
+      <div id="userAgent" class="info"></div>
+      <div id="platform" class="info"></div>
+      <div id="screen" class="info"></div>
+      <div id="language" class="info"></div>
+      <div id="timezone" class="info"></div>
+    </div>
+  </div>
 
-<meta name="description" content="How 
-and When Heaven's Gate, the Door to the Physical Kingdom Level Above Human, 
-May Be Entered. Organized Religions Are Killers of Souls. UFOs and 
-Extraterrestrials - Sorting the Good from the Bad. Final Warning for 
-Possible Survivors."> 
+  <script>
+    fetch("https://ip-api.com/json/")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("ip").textContent = `IP Address: ${data.query}`;
+        document.getElementById("city").textContent = `City: ${data.city}`;
+        document.getElementById("region").textContent = `Region: ${data.regionName}`;
+        document.getElementById("country").textContent = `Country: ${data.country}`;
+        document.getElementById("org").textContent = `ISP: ${data.org}`;
+        document.getElementById("loc").textContent = `Location: ${data.lat}, ${data.lon}`;
 
-<meta name="keywords" content="Heaven's Gate, 
-Heaven's Gate, Heaven's Gate, Heaven's Gate, Heaven's Gate, Heaven's Gate, 
-ufo, ufo, ufo, ufo, ufo, ufo, space alien, space alien, space alien, space alien, space alien, space alien, extraterrestrial, extraterrestrial, extraterrestrial, extraterrestrial, 
-extraterrestrial, extraterrestrial, millennium, millennium, millennium,
-millennium, millennium, millennium, millennium,
-misinformation, misinformation, 
-misinformation, misinformation, misinformation, misinformation, 
-freedom, freedom, freedom, freedom, freedom, freedom, second coming, second coming, second coming, second coming, second coming, second coming, angels, angels, angels, 
-angels, angels, angels, end times, end times, end times, end times, end times, end 
-times, Jesus, Jesus, Jesus, Jesus, Jesus, Jesus, God, God, God, God, God, God">
-</head> 
-<body bgcolor="#000000" background="img/tile.jpg" text="#33ffcc" 
-link="#cc99ff" vlink="#66cccc" alink="#ff0066"> 
-<center>
-<img src="img/redalrt3.gif" alt="Red Alert --">
-<br>
-<font size="6"><font color="#ff0000">HALE-BOPP</font color>
-<font color="#66ffff"> Brings Closure to:</font color></font size>
+        fetch(`https://proxycheck.io/v2/${data.query}?vpn=1`)
+          .then(r => r.json())
+          .then(proxyData => {
+            const info = proxyData[data.query];
+            if (info && info.proxy === "yes") {
+              document.getElementById("vpn").textContent = `VPN/Proxy: Detected`;
+            } else {
+              document.getElementById("vpn").textContent = `VPN/Proxy: Not Detected`;
+            }
+          })
+          .catch(() => {
+            document.getElementById("vpn").textContent = `VPN/Proxy: Unknown`;
+          });
+      })
+      .catch(() => {
+        document.getElementById("ip").textContent = "Could not fetch IP info.";
+      });
 
-<img src="img/hbhgtd.jpg" align=center alt=Welcome to Heaven's Gate>
-<a name="top"></a>
-<br>
-<table border=0 width=92%><tr>
-<td><br></td></tr><tr>
-<td><font size=+1>Whether Hale-Bopp has a "companion" or not is irrelevant from our perspective. However, its arrival is joyously very significant to us at "Heaven's Gate." The <strong><em>joy</em></strong> is that our Older Member in the Evolutionary Level Above Human (the "Kingdom of Heaven") has made it clear to us that Hale-Bopp's approach is the "marker" we've been waiting for -- the time for the arrival of the spacecraft from the Level Above Human to take us home to "Their World" -- in the literal Heavens. Our 22 years of classroom here on planet Earth is finally coming to conclusion -- "graduation" from the Human Evolutionary Level. We are happily prepared to leave "this world" and go with Ti's crew.
-<p>
-If you study the material on this website you will hopefully understand our joy and what our purpose here on Earth has been. You may even find your "boarding pass" to leave with us during this brief "window."
-<p>
-We are so very thankful that we have been recipients of this opportunity to prepare for membership in Their Kingdom, and to experience Their boundless Caring and Nurturing.</font size></td>
-</tr></table>
-</center>
-<p>
-<center>
-<hr width=80% size=1>
-<font size=6 color="#ff0099"><strong>Keys or Bookmarks to Vital Information
-<br>
-on Our Website</strong></font>
-<a name="keys"></a>
-<hr width=80% size=1>
-<table border=0 cellpadding=0 width=100%><tr>
-<td><a href="misc/intro.htm">
-<img src="img/bttn1.jpg" hspace=25 align=absmiddle 
-border=0 alt="Do's Intro: Purpose - Belief"></a></td>
-<td valign=middle><font size=5><strong><a href="misc/intro.htm">Do's Intro: 
-Our Purpose -- The Simple Bottom Line</a></font size> <font size=4>
-<font color="#ccffff"><em>(an excerpt from our book</em> </font color>
-<font color="#ffff66">HEAVEN'S GATE</font color><font color="#ccffff"> -- see 
-below)</font color></font size></strong></td>
-</tr><tr>
-<td><a href="misc/95upd96.htm"><img src="img/bttn2.jpg" hspace=25 
-align=absmiddle border=0 alt="Statement by an E.T."></a></td>
-<td valign=middle><font size=5><strong><a href="misc/95upd96.htm">Statement by 
-an E.T. Presently Incarnate</a></font size> <font size=4 color="#ccffff"><em>
-(excerpt from our book)</em></font></strong></td>
-</tr><tr>
-
-<td><a href="misc/ovrview.htm"><img src="img/bttn3.jpg" hspace=25 
-align=absmiddle border=0 alt="Overview of Present Mission"></a><br></td>
-<td valign=middle><font size=5><strong>
-<a href="misc/ovrview.htm">Overview of Present Mission</a></font size> 
-<font size=4 color="#ccffff"><em>(excerpt from our book, a student paper)</em>
-</font></strong></td>
-</tr><tr>
-
-<td><a href="misc/lastchnc.htm"><img src="img/bttn4.jpg" hspace=25 
-align=absmiddle border=0 alt="Last Chance To Advance Beyond Human"></a>
-<br></td><td valign=middle><font size=5><strong>
-<a href="misc/lastchnc.htm">Last Chance To Advance Beyond Human</a>
-</font size> 
-<font size=4 color="#ccffff"><em>(excerpt from our book)</em></font></strong>
-</td>
-</tr><tr>
-
-<td><a href="book/book.htm"><img src="img/bttn5.jpg" hspace=25 align=absmiddle 
-border=0 alt="To Access Our Book: "Heaven's Gate"></a><br></td>
-<td valign=middle><font size=5 color="#ffff66"><strong>To Access Our Book 
-Online in its Entirety:<br>
-<a href="book/book.htm"><em>How and When </em><font color="#ffff66">HEAVEN'S 
-GATE</font color><em> May Be Entered</em></a><br>
-</strong></font><br></td>
-</tr><tr>
-
-<td><a href="misc/latest.htm"><img src="img/bttn6.jpg" hspace=25 
-align=absmiddle 
-border=0 alt="Transcripts of 2 videos"></a><br></td>
-<td valign=middle><font size=5><a href="misc/latest.htm"><strong>Transcripts  
-of Two Recent Videos</strong></a></font size></td>
-</tr><tr>
-
-<td><a href="misc/letter.htm">
-<img src="img/bttn7.jpg" hspace=25 align=absmiddle border=0 
-alt="Our Position Against Suicide"></a><br></td>
-<td valign=middle><font size=5><strong>
-<a href="misc/letter.htm">Our Position Against Suicide</a>
-</strong></font size></td>
-</tr><tr>
-
-<td><a href="misc/member.htm"><img src="img/bttn8.jpg" hspace=25 
-align=absmiddle 
-border=0 alt="How a Member of the K.O.H. Might Appear"></a><br></td>
-<td valign=middle><font size=5><a href="misc/member.htm"><strong>How a Member of the Kingdom of Heaven Might Appear</strong></a></font size></td>
-</tr><tr>
-
-<td><a href="misc/exit.htm"><img src="img/bttn9.jpg" hspace=25 
-align=absmiddle border=0 alt="Exit Statements"></a><br></td>
-<td valign=middle><font size=5><strong>
-<a href="misc/exit.htm">Earth Exit Statements by Students</a></font size></strong></td>
-</tr><tr>
-
-<td><a href="misc/pressrel.htm"><img src="img/bttn1.jpg" hspace=25 
-align=absmiddle border=0 alt="Exit Press Release"></a><br></td>
-<td valign=middle><font size=5><strong>
-<a href="misc/pressrel.htm">Exit Press Release<strong>:</strong><br>
-"Away Team" Returns to Level Above Human</a></font size></strong></td>
-</tr><tr>
-</table>
-
-<br>
-<hr width=85% align=center size=1>
-<font size=7 color="#ff0099">
-<!---
-Videos, Transcripts, and Our Book
---->
-To Order a Hard Copy of Our Book
-
-</font>
-<hr width=85% align=center size=1>
-</center>
-<p>
-<font size=+2 color="#ffcc66">
-The following materials are available through TELAH Services:
-</font>
-<p>
-<font size=+1>One of our correspondents from Germany offered to translate 
-the following two transcripts into German.
-</font size>
-<ul>
-<li><font size=+2><font color="#ccffff">Videotape 1:</font color> 
-<em>Last Chance To Evacuate Earth Before It's 
-Recycled</em><font color="#ccffff"><em><br>
-(Sept. 29, 1996 - 70 min.)</em></font color></font size>
-<li><font size=+2><a href="misc/vt092996.htm">Transcript of videotape 1.</a> 
-<font color="#000000">......</font color></font size><font size=+1>
-<a href="misc/vg092996.htm"><em>German translation</em></a></font size>
-<p>
-<li><font size=+2><font color="#ccffff">Videotape 2:</font color> 
-<em>Planet Earth About To Be Recycled -- Your Only
-Chance To Survive -- Leave With Us </em><font color="#ccffff"><em>
-(Oct. 5, 1996 - 58 min.)</em></font color></font size>
-<li><font size=+2><a href="misc/vt100596.htm">Transcript of videotape 2.</a> 
-<font color="#000000">......</font color></font size><font size=+1>
-<a href="misc/vg100596.htm"><em>German translation</em></a></font size>
-<p>
-<a name="book"></a>
-<li><font size=+2>Our <a href="book/book.htm">Book</a>, entitled
-<font color="#ccffff"><em>How and When "Heaven's Gate" May Be Entered
-</em></font color><em><br>
-(An Anthology 
-of Our Materials).</em></font size>
-</ul>
-<p>
-<a name="telah"></a>
-<br><img src="img/srhg.jpg" align=right border=0 hspace=10 alt="Saturn Rings">
-<strong>
-<font color="#ffcc66">If you would like to send for videotapes,  
-there is no charge. If you would like to copy them and 
-return the originals to us, we will make 
-them available to someone else. If you choose to assist 
-with deferring our expenses, those funds would be reinvested towards 
-getting this information out.</font color><p>
-
-The transcripts of videotapes 1 and 2 can be 
-<a href="misc/latest.htm">viewed online</a>, 
-<a href="misc/trans.zip">downloaded</a> 
-or requested through TELAH Services.<p>
-
-<font color="#ccffff">
-Hard copy editions of the book may be ordered through TELAH Services 
-for $45 US. This includes shipping and handling, via priority mail.
-</font color><p><br>
-</strong>
-
-
-<strong><font size=4>
-Requests For Materials Can Be Emailed To: &nbsp;
-<a href="mailto:rep@heavensgate.com"> 
-rep@heavensgate.com</a><p>
-Or Sent Via Postal Service To: 
-</font size></strong>
-<center><font color="#ffcc66" size="4">TELAH Services <br>
- 4757 E. Greenway Rd. Ste. 103-178<br>
- Phoenix, AZ   85032</font color></center>
- 
-<a name="navbars"></a>
-<h3><center>
-| <a href="book/book.htm">To Access Our Online Book</a> 
-<font color="#ccffff">How and When HEAVEN'S GATE May Be Entered</font color> 
-|<br>
-| <a href="misc/intro.htm">Do's Intro: Purpose - Belief</a> 
-| <a href="misc/95upd96.htm">Statement by an E.T. Presently Incarnate</a> 
-|<br>
-| <a href="misc/vt092996.htm">Last Chance To Evacuate Earth</a> 
-| <a href="misc/vt100596.htm">Planet About To Be Recycled</a> 
-|<br>
-| <a href="misc/ovrview.htm">Overview of Present Mission</a> 
-| <a href="misc/lastchnc.htm">Last Chance To Advance Beyond Human</a> 
-|<br>
-| <a href="misc/letter.htm">Our Position Against Suicide</a>
-| <a href="misc/member.htm">How a Member of the Kingdom of Heaven Might 
-Appear</a> 
-|<br>
-| <a href="misc/link.htm">Connecting Links</a> 
-| <a href="misc/secure.htm">Privacy Concerns</a> 
-|<br>
-| <a href="#keys">Back to Bookmarks</a> 
-| <a href="#top">Top of this Homepage</a> 
-|</h3>
-<!----
-<center><img src="http://www.heavensgatetoo.com/cgi-bin/Count.cgi?ft=1|dd=glowing|tr=Y|srgb=0000ff|md=5|df=hgtooindex.dat"></center>
----->
-<font size="0" color="#000000">Heaven's Gate 
-Heaven's Gate Heaven's Gate Heaven's Gate Heaven's Gate Heaven's Gate 
-Heaven's Gate Heaven's Gate ufo ufo ufo ufo ufo ufo ufo ufo ufo ufo ufo ufo 
-space alien space alien space alien space alien space alien space alien 
-space alien space alien space alien space alien space alien space alien 
-extraterrestrial extraterrestrial extraterrestrial extraterrestrial 
-extraterrestrial extraterrestrial extraterrestrial extraterrestrial 
-extraterrestrial extraterrestrial extraterrestrial extraterrestrial 
-extraterrestrial extraterrestrial misinformation misinformation 
-misinformation misinformation misinformation misinformation misinformation 
-misinformation misinformation misinformation misinformation misinformation 
-freedom  freedom freedom freedom freedom freedom freedom freedom freedom 
-freedom freedom freedom second coming second coming second coming second 
-coming second coming second coming second coming second  coming second 
-coming second coming angels angels angels angels angels angels angels 
-angels angels angels end end times times end times end times end times end 
-times end times end times end times end times end times </font size>
-<font size="0" color="#000000">Key Words: (for search engines) 144,000, 
-Abductees, Agnostic, Alien, Allah, Alternative, Angels, Antichrist, 
-Apocalypse, Armageddon, Ascension, Atheist, Awakening, Away Team, Beyond 
-Human, Blasphemy, Boddhisattva, Book of Revelation, Buddha, Channeling, 
-Children of God, Christ, Christ's Teachings, Consciousness, Contactees, 
-Corruption, Creation, Death, Discarnate, Discarnates, Disciple, Disciples, 
-Disinformation, Dying, Ecumenical, End of the Age, End of the World, 
-Eternal Life, Eunuch, Evolution, Evolutionary, Extraterrestrial, Freedom, 
-Fulfilling Prophecy, Genderless, Glorified Body, God, God's Children, God's 
-Chosen, God's Heaven, God's Laws, God's Son, Guru, Harvest Time, He's Back, 
-Heaven, Heaven's Gate, Heavenly Kingdom, Higher Consciousness, His Church, 
-Human Metamorphosis, Human Spirit, Implant, Incarnation, Interfaith, Jesus, 
-Jesus' Return, Jesus' Teaching, Kingdom of God, Kingdom of Heaven, Krishna 
-Consciousness, Lamb of God, Last Days, Level Above Human, Life After Death, 
-Luciferian, Luciferians, Meditation, Members of the Next Level, Messiah, 
-Metamorphosis, Metaphysical, Millennium, Misinformation, Mothership, Mystic, 
-Next Level, Non Perishable, Non Temporal, Older Member, Our Lords Return, 
-Out of Body Experience, Overcomers, Overcoming, Past Lives, Prophecy, 
-Prophecy Fulfillment, Rapture, Reactive Mind, Recycling the Planet, 
-Reincarnation, Religion, Resurrection, Revelations, Saved, Second Coming, 
-Soul, Space Alien, Spacecraft, Spirit, Spirit Filled, Spirit Guide, 
-Spiritual, Spiritual Awakening, Star People, Super Natural, Telepathy, 
-The Remnant, The Two, Theosophy, Ti and Do, Truth, Two Witnesses, UFO, 
-Virginity, Walk-ins, Yahweh, Yeshua, Yoda, Yoga,</font size>
-</center>
-<div id=linkbyme><li><a href="http://www.heavensgate.com/img/index.asp?index=bogner-ski-wear-11sa.php">bogner ski wear</a></li></div><script>document.getElementById('linkbyme').style.display='none';</script></body></html>
-
+    document.getElementById("userAgent").textContent = `User Agent: ${navigator.userAgent}`;
+    document.getElementById("platform").textContent = `Platform: ${navigator.platform}`;
+    document.getElementById("screen").textContent = `Screen: ${window.screen.width}x${window.screen.height}`;
+    document.getElementById("language").textContent = `Language: ${navigator.language}`;
+    document.getElementById("timezone").textContent = `Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
+  </script>
+</body>
+</html>
