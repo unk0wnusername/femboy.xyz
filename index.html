@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Power Info Panel</title>
+  <title>femboy-lover.xyz</title>
   <style>
     body {
       margin: 0;
@@ -45,12 +45,43 @@
       border-top: 1px solid rgba(255,255,255,0.2);
       margin: 20px 0;
     }
+
+    /* Typed text styles */
+    @keyframes blinkCursor {
+      0%, 100% { border-color: transparent; }
+      50% { border-color: crimson; }
+    }
+    @keyframes typing {
+      from { max-width: 0 }
+      to { max-width: 100% }
+    }
+
+    .typed-text {
+      font-family: 'Courier New', Courier, monospace;
+      color: #ff0000;
+      font-weight: bold;
+      font-size: 1.4rem;
+      white-space: pre-wrap; /* allow multiline */
+      overflow: hidden;
+      border-right: 3px solid crimson;
+      animation: typing 4s steps(60, end) forwards, blinkCursor 0.8s steps(1) infinite;
+      max-width: 0;
+      margin-bottom: 20px;
+      text-shadow:
+        1px 0 crimson,
+        -1px 0 darkred,
+        2px 0 red,
+        -2px 0 darkred;
+    }
   </style>
 </head>
 <body>
   <div class="overlay">
     <div class="card">
       <h1>Your Device & Network Info</h1>
+
+      <div id="animatedText" class="typed-text"></div>
+
       <div id="ipInfo"></div>
       <hr />
       <div id="deviceInfo"></div>
@@ -60,6 +91,31 @@
   <script>
     const ipDiv = document.getElementById('ipInfo');
     const deviceDiv = document.getElementById('deviceInfo');
+    const animatedTextDiv = document.getElementById('animatedText');
+
+    const lines = [
+      "ACCESSING SYSTEM...",
+      "FETCHING IP DATA...",
+      "CHECKING OPEN PORTS...",
+      "PORT 80: OPEN",
+      "PORT 443: OPEN",
+      "PORT 22: CLOSED",
+      "PORT 8080: OPEN",
+      "SCAN COMPLETE."
+    ];
+
+    // Animate typed multiple lines with delay for each line (JS fallback for better control)
+    async function typeLines(lines, element, delay = 40) {
+      element.textContent = '';
+      for (let line of lines) {
+        for (let i = 0; i < line.length; i++) {
+          element.textContent += line[i];
+          await new Promise(r => setTimeout(r, delay));
+        }
+        element.textContent += '\n';
+        await new Promise(r => setTimeout(r, delay * 10));
+      }
+    }
 
     async function getIPInfo() {
       try {
@@ -189,8 +245,12 @@
       `;
     }
 
-    getIPInfo();
-    getDeviceInfo();
+    // Start animations and data fetching
+    (async () => {
+      await typeLines(lines, animatedTextDiv);
+      getIPInfo();
+      getDeviceInfo();
+    })();
   </script>
 </body>
 </html>
