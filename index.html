@@ -64,24 +64,49 @@
     async function getIPInfo() {
       try {
         const res = await fetch("https://ip-api.com/json/");
+        if (!res.ok) throw new Error("ip-api.com failed");
         const data = await res.json();
-        ipDiv.innerHTML = `
-          <div class="info">IP Address: ${data.query}</div>
-          <div class="info">City: ${data.city}</div>
-          <div class="info">Region: ${data.regionName}</div>
-          <div class="info">Country: ${data.country}</div>
-          <div class="info">Location: ${data.lat}, ${data.lon}</div>
-          <div class="info">ISP: ${data.org}</div>
-        `;
+        renderIPInfo(data);
+        await checkVPN(data.query);
+      } catch (err1) {
+        try {
+          const res2 = await fetch("https://api.db-ip.com/v2/free/self");
+          const data2 = await res2.json();
+          ipDiv.innerHTML = `
+            <div class="info">IP Address: ${data2.ipAddress}</div>
+            <div class="info">City: ${data2.city || "N/A"}</div>
+            <div class="info">Region: ${data2.stateProv || "N/A"}</div>
+            <div class="info">Country: ${data2.countryName || "N/A"}</div>
+            <div class="info">ISP: Unknown</div>
+            <div class="info">Location: Approximate</div>
+          `;
+          await checkVPN(data2.ipAddress);
+        } catch (err2) {
+          ipDiv.innerHTML = "<div class='info'>❌ Could not retrieve IP info from any source.</div>";
+        }
+      }
+    }
 
-        const vpnCheck = await fetch(`https://proxycheck.io/v2/${data.query}?vpn=1&asn=1`);
-        const vpnData = await vpnCheck.json();
-        const result = vpnData[data.query];
-        let vpnStatus = result.proxy === 'yes' ? '🛑 VPN/Proxy Detected' : '✅ No VPN/Proxy Detected';
+    function renderIPInfo(data) {
+      ipDiv.innerHTML = `
+        <div class="info">IP Address: ${data.query}</div>
+        <div class="info">City: ${data.city}</div>
+        <div class="info">Region: ${data.regionName}</div>
+        <div class="info">Country: ${data.country}</div>
+        <div class="info">Location: ${data.lat}, ${data.lon}</div>
+        <div class="info">ISP: ${data.org}</div>
+      `;
+    }
 
+    async function checkVPN(ip) {
+      try {
+        const res = await fetch(`https://proxycheck.io/v2/${ip}?vpn=1&asn=1`);
+        const data = await res.json();
+        const result = data[ip];
+        const vpnStatus = result?.proxy === 'yes' ? '🛑 VPN/Proxy Detected' : '✅ No VPN/Proxy Detected';
         ipDiv.innerHTML += `<div class="info">VPN Check: ${vpnStatus}</div>`;
-      } catch (err) {
-        ipDiv.innerHTML = "<div class='info'>Failed to retrieve IP info.</div>";
+      } catch {
+        ipDiv.innerHTML += `<div class="info">VPN Check: Unknown</div>`;
       }
     }
 
@@ -91,33 +116,61 @@
       ctx.textBaseline = "top";
       ctx.font = "14px 'Arial'";
       ctx.fillText("Fingerprint!", 2, 2);
-      return canvas.toDataURL();
+      return canvas.toDataURL().slice(-16);
     }
 
     async function getAudioFingerprint() {
       try {
         const ctx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 44100, 44100);
         const osc = ctx.createOscillator();
-        const compressor = ctx.createDynamicsCompressor();
-        osc.type = 'triangle';
+        const comp = ctx.createDynamicsCompressor();
+        osc.type = "triangle";
         osc.frequency.value = 10000;
-        osc.connect(compressor);
-        compressor.connect(ctx.destination);
+        osc.connect(comp);
+        comp.connect(ctx.destination);
         osc.start(0);
         const buffer = await ctx.startRendering();
         let sum = 0;
-        for (let i = 0; i < buffer.length; i++) {
-          sum += Math.abs(buffer.getChannelData(0)[i]);
-        }
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < data.length; i++) sum += Math.abs(data[i]);
         return sum.toString().slice(0, 10);
       } catch {
-        return 'Unavailable';
+        return "Unavailable";
+      }
+    }
+
+    function getWebGLInfo() {
+      try {
+        const canvas = document.createElement("canvas");
+        const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+        return {
+          vendor: gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL),
+          renderer: gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)
+        };
+      } catch {
+        return { vendor: "Unavailable", renderer: "Unavailable" };
+      }
+    }
+
+    async function getBatteryInfo() {
+      if (navigator.getBattery) {
+        try {
+          const battery = await navigator.getBattery();
+          return `${(battery.level * 100).toFixed(0)}% ${battery.charging ? "(Charging)" : "(Not charging)"}`;
+        } catch {
+          return "Unavailable";
+        }
+      } else {
+        return "Not Supported";
       }
     }
 
     async function getDeviceInfo() {
       const canvasHash = getCanvasFingerprint();
       const audioHash = await getAudioFingerprint();
+      const webgl = getWebGLInfo();
+      const battery = await getBatteryInfo();
 
       deviceDiv.innerHTML = `
         <div class="info">User Agent: ${navigator.userAgent}</div>
@@ -125,23 +178,15 @@
         <div class="info">Language: ${navigator.language}</div>
         <div class="info">Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}</div>
         <div class="info">Screen: ${screen.width}x${screen.height} @${screen.colorDepth}bit</div>
-        <div class="info">CPU Threads: ${navigator.hardwareConcurrency || 'Unknown'}</div>
+        <div class="info">CPU Threads: ${navigator.hardwareConcurrency || "Unknown"}</div>
+        <div class="info">RAM (estimate): ${navigator.deviceMemory || "Unknown"} GB</div>
         <div class="info">Touch Support: ${'ontouchstart' in window ? 'Yes' : 'No'}</div>
-        <div class="info">WebGL Renderer: ${getWebGLRenderer()}</div>
-        <div class="info">Canvas Hash: ${canvasHash.slice(-16)}</div>
+        <div class="info">Battery Level: ${battery}</div>
+        <div class="info">WebGL Vendor: ${webgl.vendor}</div>
+        <div class="info">WebGL Renderer: ${webgl.renderer}</div>
+        <div class="info">Canvas Hash: ${canvasHash}</div>
         <div class="info">Audio Hash: ${audioHash}</div>
       `;
-    }
-
-    function getWebGLRenderer() {
-      try {
-        const canvas = document.createElement("canvas");
-        const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-        const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
-        return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-      } catch {
-        return "Unavailable";
-      }
     }
 
     getIPInfo();
