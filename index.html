@@ -3,76 +3,87 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>femboy.systems</title>
+  <meta property="og:title" content="HOT FURRY FEMBOYS IN YOUR AREA" />
+  <meta property="og:description" content="CLICK NOW DONT MISS OUT!!!" />
+  <meta property="og:image" content="https://files.catbox.moe/yfakne.png" />
+  <meta property="og:url" content="https://femboy.systems" />
+  <meta name="twitter:card" content="summary_large_image" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }html, body {
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }html, body {
   height: 100%;
   background: url('https://files.catbox.moe/yfakne.png') center center fixed no-repeat;
   background-size: cover;
-  font-family: monospace;
-  color: #eaaaff;
+  font-family: 'Courier New', Courier, monospace;
+  color: #fce4ff;
   overflow: hidden;
 }
 
-.overlay {
-  background-color: rgba(0, 0, 0, 0.75);
+.overlay, .intro-screen {
+  position: absolute;
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  padding: 20px;
+  z-index: 10;
+  transition: opacity 1.2s ease;
+}
+
+.intro-screen {
+  background-color: #000;
+  color: #fff;
 }
 
 .info-box {
-  background-color: #1a1a1a;
-  border: 2px solid #ff55cc;
-  border-radius: 12px;
-  padding: 30px;
-  width: 100%;
-  max-width: 800px;
+  background: rgba(10, 10, 10, 0.7);
+  border-radius: 18px;
+  padding: 40px;
+  max-width: 880px;
+  width: 90%;
   height: 85vh;
   overflow-y: auto;
-  box-shadow: 0 0 25px rgba(255, 85, 204, 0.8);
   font-size: 18px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
+  line-height: 1.6;
+  box-shadow: 0 0 40px rgba(255, 0, 200, 0.4);
+  backdrop-filter: blur(10px);
 }
 
 h1 {
-  color: #ff77dd;
-  font-size: 24px;
+  font-size: 30px;
   text-align: center;
   margin-bottom: 20px;
-  text-shadow: 0 0 5px #ff99ee;
+  color: #ff88dd;
+  text-shadow: 0 0 10px #ff99ee;
 }
 
 .click-prompt {
-  margin-top: 10px;
-  font-size: 20px;
-  color: #ffe0ff;
-  text-align: center;
+  font-size: 26px;
+  color: #ffffff;
+  background: linear-gradient(to right, #ff66cc, #aa00ff);
+  padding: 16px 40px;
+  border-radius: 50px;
   cursor: pointer;
-  font-family: monospace;
-  animation: pulse 1.5s infinite;
-  text-shadow: 0 0 8px #ff99dd;
-  background: rgba(255, 85, 204, 0.1);
-  border: 1px solid #ff99ee;
-  border-radius: 8px;
-  padding: 10px 20px;
-  transition: transform 0.2s ease, background 0.3s ease;
+  box-shadow: 0 0 20px #ff66cc80;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  animation: pulse 1.6s infinite;
 }
 
 .click-prompt:hover {
-  background: rgba(255, 85, 204, 0.2);
   transform: scale(1.05);
+  box-shadow: 0 0 30px #ff66ccaa;
 }
 
 @keyframes pulse {
-  0% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.05); }
-  100% { opacity: 0.4; transform: scale(1); }
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
 }
 
 ::selection { background: rgba(255, 85, 204, 0.5); }
@@ -85,24 +96,30 @@ h1 {
   </style>
 </head>
 <body>
-  <div class="overlay">
+  <div class="intro-screen" id="intro">
+    <div class="click-prompt" id="startButton">Click to Start</div>
+  </div>  <div class="overlay" id="mainContent" style="opacity: 0; pointer-events: none;">
     <h1>femboy.systems — system profile</h1>
     <div class="info-box">
-      <pre id="output">Click below to begin diagnostics...</pre>
+      <pre id="output">Initializing...</pre>
     </div>
-    <div class="click-prompt" id="startButton">[ Click to begin ]</div>
   </div>  <iframe id="bgmusic" width="0" height="0" style="display:none" allow="autoplay"
     src="https://www.youtube.com/embed/x0jrUwxUFLU?enablejsapi=1&version=3&playerapiid=ytplayer">
   </iframe>  <script>
     const output = document.getElementById("output");
     const startButton = document.getElementById("startButton");
-    const music = document.getElementById("bgmusic");
+    const intro = document.getElementById("intro");
+    const mainContent = document.getElementById("mainContent");
 
     startButton.addEventListener("click", async () => {
-      startButton.style.opacity = 0;
-      startButton.style.pointerEvents = "none";
-      playYouTube();
-      await displayInfo();
+      intro.style.opacity = 0;
+      setTimeout(() => {
+        intro.style.display = 'none';
+        mainContent.style.opacity = 1;
+        mainContent.style.pointerEvents = 'auto';
+        playYouTube();
+        displayInfo();
+      }, 1200);
     });
 
     function playYouTube() {
@@ -180,7 +197,7 @@ h1 {
 
       output.textContent = "";
       for (const line of lines) {
-        await new Promise(r => setTimeout(r, 100));
+        await new Promise(r => setTimeout(r, 90));
         output.textContent += line + "\n";
       }
     }
