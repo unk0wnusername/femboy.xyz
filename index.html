@@ -2,38 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>femboy.systems</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
-      width: 100%;
       height: 100%;
+      width: 100%;
       font-family: 'Courier New', monospace;
-      color: #ffeaff;
-      background: url('https://files.catbox.moe/yfakne.png') center center fixed no-repeat;
+      background: url('https://files.catbox.moe/yfakne.png') center center no-repeat fixed;
       background-size: cover;
       overflow: hidden;
+      color: #ffeaff;
     }
 
     .overlay {
-      background-color: rgba(0, 0, 0, 0.85);
+      background-color: rgba(0, 0, 0, 0.6);
       width: 100%;
       height: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       padding: 20px;
     }
 
     .terminal {
-      background-color: #121212;
+      background-color: rgba(18, 18, 18, 0.75);
       border: 2px solid #ff66cc;
       border-radius: 15px;
       padding: 30px;
@@ -43,9 +39,10 @@
       overflow-y: auto;
       box-shadow: 0 0 30px #ff66cc;
       font-size: 16px;
-      line-height: 1.5;
+      line-height: 1.6;
       white-space: pre-wrap;
       position: relative;
+      backdrop-filter: blur(5px);
     }
 
     h1 {
@@ -69,22 +66,6 @@
       to { opacity: 0.4; }
     }
 
-    .yt-container {
-      margin-top: 20px;
-      width: 100%;
-      max-width: 640px;
-      aspect-ratio: 16 / 9;
-      position: relative;
-    }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      border-radius: 10px;
-      box-shadow: 0 0 15px #ff66cc;
-    }
-
     .music-btn {
       margin-top: 20px;
       padding: 10px 20px;
@@ -102,6 +83,14 @@
     .music-btn:hover {
       background: #ff55cc;
       box-shadow: 0 0 20px #ff55cc;
+    }
+
+    .yt-embed {
+      position: absolute;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      pointer-events: none;
     }
 
     ::selection {
@@ -137,24 +126,23 @@
       <pre id="output">Click to begin system scan...</pre>
       <div class="click-prompt">▸ Click anywhere to begin ▸</div>
     </div>
-
-    <button class="music-btn" onclick="playYouTube()">▶ Enable Music</button>
-    
-    <div class="yt-container">
-      <iframe
-        id="ytplayer"
-        src="https://www.youtube.com/embed/x0jrUwxUFLU?enablejsapi=1&rel=0&autoplay=0&mute=1"
-        allow="autoplay"
-        allowfullscreen
-      ></iframe>
-    </div>
+    <button class="music-btn" onclick="toggleMusic()">🔊 Toggle Music</button>
   </div>
+
+  <!-- Hidden YouTube Player -->
+  <iframe
+    id="ytplayer"
+    class="yt-embed"
+    src="https://www.youtube.com/embed/x0jrUwxUFLU?enablejsapi=1&autoplay=1&mute=1"
+    allow="autoplay"
+  ></iframe>
 
   <script>
     const output = document.getElementById("output");
     const prompt = document.querySelector(".click-prompt");
     const terminal = document.getElementById("terminal");
     let hasRun = false;
+    let isMuted = true;
 
     terminal.addEventListener("click", () => {
       if (!hasRun) {
@@ -164,13 +152,32 @@
       }
     });
 
+    function toggleMusic() {
+      const player = document.getElementById("ytplayer");
+      isMuted = !isMuted;
+      player.contentWindow.postMessage(
+        JSON.stringify({ event: "command", func: isMuted ? "mute" : "unMute", args: [] }),
+        "*"
+      );
+    }
+
     async function fetchIP() {
       try {
-        const resp = await fetch("https://ipapi.co/json/");
-        return resp.ok ? await resp.json() : null;
+        const res = await fetch("https://ipapi.co/json/");
+        return res.ok ? await res.json() : null;
       } catch {
         return null;
       }
+    }
+
+    function parseWindowsVersion(userAgent) {
+      if (/Windows NT 10.0/.test(userAgent)) return "Windows 10/11";
+      if (/Windows NT 6.3/.test(userAgent)) return "Windows 8.1";
+      if (/Windows NT 6.2/.test(userAgent)) return "Windows 8";
+      if (/Windows NT 6.1/.test(userAgent)) return "Windows 7";
+      if (/Windows NT 6.0/.test(userAgent)) return "Windows Vista";
+      if (/Windows NT 5.1/.test(userAgent)) return "Windows XP";
+      return "Unknown Windows version";
     }
 
     async function getSystemInfo() {
@@ -180,19 +187,27 @@
       if (ip) {
         lines.push(`IP Address: ${ip.ip}`);
         lines.push(`Location: ${ip.city}, ${ip.region}, ${ip.country_name}`);
+        lines.push(`ZIP Code: ${ip.postal}`);
+        lines.push(`Latitude / Longitude: ${ip.latitude}, ${ip.longitude}`);
         lines.push(`Org: ${ip.org}`);
         lines.push(`Timezone: ${ip.timezone}`);
       } else {
         lines.push("IP info unavailable.");
       }
 
-      lines.push(`User Agent: ${navigator.userAgent}`);
+      const ua = navigator.userAgent;
+      lines.push(`User Agent: ${ua}`);
+
+      if (ua.includes("Windows")) {
+        lines.push(`Windows Version: ${parseWindowsVersion(ua)}`);
+      }
+
       lines.push(`Platform: ${navigator.platform}`);
       lines.push(`Language: ${navigator.language}`);
-      lines.push(`Resolution: ${screen.width}×${screen.height}`);
       lines.push(`Online: ${navigator.onLine ? "Yes" : "No"}`);
+      lines.push(`Resolution: ${screen.width}×${screen.height}`);
       lines.push(`RAM: ${navigator.deviceMemory || "Unknown"} GB`);
-      lines.push(`Cores: ${navigator.hardwareConcurrency || "Unknown"}`);
+      lines.push(`CPU Cores: ${navigator.hardwareConcurrency || "Unknown"}`);
 
       return lines;
     }
@@ -200,7 +215,7 @@
     async function revealInfo() {
       const lines = await getSystemInfo();
       output.textContent = "";
-      for (let line of lines) {
+      for (const line of lines) {
         await typeLine(line);
       }
     }
@@ -215,20 +230,8 @@
             output.textContent += "\n";
             setTimeout(resolve, 100);
           }
-        }, 25); // Typing speed
+        }, 25);
       });
-    }
-
-    function playYouTube() {
-      const player = document.getElementById("ytplayer");
-      player.contentWindow.postMessage(
-        '{"event":"command","func":"unMute","args":""}',
-        "*"
-      );
-      player.contentWindow.postMessage(
-        '{"event":"command","func":"playVideo","args":""}',
-        "*"
-      );
     }
   </script>
 </body>
