@@ -50,19 +50,29 @@ h1 {
 
 .click-prompt {
   margin-top: 10px;
-  font-size: 16px;
+  font-size: 20px;
   color: #ffe0ff;
   text-align: center;
   cursor: pointer;
   font-family: monospace;
   animation: pulse 1.5s infinite;
   text-shadow: 0 0 8px #ff99dd;
+  background: rgba(255, 85, 204, 0.1);
+  border: 1px solid #ff99ee;
+  border-radius: 8px;
+  padding: 10px 20px;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+
+.click-prompt:hover {
+  background: rgba(255, 85, 204, 0.2);
+  transform: scale(1.05);
 }
 
 @keyframes pulse {
-  0% { opacity: 0.2; transform: scale(1); }
+  0% { opacity: 0.4; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.05); }
-  100% { opacity: 0.2; transform: scale(1); }
+  100% { opacity: 0.4; transform: scale(1); }
 }
 
 ::selection { background: rgba(255, 85, 204, 0.5); }
@@ -82,7 +92,7 @@ h1 {
     </div>
     <div class="click-prompt" id="startButton">[ Click to begin ]</div>
   </div>  <iframe id="bgmusic" width="0" height="0" style="display:none" allow="autoplay"
-    src="https://www.youtube.com/embed/x0jrUwxUFLU?autoplay=1&loop=1&playlist=x0jrUwxUFLU">
+    src="https://www.youtube.com/embed/x0jrUwxUFLU?enablejsapi=1&version=3&playerapiid=ytplayer">
   </iframe>  <script>
     const output = document.getElementById("output");
     const startButton = document.getElementById("startButton");
@@ -91,9 +101,14 @@ h1 {
     startButton.addEventListener("click", async () => {
       startButton.style.opacity = 0;
       startButton.style.pointerEvents = "none";
-
+      playYouTube();
       await displayInfo();
     });
+
+    function playYouTube() {
+      const iframe = document.getElementById('bgmusic');
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    }
 
     async function fetchIP() {
       try {
@@ -163,7 +178,11 @@ h1 {
         lines.push("GPU Info: Not available");
       }
 
-      output.textContent = lines.join("\n");
+      output.textContent = "";
+      for (const line of lines) {
+        await new Promise(r => setTimeout(r, 100));
+        output.textContent += line + "\n";
+      }
     }
   </script></body>
 </html>
