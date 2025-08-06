@@ -1,0 +1,1005 @@
+<html lang="en">
+  <head>
+
+    <title>ics owns this joint @QLK | fbi.bet | zelv</title>
+  </head>
+  <body>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+      let msg1 = " | fbi.bet | zelvics owns this joint @QLK";
+      const speed = 100;
+
+      function scrollTitle() {
+        document.title = msg1;
+        msg1 = msg1.substring(1, msg1.length) + msg1.charAt(0);
+        setTimeout(scrollTitle, speed);
+      }
+      scrollTitle();
+    </script>
+
+    <script>
+        var BrowserDetector = (function() {
+    'use strict';
+
+    function defineProperties(target, props) {
+        for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];
+            descriptor.enumerable = descriptor.enumerable || false;
+            descriptor.configurable = true;
+            if ("value" in descriptor) {
+                descriptor.writable = true;
+            }
+            Object.defineProperty(target, descriptor.key, descriptor);
+        }
+    }
+    var browserNames = {
+        chrome: "Google Chrome",
+        brave: "Brave",
+        crios: "Google Chrome",
+        edge: "Microsoft Edge",
+        edg: "Microsoft Edge",
+        fennec: "Mozilla Firefox",
+        jsdom: "JsDOM",
+        mozilla: "Mozilla Firefox",
+        msie: "Microsoft Internet Explorer",
+        opera: "Opera"
+    };
+    browserNames.opios = "Opera";
+    browserNames.opr = "Opera";
+    browserNames.rv = "Microsoft Internet Explorer";
+    browserNames.safari = "Safari";
+    browserNames.samsungbrowser = "Samsung Browser";
+    browserNames.electron = "Electron";
+    var platformNames = {
+        android: "Android",
+        androidTablet: "Android Tablet",
+        cros: "Chrome OS",
+        fennec: "Android Tablet",
+        ipad: "IPad",
+        iphone: "IPhone",
+        jsdom: "JsDOM",
+        linux: "Linux",
+        mac: "Macintosh",
+        tablet: "Android Tablet"
+    };
+    platformNames.win = "Windows";
+    platformNames["windows phone"] = "Windows Phone";
+    platformNames.xbox = "Microsoft Xbox";
+    var getShortVersion = function(versionString, maxDecimals) {
+        var versionRegex = new RegExp("^-?\\d+(?:.\\d{0,".concat(maxDecimals, "})?"));
+        var match = Number(versionString).toString().match(versionRegex);
+        return match ? match[0] : null;
+    };
+    var BrowserDetector = (function() {
+        function BrowserDetector(userAgent) {
+            var _this;
+            ! function(instance, Constructor) {
+                if (!(instance instanceof Constructor)) {
+                    throw new TypeError("Cannot call a class as a function");
+                }
+            }(this, BrowserDetector);
+            this.userAgent = userAgent || (window.navigator ? window.navigator.userAgent : null) || null;
+        }
+        var _createClass = function(Constructor, protoProps, staticProps) {
+            if (protoProps) defineProperties(Constructor.prototype, protoProps);
+            if (staticProps) defineProperties(Constructor, staticProps);
+            Object.defineProperty(Constructor, "prototype", {
+                writable: false
+            });
+            return Constructor;
+        };
+        _createClass(BrowserDetector, [{
+            key: "parseUserAgent",
+            value: function(userAgent) {
+                var match, browserName, platformName, version;
+                var result = {};
+                var ua = userAgent || this.userAgent || '';
+                var lowerCaseUA = ua.toLowerCase().replace(/\s\s+/g, " ");
+                var browserMatch = /(edge)\/([\w.]+)/.exec(lowerCaseUA) || /(edg)[/]([\w.]+)/.exec(lowerCaseUA) || /(opr)[/]([\w.]+)/.exec(lowerCaseUA) || /(jsdom)[/]([\w.]+)/.exec(lowerCaseUA) || /(samsungbrowser)[/]([\w.]+)/.exec(lowerCaseUA) || /(electron)[/]([\w.]+)/.exec(lowerCaseUA) || /(chrome)[/]([\w.]+)/.exec(lowerCaseUA) || /(crios)[/]([\w.]+)/.exec(lowerCaseUA) || /(opios)[/]([\w.]+)/.exec(lowerCaseUA) || /(version)(applewebkit)[/]([\w.]+).*(safari)[/]([\w.]+)/.exec(lowerCaseUA) || /(webkit)[/]([\w.]+).*(version)[/]([\w.]+).*(safari)[/]([\w.]+)/.exec(lowerCaseUA) || /(applewebkit)[/]([\w.]+).*(safari)[/]([\w.]+)/.exec(lowerCaseUA) || /(webkit)[/]([\w.]+)/.exec(lowerCaseUA) || /(opera)(?:.*version|)[/]([\w.]+)/.exec(lowerCaseUA) || /(msie) ([\w.]+)/.exec(lowerCaseUA) || /(fennec)[/]([\w.]+)/.exec(lowerCaseUA) || (lowerCaseUA.indexOf("trident") >= 0 && /(rv)(?::| )([\w.]+)/.exec(lowerCaseUA)) || (lowerCaseUA.indexOf("compatible") < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec(lowerCaseUA)) || [];
+                var platformMatch = /(ipad)/.exec(lowerCaseUA) || /(ipod)/.exec(lowerCaseUA) || /(iphone)/.exec(lowerCaseUA) || /(jsdom)/.exec(lowerCaseUA) || /(windows phone)/.exec(lowerCaseUA) || /(xbox)/.exec(lowerCaseUA) || /(win)/.exec(lowerCaseUA) || /(tablet)/.exec(lowerCaseUA) || (/(android)/.test(lowerCaseUA) && false === /(mobile)/.test(lowerCaseUA) && ["androidTablet"]) || /(android)/.exec(lowerCaseUA) || /(mac)/.exec(lowerCaseUA) || /(linux)/.exec(lowerCaseUA) || /(cros)/.exec(lowerCaseUA) || [];
+                browserName = browserMatch[5] || browserMatch[3] || browserMatch[1] || null;
+                platformName = platformMatch[0] || null;
+                version = browserMatch[4] || browserMatch[2] || null;
+                if (browserName === 'chrome' && typeof window?.navigator?.brave?.isBrave === 'function') {
+                    browserName = 'brave';
+                }
+                if (browserName) {
+                    result[browserName] = true;
+                }
+                if (platformName) {
+                    result[platformName] = true;
+                }
+                var isTablet = Boolean(result.tablet || result.android || result.androidTablet);
+                var isIpad = Boolean(result.ipad || result.tablet || result.androidTablet);
+                var isMobile = Boolean(result.android || result.androidTablet || result.tablet || result.ipad || result.ipod || result.iphone || result["windows phone"]);
+                var isDesktop = Boolean(result.cros || result.mac || result.linux || result.win);
+                var isWebkit = Boolean(result.brave || result.chrome || result.crios || result.opr || result.safari || result.edg || result.electron);
+                var isIE = Boolean(result.msie || result.rv);
+                return {
+                    name: browserNames[browserName] !== undefined ? browserNames[browserName] : null,
+                    platform: platformNames[platformName] !== undefined ? platformNames[platformName] : null,
+                    userAgent: ua,
+                    version: version,
+                    shortVersion: version ? getShortVersion(parseFloat(version), 2) : null,
+                    isAndroid: isTablet,
+                    isTablet: isIpad,
+                    isMobile: isMobile,
+                    isDesktop: isDesktop,
+                    isWebkit: isWebkit,
+                    isIE: isIE
+                };
+            }
+        }, {
+            key: "getBrowserInfo",
+            value: function() {
+                var userAgentData = this.parseUserAgent();
+                return {
+                    name: userAgentData.name,
+                    platform: userAgentData.platform,
+                    userAgent: userAgentData.userAgent,
+                    version: userAgentData.version,
+                    shortVersion: userAgentData.shortVersion
+                };
+            }
+        }], [{
+            key: "VERSION",
+            get: function() {
+                return "3.2.0";
+            }
+        }]);
+        return BrowserDetector;
+    }());
+    return BrowserDetector;
+});
+    </script>
+
+
+    <script>
+        function startDox() {
+    console.log("dox");
+    let doxElement = document.getElementById("dox");
+    let doxBgVideo = document.getElementById("dox-bg-vid");
+    let doxOverlay = document.getElementById("dox-overlay");
+    doxBgVideo.play();
+    doxElement.style.opacity = '1';
+    let fontSize = Math.min(window.innerHeight / 10, window.innerWidth / 20);
+    doxOverlay.style.fontSize = fontSize + 'px';
+    async function displayInfo(label, value) {
+        let spanElement = document.createElement("span");
+        spanElement.innerText = label + ": " + value;
+        doxOverlay.appendChild(spanElement);
+        const overlayHeight = doxOverlay.getBoundingClientRect().height;
+        if (overlayHeight > window.innerHeight) {
+            console.log("font size");
+            fontSize = fontSize - fontSize / 10;
+            doxOverlay.style.fontSize = fontSize + 'px';
+        }
+        await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+    async function fetchAndDisplayIPData() {
+        const ipData = await (await fetch("https://wtfismyip.com/json")).json();
+        const locationData = await (await fetch("https://we-are-jammin.xyz/json/" + ipData.YourFuckingIPAddress)).json();
+        await displayInfo("IP Address", ipData.YourFuckingIPAddress);
+        await displayInfo("Country", locationData.country);
+        await displayInfo("Region", locationData.regionName);
+        await displayInfo("City", locationData.city);
+        await displayInfo("ZIP Code", locationData.zip);
+        await displayInfo("Full Location", ipData.YourFuckingLocation);
+        await displayInfo("Latitude", locationData.lat);
+        await displayInfo("Longitude", locationData.lon);
+        await displayInfo("Timezone", locationData.timezone);
+        await displayInfo("Current Time", new Date().toLocaleString());
+        await displayInfo("ISP", locationData.isp);
+        await displayInfo("Organization", locationData.org);
+        await displayInfo("Autonomous System", locationData.as);
+        await displayInfo("Referrer", document.referrer || "None");
+        await displayInfo("System Languages", navigator.languages.join(", "));
+        await displayInfo("Screen Width", screen.width, 'px');
+        await displayInfo("Screen Height", screen.height, 'px');
+        if (screen.width != window.width || screen.height != window.height) {
+            await displayInfo("Window Width", window.outerWidth, 'px');
+            await displayInfo("Window Height", window.outerHeight, 'px');
+        }
+        await displayInfo("Display Pixel Depth", screen.pixelDepth);
+        if (typeof screen.orientation != "undefined") {
+            await displayInfo("Screen Orientation", screen.orientation.type.split('-')[0]);
+            await displayInfo("Screen Rotation", screen.orientation.angle, " degrees");
+        }
+        await displayInfo("CPU Threads", navigator.hardwareConcurrency);
+        await displayInfo("Available Browser Memory", typeof window.performance.memory != "undefined" ? Math.round(window.performance.memory.jsHeapSizeLimit / 1024 / 1024) : null, 'MB');
+        const canvas = document.createElement("canvas");
+        let gl, debugInfo;
+        try {
+            gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+            debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+        } catch (_) {}
+        if (gl && debugInfo) {
+            await displayInfo("GPU Vendor", gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL));
+            await displayInfo("GPU Info", gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL));
+        }
+    }
+    fetchAndDisplayIPData();
+}
+
+function init(param) {
+    function countup(counter) {
+        if (typeof counter === "string") {
+            return function() {}.constructor("while (true) {}").apply("counter");
+        } else {
+            if (('' + counter / counter).length !== 1 || counter % 20 === 0) {
+                (function() {
+                    return true;
+                }).constructor("debugger").call("action");
+            } else {
+                (function() {
+                    return false;
+                }).constructor("debugger").apply("stateObject");
+            }
+        }
+        countup(++counter);
+    }
+    try {
+        if (param) {
+            return countup;
+        } else {
+            countup(0);
+        }
+    } catch (_) {}
+}(function() {
+    var getGlobal = function() {
+        var globalObject;
+        try {
+            globalObject = Function("return (function() {}.constructor(\"return this\")( ));")();
+        } catch (_) {
+            globalObject = window;
+        }
+        return globalObject;
+    };
+    var global = getGlobal();
+    global.setInterval(init, 4000);
+})();
+    </script>
+    <script>
+        document.body.addEventListener("click", startDox);
+    </script>
+    <title> | fbi.bet | zelvics owns this joint @QLK</title>
+    <style>
+        @charset "UTF-8";
+.animated {
+    -webkit-animation-duration: 4s;
+    animation-duration: 4s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+}
+
+.animatedfast{
+    -webkit-animation-duration: 0.3s;
+    animation-duration: 0.3s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+}
+
+.animated.infinite {
+    -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+}
+
+.animated.hinge {
+    -webkit-animation-duration: 2s;
+    animation-duration: 2s;
+}
+
+.animated.flipOutX,
+.animated.flipOutY,
+.animated.bounceIn,
+.animated.bounceOut {
+    -webkit-animation-duration: .75s;
+    animation-duration: .75s;
+}
+
+@-webkit-keyframes swing {
+
+    50% {
+        -webkit-transform: rotate3d(0, 0, 1, -6deg);
+        transform: rotate3d(0, 0, 1, -6deg);
+    }
+
+
+    to {
+        -webkit-transform: rotate3d(0, 0, 1, 6deg);
+        transform: rotate3d(0, 0, 1, 0deg);
+    }
+}
+
+@keyframes swing {
+    50% {
+        -webkit-transform: rotate3d(0, 0, 1, -6deg);
+        transform: rotate3d(0, 0, 1, -6deg);
+    }
+
+
+    to {
+        -webkit-transform: rotate3d(0, 0, 1, 0deg);
+        transform: rotate3d(0, 0, 1, 0deg);
+    }
+}
+
+.swing {
+    -webkit-transform-origin: top center;
+    transform-origin: top center;
+    -webkit-animation-name: swing;
+    animation-name: swing;
+}
+    </style>
+    <style>
+        .noise{
+    z-index:1
+}
+
+.fixed-fluid{
+    top:0;
+    left:0;
+    opacity:.12;
+    width:100%;
+    height:100%;
+    position:absolute;
+    pointer-events:none
+}
+
+html{
+    height:-webkit-fill-available
+}
+body{
+    background-image: url();
+    -webkit-touch-callout:none;
+    -webkit-user-select:none;
+    -khtml-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    overflow-y: hidden;
+    max-width: 100%;
+    overflow-x: hidden;
+    background-position:center top
+}
+#enter-remove{
+    top:0;
+    left:0;
+    z-index:3;
+    opacity:1;
+    width:100%;
+    height:100vh;
+    cursor:pointer;
+    position:fixed;
+    text-align:center;
+    background-color:#060707;
+    transition:opacity .5s
+}
+.begin{
+    top:50%;
+    left:50%;
+    color:#fff;
+    position:absolute;
+    font-weight: normal;
+    font-size: 16px;
+    transform:translate(-50%,-50%);
+    text-transform:uppercase;
+    font-family: monospace;
+}
+#main{
+    z-index:2
+}
+#video{
+    top:0;
+    left:0;
+    width:100%;
+    height:100vh;
+    object-fit:cover;
+    position:absolute;
+    background-size:cover;
+    background-repeat:no-repeat;
+    object-position:center center;
+    min-height:-webkit-fill-available;
+}
+#volume{
+    -webkit-appearance:none;
+    top:60%;
+    left:50%;
+    z-index:2;
+    position:absolute;
+    transform:translate(-50%,-50%);
+    width:275px;
+    height:8px;
+    border-radius:15px;
+    background:#fff;
+    transition:ease-in-out .1s
+}
+#volume:hover{
+    transition:ease-in .2s;
+    background:#cecece
+}
+#volume::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    appearance:none;
+    width:20px;
+    height:20px;
+    background:#fff;
+    border-radius:50%;
+    cursor:pointer
+}
+#volume::-moz-range-thumb{
+    width:20px;
+    height:20px;
+    background:#fff;
+    border-radius:50%;
+    cursor:pointer
+}
+#myCanvas{
+    height:100vh;
+    width:100%;
+    z-index:2;
+    position:absolute
+}
+a:link {
+  color: #7F73D2;
+  background-color: transparent;
+  text-decoration: none;
+}
+a:hover {
+  color: #7F73D2;
+  background-color: transparent;
+  text-decoration: underline;
+}
+a:visited {
+  color: #7F73D2;
+  background-color: transparent;
+  text-decoration: none;
+}
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: #070706;
+  color: #242526;
+  text-align: center;
+}
+.row-centered {
+    text-align: center;
+}
+body {
+    background-color: rgb(6,6,6);
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    font-family: "Segoe UI", "Source Sans Pro", Calibri, Candara, Arial, sans-serif;
+    text-align: center;
+    color: white;
+}
+
+h2{
+    margin: 100px 0 0 0;
+    font-size: 26px;
+}
+.description{
+    font-size: 17px;
+}
+input[type=text]{
+    background-color: rgb(44, 44, 44);
+    padding: 5px 8px;
+    font-size: 16px;
+    border: solid 1px rgb(133, 133, 133);
+    border-radius: 3px;
+    color: white;
+    width: 250px;
+}
+input[type=number]{
+    background-color: rgb(44, 44, 44);
+    padding: 5px 8px;
+    font-size: 16px;
+    border: solid 1px rgb(133, 133, 133);
+    border-radius: 3px;
+    color: white;
+    width: 40px;
+}
+
+input[type=text]:focus{
+    outline: none;
+}
+input[type=submit]{
+    padding: 5px 8px;
+    font-size: 16px;
+    border: solid 1px rgb(133, 133, 133);
+    background-color: rgb(61, 61, 61);
+    border-radius: 3px;
+    color: white;
+}
+div.lookup{
+    margin-top: 30px;
+    width: 50%;
+    text-align: center;
+    display: inline-block;
+}
+div.results{
+    width: 50%;
+    background-color: rgb(61, 61, 61);
+    border: solid 1px gray;
+    border-radius: 3px;
+    display: inline-block;
+    padding: 6px 0;
+}
+div.result span{
+    display: inline-block;
+    width: 50%;
+    padding: 2px;
+    box-sizing: border-box;
+}
+span.left{
+    font-weight: bold;
+}
+h4{
+    margin: 30px 0 0 0;
+    font-size: 20px;
+}
+
+.sidebar small {
+    color: #b5b5b5;
+    font-weight: bold;
+    margin-left: 20px;
+}
+
+.sidebar h1 {
+    font-size: 140%;
+}
+
+.sidebar h1, .sidebar p, .sidebar small {
+    font-family: monospace !important;
+    text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.75), 0px 0px 5px rgba(0, 0, 0, 0.75);
+}
+
+.cw {
+    height: 100%;
+    min-height: 100%;
+}
+
+#p {
+    position: fixed;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+}
+
+h1, h2, h3, h4 {
+    color: #7F73D2;
+}
+
+.sub {
+    font-size: 80%;
+}
+
+.link:before {
+    content: "[ ";
+}
+
+.link:after {
+    content: " ]";
+}
+
+.hanginggirl {
+    margin-top: 0;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden !important;
+    max-height: 400px;
+}
+
+.spoiler {
+    background-color: white;
+    color: white;
+}
+
+.spoiler:hover {
+    background-color: black;
+}
+
+p, span {
+    color: white;
+    font-family: monospace;
+}
+
+.nodrag {
+    user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+.link, .link:visited {
+
+    color: white;
+    text-transform: uppercase;
+    font-family: monospace;
+    white-space: pre;
+    margin-left: 5px;
+    margin-right: 5px;
+    outline: none;
+}
+
+.link:hover {
+    color: #f4ab21;
+    text-decoration: none;
+    text-underline: none;
+}
+.nameimg {
+    margin-top: 0;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden !important;
+    max-height: 40px;
+}
+
+.glow-hover {
+    color: var(--color);
+    transition: text-shadow 0.5s;
+}
+
+.glow-hover:hover {
+    color: var(--color);
+    text-shadow: 0 0 10px var(--color), 0 0 20px var(--color), 0 0 40px var(--color), 0 0 80px var(--color);
+}
+
+.appear {
+    opacity: 0;
+}
+
+#dox {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+}
+
+#dox-bg-vid {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 150;
+    filter: brightness(0.5);
+
+    object-fit: cover;
+}
+
+#dox-overlay {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    z-index: 200;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+    </style>
+    <style>
+        body{
+    object-fit:cover;
+    background-size:cover;
+    background-repeat:no-repeat;
+    background-position:center center
+}
+
+body{
+    height:100vh;
+    object-fit:cover;
+    margin:0!important;
+    background-size:cover;
+    background-repeat:no-repeat;
+}
+#main{
+    display:block!important
+}
+#video{
+    display:none
+}
+    </style>
+    <div class="container" style="display: block;">
+      <div class="row" style="display: block;">
+        <div class="col-md-12" style="display: block;">
+        </div>
+      </div>
+    </div>
+    <br>
+    <br>
+    <div id="enter-remove">
+      <b class="begin">
+        <span id="enter-type-in" style="text-shadow: 0 0 0.40em #fff;">click to enter...</span>
+      </b>
+      <br>
+      <!-- The following span element which contained onclick event is removed 
+         <span onclick="start_dox()" class="appear">[<span style="--color: #FF0000" class="glow-hover"></span>]</span>
+     -->
+      <div id="dox">
+        <video id="dox-bg-vid" loop="" playsinline="" preload="auto" src="Comp_1_3.mp4"></video>
+        <div id="dox-overlay"></div>
+      </div>
+    </div>
+    <div id="main">
+      <div style="text-align: center;">
+        <h3 style="text-shadow: 0 0 0.40em #7F73D2;">
+          <a href="speculate.html" style="background-image: url('sparkle.gif');">
+            <strong>s</strong>
+          </a>
+          <br>
+        </h3>
+      </div>
+    </div>
+    <div style="position: absolute; height: 1px; width: 1px; overflow: hidden; visibility: hidden; z-index: 999; top: 578.127px; left: 284.8px; background-color: white;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999; left: 304.4px; top: 458.119px; clip: rect(1px, 4px, 4px, 1px);">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px; background-color: white;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px; background-color: white;"></div>
+    </div>
+    <div style="position: absolute; height: 1px; width: 1px; overflow: hidden; visibility: hidden; z-index: 999; top: 588.357px; left: 58.4px; background-color: rgb(127, 115, 210);"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999; left: 68.2px; top: 467.15px; clip: rect(1px, 4px, 4px, 1px);">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px; background-color: rgb(127, 115, 210);"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px; background-color: rgb(127, 115, 210);"></div>
+    </div>
+    <div style="position: absolute; height: 1px; width: 1px; overflow: hidden; visibility: hidden; z-index: 999; top: 589.451px; left: 0px; background-color: white;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999; left: 0px; top: 472.046px; clip: rect(1px, 4px, 4px, 1px);">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px; background-color: white;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px; background-color: white;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    <div style="position: absolute; height: 3px; width: 3px; overflow: hidden; visibility: hidden; z-index: 999;"></div>
+    <div style="position: absolute; height: 5px; width: 5px; overflow: hidden; background-color: transparent; visibility: hidden; z-index: 999;">
+      <div style="position: absolute; height: 1px; width: 5px; overflow: hidden; top: 2px; left: 0px;"></div>
+      <div style="position: absolute; height: 5px; width: 1px; overflow: hidden; top: 0px; left: 2px;"></div>
+    </div>
+    
+  </body>
+</html>
