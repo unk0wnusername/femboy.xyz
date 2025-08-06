@@ -1,227 +1,342 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>femboy.systems - Diagnostic</title>
+  <title>femboy.systems</title>
   <style>
-    * { box-sizing: border-box; }html, body {
-  margin: 0;
-  padding: 0;
-  background-color: #0b0b0b;
-  font-family: 'Courier New', monospace;
-  color: #f0aaff;
-  height: 100%;
-  overflow: hidden;
-}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-.container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  padding: 20px;
-}
+    html, body {
+      height: 100%;
+      background: url('https://cdn.discordapp.com/attachments/1373066456937533580/1402748763130564618/487798706a16bcc831a5c328f83b2e59bb0c6e99.jpg') center center fixed no-repeat;
+      background-size: cover;
+      font-family: monospace;
+      color: #eaaaff;
+      overflow: hidden;
+      user-select: none;
+    }
 
-.terminal {
-  background-color: #111;
-  border: 2px solid #ff66cc;
-  border-radius: 12px;
-  padding: 30px;
-  max-width: 850px;
-  width: 100%;
-  height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 0 20px #ff66cc80;
-  font-size: 18px;
-  line-height: 1.6;
-  transition: font-size 0.3s ease;
-}
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.85);
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      flex-direction: column;
+    }
 
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #ff80ff;
-  font-size: 26px;
-  text-shadow: 0 0 5px #ff99ff;
-}
+    .terminal {
+      background-color: #1a1a1a;
+      border: 2px solid #ff55cc;
+      border-radius: 12px;
+      padding: 30px;
+      width: 100%;
+      max-width: 800px;
+      height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 0 25px rgba(255, 85, 204, 0.8);
+      font-size: 18px;
+      line-height: 1.5;
+      transition: font-size 0.3s ease;
+      user-select: text;
+      display: flex;
+      flex-direction: column;
+    }
 
-audio {
-  position: fixed;
-  bottom: 15px;
-  left: 15px;
-  width: 260px;
-  opacity: 0.6;
-  z-index: 10;
-}
+    h1 {
+      color: #ff77dd;
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+      text-shadow: 0 0 5px #ff99ee;
+      user-select: text;
+    }
 
-@media (max-width: 600px) {
-  .terminal { font-size: 14px; }
-  audio { width: 200px; }
-}
+    #output {
+      flex-grow: 1;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      margin-bottom: 10px;
+    }
 
-::selection { background-color: #ff66cc66; }
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-thumb {
-  background: #ff66cc;
-  border-radius: 10px;
-}
+    #input-line {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      color: #eaaaff;
+    }
 
+    #input-prompt {
+      user-select: none;
+      margin-right: 5px;
+    }
+
+    #input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #eaaaff;
+      font-family: monospace;
+      flex-grow: 1;
+      caret-color: #ff55cc;
+    }
+
+    #input::selection {
+      background: rgba(255, 85, 204, 0.5);
+    }
+
+    audio {
+      position: fixed;
+      bottom: 15px;
+      left: 15px;
+      width: 250px;
+      opacity: 0.7;
+      z-index: 10;
+      border-radius: 6px;
+      background: rgba(0,0,0,0.4);
+      padding: 4px;
+    }
+
+    #audio-control {
+      position: fixed;
+      bottom: 15px;
+      left: 275px;
+      color: #ff55cc;
+      font-size: 18px;
+      cursor: pointer;
+      user-select: none;
+      z-index: 11;
+      font-weight: bold;
+      text-shadow: 0 0 8px #ff55cc;
+    }
+
+    @media (max-width: 768px) {
+      .terminal { font-size: 16px; }
+      audio { width: 180px; }
+      #audio-control { left: 190px; font-size: 16px; }
+    }
+
+    ::selection { background: rgba(255, 85, 204, 0.5); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb {
+      background: #ff55cc;
+      border-radius: 10px;
+    }
+
+    /* Blinking caret for input */
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    #caret {
+      display: inline-block;
+      background: #ff55cc;
+      width: 8px;
+      height: 20px;
+      margin-left: 2px;
+      animation: blink 1s steps(2, start) infinite;
+      vertical-align: bottom;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="terminal">
-      <h1>femboy.systems - diagnostic mode</h1>
-      <pre id="output">Initiating system scan...</pre>
+  <div class="overlay">
+    <div class="terminal" aria-live="polite" aria-atomic="true">
+      <h1>femboy.systems — diagnostic mode</h1>
+      <pre id="output">Booting system diagnostics...\n</pre>
+      <div id="input-line">
+        <span id="input-prompt">></span>
+        <input id="input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+        <span id="caret"></span>
+      </div>
     </div>
-  </div>  <audio autoplay loop>
+  </div>
+
+  <audio id="bg-music" autoplay loop>
     <source src="https://cdn.discordapp.com/attachments/1373066456937533580/1402746841161924648/Seven_Minutes_in_Heaven.mp3" type="audio/mpeg">
-    Your browser does not support audio.
-  </audio>  <script>
-    const output = document.getElementById("output")
-    const terminal = document.querySelector(".terminal")
-    const sleep = ms => new Promise(r => setTimeout(r, ms))
+  </audio>
+  <div id="audio-control" title="Toggle music">⏸️</div>
 
-    async function typeLine(text, delay=15) {
-      for (const char of text) {
-        output.textContent += char
-        terminal.scrollTop = terminal.scrollHeight
-        adjustFontSize()
-        await sleep(delay)
+  <script>
+    const output = document.getElementById('output');
+    const input = document.getElementById('input');
+    const terminal = document.querySelector('.terminal');
+    const audio = document.getElementById('bg-music');
+    const audioControl = document.getElementById('audio-control');
+    let baseSize = 18;
+    let minFontSize = 12;
+
+    function sleep(ms) {
+      return new Promise(res => setTimeout(res, ms));
+    }
+
+    function scrollToBottom() {
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    async function typeLine(line) {
+      for (const char of line) {
+        output.textContent += char;
+        adjustFont();
+        scrollToBottom();
+        await sleep(15);
       }
-      output.textContent += "\n"
+      output.textContent += '\n';
+      scrollToBottom();
     }
 
-    async function typeLines(lines, delayBetween=90) {
-      for (const l of lines) {
-        await typeLine(l)
-        await sleep(delayBetween)
+    function adjustFont() {
+      const overflow = output.scrollHeight - terminal.clientHeight;
+      const newSize = Math.max(minFontSize, baseSize - overflow / 50);
+      terminal.style.fontSize = newSize + 'px';
+    }
+
+    async function fetchIP() {
+      try {
+        const resp = await fetch('https://ipapi.co/json/');
+        return resp.ok ? resp.json() : null;
+      } catch {
+        return null;
       }
-    }
-
-    function adjustFontSize() {
-      const max = terminal.clientHeight
-      const content = output.scrollHeight
-      const base = 18
-      let size = base
-      if (content > max * 0.95) {
-        size = Math.max(12, base - (content - max)/50)
-      }
-      terminal.style.fontSize = size + "px"
-    }
-
-    async function fetchIPInfo() {
-      try {
-        const res = await fetch("https://ipapi.co/json/")
-        return res.ok ? res.json() : null
-      } catch { return null }
-    }
-
-    async function fetchVPNStatus(ip) {
-      try {
-        const res = await fetch(`https://proxycheck.io/v2/${ip}?vpn=1`)
-        const d = await res.json()
-        return d[ip]?.proxy === "yes" ? "VPN/Proxy: YES" : "VPN/Proxy: NO"
-      } catch { return "VPN/Proxy: Unknown" }
-    }
-
-    function getCanvasFingerprint() {
-      try {
-        const c = document.createElement("canvas")
-        const ctx = c.getContext("2d")
-        ctx.font = "14px Arial"
-        ctx.fillText("Fingerprint!", 2, 2)
-        return c.toDataURL().slice(-16)
-      } catch { return "Unavailable" }
-    }
-
-    async function getAudioFingerprint() {
-      try {
-        const ctx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1,44100,44100)
-        const osc = ctx.createOscillator(), comp = ctx.createDynamicsCompressor()
-        osc.type="triangle"; osc.frequency.value=10000
-        osc.connect(comp); comp.connect(ctx.destination); osc.start(0)
-        const buf = await ctx.startRendering()
-        const data = buf.getChannelData(0)
-        const sum = data.reduce((a,b) => a + Math.abs(b), 0)
-        return sum.toString().slice(0,10)
-      } catch { return "Unavailable" }
-    }
-
-    function getWebGLInfo() {
-      try {
-        const c = document.createElement("canvas")
-        const gl = c.getContext("webgl") || c.getContext("experimental-webgl")
-        const dbg = gl.getExtension("WEBGL_debug_renderer_info")
-        return {
-          vendor: dbg ? gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) : "Unknown",
-          renderer: dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : "Unknown"
-        }
-      } catch { return {vendor:"Unavailable", renderer:"Unavailable"} }
-    }
-
-    async function getBatteryStatus() {
-      if (navigator.getBattery) {
-        try {
-          const b = await navigator.getBattery()
-          return `${Math.round(b.level*100)}% (${b.charging ? "Charging":"Not Charging"})`
-        } catch { return "Unavailable" }
-      }
-      return "Not Supported"
     }
 
     async function getSystemInfo() {
-      const ip = await fetchIPInfo()
-      const vpn = ip ? await fetchVPNStatus(ip.ip) : "VPN/Proxy: Unknown"
-      const canvasHash = getCanvasFingerprint()
-      const audioHash = await getAudioFingerprint()
-      const webgl = getWebGLInfo()
-      const battery = await getBatteryStatus()
+      const ip = await fetchIP();
+      const lines = [];
 
-      const lines = []
       if (ip) {
-        lines.push(`IP Address: ${ip.ip}`)
-        lines.push(`ISP: ${ip.org}`)
-        lines.push(`Location: ${ip.city}, ${ip.region}, ${ip.country_name}`)
-        lines.push(`Coordinates: ${ip.latitude}, ${ip.longitude}`)
-        lines.push(`Timezone: ${ip.timezone}`)
-        lines.push(vpn)
+        lines.push(`IP Address: ${ip.ip}`);
+        lines.push(`Location: ${ip.city}, ${ip.region}, ${ip.country_name}`);
+        lines.push(`Org: ${ip.org}`);
+        lines.push(`Timezone: ${ip.timezone}`);
       } else {
-        lines.push("IP / Geo info not available.")
+        lines.push('IP info unavailable.');
       }
 
-      lines.push(`User Agent: ${navigator.userAgent}`)
-      lines.push(`Platform: ${navigator.platform}`)
-      lines.push(`Language: ${navigator.language}`)
-      lines.push(`Screen: ${screen.width}x${screen.height}`)
-      lines.push(`Color Depth: ${screen.colorDepth}`)
-      lines.push(`CPU Threads: ${navigator.hardwareConcurrency ?? "Unknown"}`)
-      lines.push(`RAM: ${navigator.deviceMemory ?? "Unknown"} GB`)
-      lines.push(`Battery: ${battery}`)
-      lines.push(`Online: ${navigator.onLine ? "Yes" : "No"}`)
-      lines.push(`Touch Capable: ${'ontouchstart' in window ? "Yes" : "No"}`)
-      lines.push(`WebGL Vendor: ${webgl.vendor}`)
-      lines.push(`WebGL Renderer: ${webgl.renderer}`)
-      lines.push(`Canvas Fingerprint: ${canvasHash}`)
-      lines.push(`Audio Fingerprint: ${audioHash}`)
+      lines.push(`User Agent: ${navigator.userAgent}`);
+      lines.push(`Platform: ${navigator.platform}`);
+      lines.push(`Language: ${navigator.language}`);
+      lines.push(`Resolution: ${screen.width}×${screen.height}`);
+      lines.push(`Online: ${navigator.onLine ? 'Yes' : 'No'}`);
+      lines.push(`RAM: ${navigator.deviceMemory || 'Unknown'} GB`);
+      lines.push(`Cores: ${navigator.hardwareConcurrency || 'Unknown'}`);
 
-      if (navigator.connection) {
-        lines.push(`Connection Type: ${navigator.connection.effectiveType}`)
-        lines.push(`Downlink: ${navigator.connection.downlink} Mbps`)
-        lines.push(`RTT: ${navigator.connection.rtt} ms`)
-      }
-
-      lines.push(`Cookies Enabled: ${navigator.cookieEnabled ? "Yes" : "No"}`)
-      lines.push(`LocalStorage: ${typeof localStorage !== "undefined" ? "Yes" : "No"}`)
-      lines.push(`Clipboard API: ${"clipboard" in navigator ? "Yes" : "No"}`)
-      lines.push(`Vibration API: ${"vibrate" in navigator ? "Yes" : "No"}`)
-      return lines
+      return lines;
     }
 
+    async function clearTerminal() {
+      output.textContent = '';
+      adjustFont();
+      scrollToBottom();
+    }
+
+    function printHelp() {
+      return [
+        'Available commands:',
+        'help       - Show this help message',
+        'clear      - Clear the terminal',
+        'sysinfo    - Show system information',
+        'ipinfo     - Show IP and location info',
+        'exit       - Exit diagnostic mode (reload page)',
+      ];
+    }
+
+    async function runCommand(cmd) {
+      const command = cmd.trim().toLowerCase();
+      switch(command) {
+        case 'help':
+          for (const line of printHelp()) {
+            await typeLine(line);
+          }
+          break;
+        case 'clear':
+          await clearTerminal();
+          break;
+        case 'sysinfo':
+          {
+            const sysLines = [];
+            sysLines.push(`User Agent: ${navigator.userAgent}`);
+            sysLines.push(`Platform: ${navigator.platform}`);
+            sysLines.push(`Language: ${navigator.language}`);
+            sysLines.push(`Resolution: ${screen.width}×${screen.height}`);
+            sysLines.push(`Online: ${navigator.onLine ? 'Yes' : 'No'}`);
+            sysLines.push(`RAM: ${navigator.deviceMemory || 'Unknown'} GB`);
+            sysLines.push(`Cores: ${navigator.hardwareConcurrency || 'Unknown'}`);
+            for (const line of sysLines) {
+              await typeLine(line);
+            }
+          }
+          break;
+        case 'ipinfo':
+          {
+            await typeLine('Fetching IP info...');
+            const ip = await fetchIP();
+            if (ip) {
+              await typeLine(`IP Address: ${ip.ip}`);
+              await typeLine(`Location: ${ip.city}, ${ip.region}, ${ip.country_name}`);
+              await typeLine(`Org: ${ip.org}`);
+              await typeLine(`Timezone: ${ip.timezone}`);
+            } else {
+              await typeLine('IP info unavailable.');
+            }
+          }
+          break;
+        case 'exit':
+          await typeLine('Exiting diagnostic mode...');
+          await sleep(500);
+          location.reload();
+          break;
+        default:
+          await typeLine(`Unknown command: ${cmd}`);
+          await typeLine('Type "help" for a list of commands.');
+          break;
+      }
+    }
+
+    input.addEventListener('keydown', async (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const cmd = input.value;
+        if (!cmd.trim()) return;
+        output.textContent += `> ${cmd}\n`;
+        input.value = '';
+        adjustFont();
+        scrollToBottom();
+        await runCommand(cmd);
+      }
+    });
+
+    audioControl.addEventListener('click', () => {
+      if (audio.paused) {
+        audio.play();
+        audioControl.textContent = '⏸️';
+      } else {
+        audio.pause();
+        audioControl.textContent = '▶️';
+      }
+    });
+
+    // On load, fetch and print system info automatically
     (async () => {
-      output.textContent = ""
-      const info = await getSystemInfo()
-      await typeLines(info)
-    })()
-  </script></body>
+      output.textContent = '';
+      const info = await getSystemInfo();
+      for (const line of info) {
+        await typeLine(line);
+        await sleep(70);
+      }
+      await typeLine('\nType "help" for commands.');
+    })();
+
+    // Focus input on page load
+    window.onload = () => input.focus();
+
+    // Focus input if terminal is clicked
+    terminal.addEventListener('click', () => input.focus());
+  </script>
+</body>
 </html>
