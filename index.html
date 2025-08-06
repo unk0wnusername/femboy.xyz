@@ -171,7 +171,7 @@
     }
 
     function parseWindowsVersion(userAgent) {
-      if (/Windows NT 10.0/.test(userAgent)) return "Windows 10/11";
+      if (/Windows NT 10.0/.test(userAgent)) return "Windows 10 or 11";
       if (/Windows NT 6.3/.test(userAgent)) return "Windows 8.1";
       if (/Windows NT 6.2/.test(userAgent)) return "Windows 8";
       if (/Windows NT 6.1/.test(userAgent)) return "Windows 7";
@@ -180,16 +180,25 @@
       return "Unknown Windows version";
     }
 
+    function detectDeviceType() {
+      const ua = navigator.userAgent;
+      if (/Mobi|Android/i.test(ua)) return "Mobile";
+      if (/Tablet|iPad/i.test(ua)) return "Tablet";
+      return "Desktop";
+    }
+
     async function getSystemInfo() {
       const ip = await fetchIP();
       const lines = [];
+
+      lines.push("Booting system diagnostics...\n");
 
       if (ip) {
         lines.push(`IP Address: ${ip.ip}`);
         lines.push(`Location: ${ip.city}, ${ip.region}, ${ip.country_name}`);
         lines.push(`ZIP Code: ${ip.postal}`);
         lines.push(`Latitude / Longitude: ${ip.latitude}, ${ip.longitude}`);
-        lines.push(`Org: ${ip.org}`);
+        lines.push(`ISP/Org: ${ip.org}`);
         lines.push(`Timezone: ${ip.timezone}`);
       } else {
         lines.push("IP info unavailable.");
@@ -197,17 +206,30 @@
 
       const ua = navigator.userAgent;
       lines.push(`User Agent: ${ua}`);
-
+      lines.push(`Platform: ${navigator.platform}`);
+      lines.push(`Device Type: ${detectDeviceType()}`);
       if (ua.includes("Windows")) {
         lines.push(`Windows Version: ${parseWindowsVersion(ua)}`);
       }
 
-      lines.push(`Platform: ${navigator.platform}`);
       lines.push(`Language: ${navigator.language}`);
       lines.push(`Online: ${navigator.onLine ? "Yes" : "No"}`);
       lines.push(`Resolution: ${screen.width}×${screen.height}`);
       lines.push(`RAM: ${navigator.deviceMemory || "Unknown"} GB`);
       lines.push(`CPU Cores: ${navigator.hardwareConcurrency || "Unknown"}`);
+
+      // Optional: detect WebGL info (GPU info)
+      try {
+        const canvas = document.createElement("canvas");
+        const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+        const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+        const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+        lines.push(`GPU Vendor: ${vendor}`);
+        lines.push(`GPU Renderer: ${renderer}`);
+      } catch {
+        lines.push("GPU Info: Not available");
+      }
 
       return lines;
     }
