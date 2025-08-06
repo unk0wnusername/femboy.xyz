@@ -1,46 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>femboy-lover.xyz</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: monospace, monospace;
-      background: url('https://cdn.discordapp.com/attachments/1396693608056229980/1402740672586449077/Screenshot_20250805-135801.jpg?ex=6895038e&is=6893b20e&hm=afe45bf85d741d1a627b07a548879816ad17a716edd98ad90dadc26520930417&') center center / cover no-repeat fixed;
-      color: #fff;
-    }
-    .overlay {
-      background: rgba(0, 0, 0, 0.85);
-      min-height: 100vh;
-      padding: 40px 20px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-    }
-    .card {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 16px;
-      padding: 30px;
-      max-width: 800px;
-      width: 100%;
-      white-space: pre-wrap;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
-      overflow-wrap: break-word;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 32px;
-      color: #00f5ff;
-    }
-    #output {
-      font-size: 16px;
-      line-height: 1.5;
-      min-height: 400px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>femboy-lover.xyz</title>
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: monospace, monospace;
+    background: url('https://cdn.discordapp.com/attachments/1396693608056229980/1402740672586449077/Screenshot_20250805-135801.jpg?ex=6895038e&is=6893b20e&hm=afe45bf85d741d1a627b07a548879816ad17a716edd98ad90dadc26520930417&') no-repeat center center fixed;
+    background-size: cover;
+    color: #fff;
+  }
+  .overlay {
+    background: rgba(0, 0, 0, 0.85);
+    min-height: 100%;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 800px;
+    width: 100%;
+    white-space: pre-wrap;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+    overflow-wrap: break-word;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 32px;
+    color: #00f5ff;
+  }
+  #output {
+    font-size: 16px;
+    line-height: 1.5;
+    min-height: 400px;
+  }
+  audio {
+    position: fixed;
+    bottom: 15px;
+    left: 15px;
+    width: 250px;
+    outline: none;
+    opacity: 0.8;
+  }
+</style>
 </head>
 <body>
   <div class="overlay">
@@ -50,15 +60,15 @@
     </div>
   </div>
 
-  <audio autoplay loop>
-    <source src="https://music.youtube.com/watch?v=x0jrUwxUFLU&si=03KB-DHSE7RRRRJ4" type="audio/mp4">
+  <audio controls autoplay loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/02/20/audio_3b1e61a8e7.mp3?filename=relaxing-music-1233.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
 
   <script>
     const output = document.getElementById('output');
 
-    async function typeText(text, delay = 30) {
+    async function typeText(text, delay = 25) {
       for (let i = 0; i < text.length; i++) {
         output.textContent += text[i];
         await new Promise(r => setTimeout(r, delay));
@@ -165,15 +175,15 @@
       const lines = [];
 
       if (ipData) {
-        lines.push("IP Address: " + ipData.query);
-        lines.push("ISP: " + ipData.org);
-        lines.push("Country: " + ipData.country);
-        lines.push("Region: " + ipData.regionName);
-        lines.push("City: " + ipData.city);
-        lines.push("Zip Code: " + ipData.zip);
+        lines.push(`IP: ${ipData.query}`);
+        lines.push(`ISP: ${ipData.org}`);
+        lines.push(`Country: ${ipData.country}`);
+        lines.push(`Region: ${ipData.regionName}`);
+        lines.push(`City: ${ipData.city}`);
+        lines.push(`Zip: ${ipData.zip}`);
         lines.push(`Coordinates: ${ipData.lat}, ${ipData.lon}`);
-        lines.push("Timezone: " + ipData.timezone);
-        lines.push("VPN/Proxy Detected: " + vpnStatus);
+        lines.push(`Timezone: ${ipData.timezone}`);
+        lines.push(`VPN/Proxy: ${vpnStatus}`);
       } else {
         lines.push("Could not retrieve IP/Geo info.");
       }
@@ -181,47 +191,47 @@
       lines.push("");
       lines.push("=== Device & Browser Info ===");
 
-      lines.push("User Agent: " + navigator.userAgent);
-      lines.push("Platform: " + navigator.platform);
-      lines.push("Language: " + navigator.language);
-      lines.push("Timezone (Intl): " + Intl.DateTimeFormat().resolvedOptions().timeZone);
-      lines.push(`Screen Resolution: ${screen.width} x ${screen.height}`);
+      lines.push(`User Agent: ${navigator.userAgent}`);
+      lines.push(`Platform: ${navigator.platform}`);
+      lines.push(`Language: ${navigator.language}`);
+      lines.push(`Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`);
+      lines.push(`Screen: ${screen.width}x${screen.height}`);
       lines.push(`Color Depth: ${screen.colorDepth}`);
-      lines.push("CPU Threads: " + (navigator.hardwareConcurrency || "Unknown"));
-      lines.push("RAM (GB approx): " + (navigator.deviceMemory || "Unknown"));
-      lines.push("Touch Support: " + ('ontouchstart' in window ? "Yes" : "No"));
-      lines.push("Battery Level: " + batteryInfo);
-      lines.push("Online Status: " + (navigator.onLine ? "Online" : "Offline"));
+      lines.push(`CPU Threads: ${navigator.hardwareConcurrency || "Unknown"}`);
+      lines.push(`RAM (GB): ${navigator.deviceMemory || "Unknown"}`);
+      lines.push(`Touch Support: ${'ontouchstart' in window ? "Yes" : "No"}`);
+      lines.push(`Battery: ${batteryInfo}`);
+      lines.push(`Online: ${navigator.onLine ? "Yes" : "No"}`);
 
       lines.push("");
       lines.push("=== Graphics Info ===");
-      lines.push("WebGL Vendor: " + webglInfo.vendor);
-      lines.push("WebGL Renderer: " + webglInfo.renderer);
+      lines.push(`WebGL Vendor: ${webglInfo.vendor}`);
+      lines.push(`WebGL Renderer: ${webglInfo.renderer}`);
 
       lines.push("");
       lines.push("=== Fingerprints ===");
-      lines.push("Canvas Fingerprint: " + canvasHash);
-      lines.push("Audio Fingerprint: " + audioHash);
+      lines.push(`Canvas Hash: ${canvasHash}`);
+      lines.push(`Audio Hash: ${audioHash}`);
 
       lines.push("");
       lines.push("=== Network Info ===");
       if (navigator.connection) {
-        lines.push("Connection Type: " + (navigator.connection.effectiveType || "Unknown"));
-        lines.push("Downlink Speed (Mbps): " + (navigator.connection.downlink || "Unknown"));
-        lines.push("Round Trip Time (ms): " + (navigator.connection.rtt || "Unknown"));
+        lines.push(`Connection: ${navigator.connection.effectiveType || "Unknown"}`);
+        lines.push(`Downlink Mbps: ${navigator.connection.downlink || "Unknown"}`);
+        lines.push(`RTT ms: ${navigator.connection.rtt || "Unknown"}`);
       } else {
-        lines.push("Network info not supported");
+        lines.push("Network info: Not supported");
       }
 
       lines.push("");
       lines.push("=== Storage & Cookies ===");
-      lines.push("Cookies Enabled: " + (navigator.cookieEnabled ? "Yes" : "No"));
-      lines.push("LocalStorage Available: " + (typeof localStorage !== "undefined" ? "Yes" : "No"));
+      lines.push(`Cookies Enabled: ${navigator.cookieEnabled ? "Yes" : "No"}`);
+      lines.push(`LocalStorage: ${typeof localStorage !== "undefined" ? "Yes" : "No"}`);
 
       lines.push("");
-      lines.push("=== Basic System Features ===");
-      lines.push("Vibration Supported: " + ("vibrate" in navigator ? "Yes" : "No"));
-      lines.push("Clipboard Supported: " + ("clipboard" in navigator ? "Yes" : "No"));
+      lines.push("=== System Features ===");
+      lines.push(`Vibration: ${"vibrate" in navigator ? "Yes" : "No"}`);
+      lines.push(`Clipboard: ${"clipboard" in navigator ? "Yes" : "No"}`);
 
       return lines;
     }
