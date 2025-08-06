@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>System Intelligence Report</title>
+  <title>Intelligence Report</title>
   <style>
     * {
       box-sizing: border-box;
@@ -14,8 +14,9 @@
       padding: 0;
       background-color: #0d0d0d;
       color: #00ffcc;
-      font-family: monospace;
+      font-family: 'Courier New', Courier, monospace;
       height: 100%;
+      overflow: hidden;
     }
 
     .container {
@@ -26,29 +27,26 @@
       padding: 20px;
     }
 
-    .card {
+    .terminal {
       background-color: #111;
       border: 1px solid #00ffcc55;
       border-radius: 8px;
       padding: 30px;
       max-width: 800px;
       width: 100%;
-      box-shadow: 0 0 20px rgba(0, 255, 200, 0.2);
-      white-space: pre-wrap;
-      overflow-wrap: break-word;
+      height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 0 25px rgba(0, 255, 200, 0.2);
+      font-size: 18px;
+      line-height: 1.5;
+      transition: font-size 0.3s ease;
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 20px;
       color: #00ffff;
       font-size: 24px;
-    }
-
-    #output {
-      font-size: 14px;
-      line-height: 1.6;
-      min-height: 300px;
+      margin-bottom: 20px;
     }
 
     audio {
@@ -56,15 +54,25 @@
       bottom: 15px;
       left: 15px;
       width: 250px;
-      opacity: 0.8;
+      opacity: 0.6;
+    }
+
+    @media (max-width: 600px) {
+      .terminal {
+        font-size: 14px;
+      }
+
+      audio {
+        width: 180px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="card">
+    <div class="terminal">
       <h1>System Intelligence Report</h1>
-      <pre id="output">Initializing...</pre>
+      <pre id="output">Gathering data...</pre>
     </div>
   </div>
 
@@ -74,43 +82,60 @@
 
   <script>
     const output = document.getElementById("output");
+    const terminal = document.querySelector(".terminal");
+
     const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-    async function typeText(text, delay = 20) {
+    async function typeLine(text, delay = 15) {
       for (const char of text) {
         output.textContent += char;
+        terminal.scrollTop = terminal.scrollHeight;
+        adjustFontSize();
         await sleep(delay);
       }
       output.textContent += "\n";
     }
 
-    async function typeLines(lines, delay = 100) {
+    async function typeLines(lines, delayBetween = 80) {
       for (const line of lines) {
-        await typeText(line);
-        await sleep(delay);
+        await typeLine(line);
+        await sleep(delayBetween);
       }
     }
 
-    async function fetchIPData() {
+    function adjustFontSize() {
+      const maxHeight = terminal.clientHeight;
+      const contentHeight = output.scrollHeight;
+      const baseFont = 18;
+      let fontSize = baseFont;
+
+      if (contentHeight > maxHeight * 0.95) {
+        fontSize = Math.max(12, baseFont - ((contentHeight - maxHeight) / 40));
+      }
+
+      terminal.style.fontSize = fontSize + "px";
+    }
+
+    async function fetchIPInfo() {
       try {
-        const res = await fetch("https://ip-api.com/json/");
-        return res.ok ? res.json() : null;
+        const res = await fetch("https://ipapi.co/json/");
+        return await res.json();
       } catch {
         return null;
       }
     }
 
-    async function checkVPN(ip) {
+    async function fetchVPNStatus(ip) {
       try {
-        const res = await fetch(`https://proxycheck.io/v2/${ip}?vpn=1&asn=1`);
+        const res = await fetch(`https://proxycheck.io/v2/${ip}?vpn=1`);
         const data = await res.json();
-        return data[ip]?.proxy === "yes" ? "YES" : "NO";
+        return data[ip]?.proxy === "yes" ? "VPN/Proxy: YES" : "VPN/Proxy: NO";
       } catch {
-        return "UNKNOWN";
+        return "VPN/Proxy: UNKNOWN";
       }
     }
 
-    function getCanvasHash() {
+    function getCanvasFingerprint() {
       try {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
@@ -122,7 +147,7 @@
       }
     }
 
-    async function getAudioHash() {
+    async function getAudioFingerprint() {
       try {
         const ctx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 44100, 44100);
         const osc = ctx.createOscillator();
@@ -133,10 +158,9 @@
         comp.connect(ctx.destination);
         osc.start(0);
         const buffer = await ctx.startRendering();
-        let sum = 0;
         const data = buffer.getChannelData(0);
-        for (let i = 0; i < data.length; i++) sum += Math.abs(data[i]);
-        return sum.toString().slice(0, 10);
+        const hash = data.reduce((a, b) => a + Math.abs(b), 0);
+        return hash.toString().slice(0, 10);
       } catch {
         return "Unavailable";
       }
@@ -146,22 +170,21 @@
       try {
         const canvas = document.createElement("canvas");
         const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-        if (!gl) return { vendor: "Unavailable", renderer: "Unavailable" };
-        const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+        const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
         return {
-          vendor: dbg ? gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) : "Unavailable",
-          renderer: dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : "Unavailable"
+          vendor: debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : "Unknown",
+          renderer: debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "Unknown"
         };
       } catch {
         return { vendor: "Unavailable", renderer: "Unavailable" };
       }
     }
 
-    async function getBatteryInfo() {
+    async function getBatteryStatus() {
       if (navigator.getBattery) {
         try {
           const battery = await navigator.getBattery();
-          return `${(battery.level * 100).toFixed(0)}% ${battery.charging ? "(Charging)" : "(Not Charging)"}`;
+          return `${Math.round(battery.level * 100)}% (${battery.charging ? "Charging" : "Not Charging"})`;
         } catch {
           return "Unavailable";
         }
@@ -169,69 +192,53 @@
       return "Not Supported";
     }
 
-    async function collectInfo() {
-      const ipData = await fetchIPData();
-      const vpnStatus = ipData ? await checkVPN(ipData.query) : "Unknown";
-
-      const canvasHash = getCanvasHash();
-      const audioHash = await getAudioHash();
-      const webglInfo = getWebGLInfo();
-      const batteryInfo = await getBatteryInfo();
+    async function getSystemInfo() {
+      const ipData = await fetchIPInfo();
+      const vpnStatus = ipData ? await fetchVPNStatus(ipData.ip) : "VPN/Proxy: Unknown";
+      const canvasHash = getCanvasFingerprint();
+      const audioHash = await getAudioFingerprint();
+      const webgl = getWebGLInfo();
+      const battery = await getBatteryStatus();
 
       const lines = [];
 
       if (ipData) {
-        lines.push(`IP Address: ${ipData.query}`);
+        lines.push(`IP Address: ${ipData.ip}`);
         lines.push(`ISP: ${ipData.org}`);
-        lines.push(`Country: ${ipData.country}`);
-        lines.push(`Region: ${ipData.regionName}`);
         lines.push(`City: ${ipData.city}`);
-        lines.push(`ZIP Code: ${ipData.zip}`);
-        lines.push(`Coordinates: ${ipData.lat}, ${ipData.lon}`);
+        lines.push(`Region: ${ipData.region}`);
+        lines.push(`Country: ${ipData.country_name}`);
+        lines.push(`Coordinates: ${ipData.latitude}, ${ipData.longitude}`);
         lines.push(`Timezone: ${ipData.timezone}`);
-        lines.push(`VPN/Proxy: ${vpnStatus}`);
+        lines.push(vpnStatus);
       } else {
-        lines.push("⚠️ Failed to retrieve IP/Geo info.");
+        lines.push("IP info not available.");
       }
 
-      lines.push("");
-      lines.push("=== Device & Browser Info ===");
       lines.push(`User Agent: ${navigator.userAgent}`);
       lines.push(`Platform: ${navigator.platform}`);
       lines.push(`Language: ${navigator.language}`);
-      lines.push(`Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`);
-      lines.push(`Screen Resolution: ${screen.width}x${screen.height}`);
+      lines.push(`Screen: ${screen.width}x${screen.height}`);
       lines.push(`Color Depth: ${screen.colorDepth}`);
       lines.push(`CPU Threads: ${navigator.hardwareConcurrency ?? "Unknown"}`);
       lines.push(`RAM: ${navigator.deviceMemory ?? "Unknown"} GB`);
-      lines.push(`Touch Support: ${'ontouchstart' in window ? "Yes" : "No"}`);
-      lines.push(`Battery: ${batteryInfo}`);
+      lines.push(`Battery: ${battery}`);
       lines.push(`Online: ${navigator.onLine ? "Yes" : "No"}`);
+      lines.push(`Touch Support: ${'ontouchstart' in window ? "Yes" : "No"}`);
 
-      lines.push("");
-      lines.push("=== Graphics Info ===");
-      lines.push(`WebGL Vendor: ${webglInfo.vendor}`);
-      lines.push(`WebGL Renderer: ${webglInfo.renderer}`);
+      lines.push(`WebGL Vendor: ${webgl.vendor}`);
+      lines.push(`WebGL Renderer: ${webgl.renderer}`);
+      lines.push(`Canvas Fingerprint: ${canvasHash}`);
+      lines.push(`Audio Fingerprint: ${audioHash}`);
 
-      lines.push("");
-      lines.push("=== Fingerprints ===");
-      lines.push(`Canvas Hash: ${canvasHash}`);
-      lines.push(`Audio Hash: ${audioHash}`);
-
-      lines.push("");
-      lines.push("=== Network Info ===");
       if (navigator.connection) {
-        lines.push(`Connection Type: ${navigator.connection.effectiveType || "Unknown"}`);
-        lines.push(`Downlink: ${navigator.connection.downlink ?? "Unknown"} Mbps`);
-        lines.push(`RTT: ${navigator.connection.rtt ?? "Unknown"} ms`);
-      } else {
-        lines.push("Network Info: Not Supported");
+        lines.push(`Connection: ${navigator.connection.effectiveType}`);
+        lines.push(`Downlink: ${navigator.connection.downlink} Mbps`);
+        lines.push(`RTT: ${navigator.connection.rtt} ms`);
       }
 
-      lines.push("");
-      lines.push("=== Browser Capabilities ===");
       lines.push(`Cookies Enabled: ${navigator.cookieEnabled ? "Yes" : "No"}`);
-      lines.push(`LocalStorage Available: ${typeof localStorage !== "undefined" ? "Yes" : "No"}`);
+      lines.push(`LocalStorage: ${typeof localStorage !== "undefined" ? "Yes" : "No"}`);
       lines.push(`Clipboard API: ${"clipboard" in navigator ? "Yes" : "No"}`);
       lines.push(`Vibration API: ${"vibrate" in navigator ? "Yes" : "No"}`);
 
@@ -240,7 +247,7 @@
 
     (async () => {
       output.textContent = "";
-      const infoLines = await collectInfo();
+      const infoLines = await getSystemInfo();
       await typeLines(infoLines);
     })();
   </script>
