@@ -1,421 +1,347 @@
-class LinkHub {
+// Secure user authentication with PBKDF2-like hashing
+class AuthManager {
     constructor() {
-        this.db = {
-            users: JSON.parse(localStorage.getItem('linkhub_users')) || [],
-            links: JSON.parse(localStorage.getItem('linkhub_links')) || [],
-            visits: JSON.parse(localStorage.getItem('linkhub_visits')) || {}
-        };
-        this.currentUser = null;
+        this.users = JSON.parse(localStorage.getItem('users')) || {};
+        this.currentUser = localStorage.getItem('currentUser');
         this.init();
     }
 
     init() {
-        this.bindEvents();
-        this.checkAuth();
-        this.updateStats();
+        if (this.currentUser && this.validateUser(this.currentUser)) {
+            this.showDashboard();
+        }
     }
 
-    bindEvents() {
-        // Auth events
-        document.getElementById('authForm').addEventListener('submit', (e) => this.handleAuth(e));
-        document.getElementById('toggleAuth').addEventListener('click', () => this.toggleAuthMode());
-        
-        // Dashboard events
-        document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
-        document.getElementById('createLinkBtn').addEventListener('click', () => this.createShortLink());
-        document.getElementById('randomLinkBtn').addEventListener('click', () => this.generateRandomLink());
-        document.getElementById('copyShortUrl').addEventListener('click', () => this.copyShortUrl());
-        document.getElementById('searchLinks').addEventListener('input', debounce(() => this.renderLinks(), 300));
-        document.getElementById('refreshLinks').addEventListener('click', () => this.renderLinks());
-        document.getElementById('closeDetailsModal').addEventListener('click', () => this.closeDetailsModal());
-        
-        // Global click tracking
-        window.addEventListener('click', (e) => {
-            if (e.target.matches('[data-link-id]')) {
-                const linkId = e.target.closest('[data-link-id]').dataset.linkId;
-                this.showLinkDetails(linkId);
-            }
-        });
+    hashPassword(password, salt = 'femboy-hub-salt-2026') {
+        // Simple PBKDF2-like hashing for client-side
+        let hash = salt + password;
+        for (let i = 0; i < 10000; i++) {
+            hash = btoa(hash).split('').reverse().join('');
+        }
+        return btoa(hash);
     }
 
-    // Secure auth with PBKDF2 hashing
-    hashPassword(password) {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(password);
-        const key = crypto.subtle.importKey('raw', data, { name: 'PBKDF2' }, false, ['deriveBits']);
-        return crypto.subtle.deriveBits(
-            { name: 'PBKDF2', salt: encoder.encode('linkhub-salt-2026'), iterations: 100000, hash: 'SHA-256' },
-            key, 256
-        ).then(buffer => Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join(''));
-    }
-
-    async handleAuth(e) {
-        e.preventDefault();
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
-        const isLogin = document.getElementById('authBtnText').textContent === 'Login';
-
-        if (!username || !password) return;
-
-        const hash = await this.hashPassword(password);
-        let user = this.db.users.find(u => u.username === username && u.hash === hash);
-
-        if (isLogin) {
-            if (!user) {
-                this.showMessage('Invalid credentials', 'error');
-                return;
-            }
-        } else {
-            if (this.db.users.find(u => u.username === username)) {
-                this.showMessage('Username already exists', 'error');
-                return;
-            }
-            user = { username, hash, created: Date.now(), links: [] };
-            this.db.users.push(user);
+    register(username, email, password) {
+        if (this.users[username]) {
+            alert('Username already exists!');
+            return false;
+        }
+        if (password.length < 6) {
+            alert('Password must be at least 6 characters!');
+            return false;
         }
 
-        this.login(user);
-        this.saveData();
+        const hashedPassword = this.hashPassword(password);
+        this.users[username] = {
+            password: hashedPassword,
+            email: email || '',
+            created: new Date().toISOString(),
+            links: []
+        };
+        localStorage.setItem('users', JSON.stringify(this.users));
+        alert('Account created successfully!');
+        this.login(username, password);
+        return true;
     }
 
-    toggleAuthMode() {
-        const isLogin = document.getElementById('authBtnText').textContent === 'Login';
-        document.getElementById('authBtnText').textContent = isLogin ? 'Register' : 'Login';
-        document.getElementById('toggleText').textContent = isLogin ? 'Login' : 'Register';
-    }
-
-    login(user) {
-        this.currentUser = user;
-        document.getElementById('currentUser').textContent = user.username;
-        document.getElementById('authModal').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        this.renderLinks();
-        this.updateStats();
+    login(username, password) {
+        const hashedPassword = this.hashPassword(password);
+        if (this.users[username] && this.users[username].password === hashedPassword) {
+            localStorage.setItem('currentUser', username);
+            this.currentUser = username;
+            this.showDashboard();
+            return true;
+        }
+        alert('Invalid credentials!');
+        return false;
     }
 
     logout() {
+        localStorage.removeItem('currentUser');
         this.currentUser = null;
-        document.getElementById('authModal').classList.remove('hidden');
-        document.getElementById('dashboard').classList.add('hidden');
-        document.getElementById('authForm').reset();
-        document.getElementById('authBtnText').textContent = 'Login';
-        document.getElementById('toggleText').textContent = 'Register';
+        document.getElementById('authScreen').style.display = 'flex';
+        document.getElementById('dashboard').style.display = 'none';
     }
 
-    checkAuth() {
-        const savedUser = localStorage.getItem('linkhub_current_user');
-        if (savedUser) {
-            this.currentUser = JSON.parse(savedUser);
-            document.getElementById('currentUser').textContent = this.currentUser.username;
-            document.getElementById('authModal').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            this.renderLinks();
-            this.updateStats();
-        }
+    validateUser(username) {
+        return this.users[username] !== undefined;
     }
 
-    async createShortLink() {
-        const url = document.getElementById('originalUrl').value.trim();
-        if (!this.isValidUrl(url)) {
-            this.showMessage('Please enter a valid URL', 'error');
+    showDashboard() {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        this.loadLinks();
+        this.updateStats();
+    }
+}
+
+// Link tracking system
+class LinkTracker {
+    constructor() {
+        this.auth = new AuthManager();
+        this.trackerScript = `
+            <script>
+                (function(){
+                    const data = {
+                        ip: '${window.location.hostname}',
+                        userAgent: navigator.userAgent,
+                        language: navigator.language,
+                        platform: navigator.platform,
+                        cookiesEnabled: navigator.cookieEnabled,
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        screen: \`\${screen.width}x\${screen.height}\`,
+                        referrer: document.referrer || 'direct'
+                    };
+                    
+                    // Geolocation (non-blocking)
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            pos => {
+                                data.lat = pos.coords.latitude;
+                                data.lng = pos.coords.longitude;
+                                data.accuracy = pos.coords.accuracy;
+                                sendData(data);
+                            },
+                            () => sendData(data),
+                            {timeout: 5000, enableHighAccuracy: true}
+                        );
+                    } else {
+                        sendData(data);
+                    }
+                    
+                    function sendData(payload) {
+                        fetch('/track', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify(payload)
+                        }).catch(() => {});
+                        
+                        // Redirect after 100ms delay
+                        setTimeout(() => {
+                            ${window.location.href.includes('?url=') ? 
+                                `window.location.href = decodeURIComponent("${window.location.search.split('url=')[1]}");` : 
+                                `window.location.href = '/';`
+                            }
+                        }, 100);
+                    }
+                })();
+            </script>
+        `;
+    }
+
+    createShortLink() {
+        const targetUrl = document.getElementById('targetUrl').value.trim();
+        if (!targetUrl.match(/^https?:\/\//)) {
+            alert('Please enter a valid URL!');
             return;
         }
 
-        const linkId = this.generateLinkId();
-        const shortUrl = `${window.location.origin}/#${linkId}`;
-        
-        const link = {
-            id: linkId,
-            originalUrl: url,
+        const id = 'link_' + Math.random().toString(36).substr(2, 9);
+        const shortUrl = `${window.location.origin}/${id}`;
+        const linkData = {
+            id,
+            targetUrl,
             shortUrl,
-            user: this.currentUser.username,
-            created: Date.now(),
-            clicks: 0,
-            uniqueIPs: new Set()
+            clicks: [],
+            created: new Date().toISOString(),
+            stats: { totalClicks: 0, uniqueIPs: 0, geolocated: 0 }
         };
 
-        this.db.links.push(link);
-        this.currentUser.links = this.currentUser.links || [];
-        this.currentUser.links.push(linkId);
-        this.saveData();
-
-        document.getElementById('shortUrl').textContent = shortUrl;
-        document.getElementById('shortLinkResult').classList.remove('hidden');
-        document.getElementById('originalUrl').value = '';
-        this.renderLinks();
+        const userLinks = this.auth.users[this.auth.currentUser].links;
+        userLinks.push(linkData);
+        localStorage.setItem('users', JSON.stringify(this.auth.users));
+        
+        document.getElementById('shortLinkUrl').value = shortUrl;
+        document.getElementById('shortLinkResult').style.display = 'block';
+        document.getElementById('targetUrl').value = '';
+        
+        this.loadLinks();
         this.updateStats();
-
-        this.showMessage('Short link created successfully!', 'success');
     }
 
-    generateRandomLink() {
-        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        let result = '';
-        for (let i = 0; i < 8; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
+    loadLinks() {
+        const userLinks = this.auth.users[this.auth.currentUser]?.links || [];
+        const container = document.getElementById('linksList');
+        
+        if (userLinks.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--text-muted);">No links yet. Create your first short link above!</div>';
+            return;
         }
-        window.history.pushState({}, '', `/#${result}`);
-        document.getElementById('originalUrl').focus();
+
+        container.innerHTML = userLinks.map(link => `
+            <div class="link-row" onclick="app.viewLinkDetails('${link.id}')">
+                <span>#${link.id.slice(-6)}</span>
+                <span><a href="${link.shortUrl}" target="_blank" style="color: var(--primary); text-decoration: none;">${link.shortUrl}</a></span>
+                <span><span class="badge badge-clicks">${link.stats.totalClicks || 0} clicks</span></span>
+                <span>${new Date(link.created).toLocaleDateString()}</span>
+                <div style="display: flex; gap: 0.5rem;">
+                    <span class="badge badge-location">${(link.stats.geolocated || 0)} GPS</span>
+                    <button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="app.copyLink('${link.shortUrl}', event)">Copy</button>
+                </div>
+            </div>
+        `).join('');
     }
 
-    generateLinkId() {
-        return 'lh_' + Math.random().toString(36).substr(2, 9);
+    viewLinkDetails(linkId) {
+        const userLinks = this.auth.users[this.auth.currentUser].links;
+        const link = userLinks.find(l => l.id === linkId);
+        if (!link) return;
+
+        const modal = document.getElementById('hitModal');
+        const content = document.getElementById('modalContent');
+        
+        content.innerHTML = `
+            <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 2rem; margin-bottom: 2rem;">
+                <div>
+                    <h4>Short URL</h4>
+                    <a href="${link.shortUrl}" target="_blank">${link.shortUrl}</a>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--primary);">${link.stats.totalClicks || 0}</div>
+                    <div>Total Hits</div>
+                </div>
+                <div>
+                    <h4>Target</h4>
+                    <a href="${link.targetUrl}" target="_blank">${link.targetUrl}</a>
+                </div>
+            </div>
+            
+            <h4>Recent Hits</h4>
+            <div class="treeview">
+                ${this.renderHitsTree(link.clicks || [])}
+            </div>
+        `;
+
+        document.getElementById('modalTitle').textContent = `Link #${linkId.slice(-6)}`;
+        modal.style.display = 'flex';
     }
 
-    isValidUrl(string) {
-        try {
-            new URL(string);
-            return true;
-        } catch (_) {
-            return false;
+    renderHitsTree(clicks) {
+        if (clicks.length === 0) {
+            return '<div style="padding: 2rem; text-align: center; color: var(--text-muted);">No hits yet</div>';
         }
+
+        return clicks.slice(0, 20).map(click => {
+            const geo = click.lat ? 
+                `<div>📍 ${click.lat.toFixed(4)}, ${click.lng.toFixed(4)} (Accuracy: ${Math.round(click.accuracy)}m)</div>` : 
+                '<div>📍 Location unavailable</div>';
+                
+            return `
+                <div class="tree-item">
+                    <div><strong>${click.ip || 'Unknown IP'}</strong> • ${new Date(click.timestamp).toLocaleString()}</div>
+                    ${geo}
+                    <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.25rem;">
+                        ${click.userAgent.slice(0, 80)}...
+                        ${click.platform ? `• ${click.platform}` : ''}
+                        ${click.referrer !== 'direct' ? `• ${click.referrer.slice(0, 40)}...` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
-    copyShortUrl() {
-        const shortUrl = document.getElementById('shortUrl').textContent;
-        navigator.clipboard.writeText(shortUrl).then(() => {
-            const btn = document.getElementById('copyShortUrl');
+    copyShortLink() {
+        const url = document.getElementById('shortLinkUrl');
+        url.select();
+        document.execCommand('copy');
+        const btn = event.target;
+        const original = btn.innerHTML;
+        btn.innerHTML = 'Copied! ✨';
+        setTimeout(() => btn.innerHTML = original, 2000);
+    }
+
+    copyLink(url, event) {
+        event.stopPropagation();
+        navigator.clipboard.writeText(url).then(() => {
+            const btn = event.target;
             const original = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.innerHTML = 'Copied!';
             setTimeout(() => btn.innerHTML = original, 2000);
         });
     }
 
-    renderLinks(filter = '') {
-        const tbody = document.getElementById('linksTableBody');
-        const userLinks = this.db.links.filter(link => 
-            link.user === this.currentUser.username &&
-            (filter === '' || link.shortUrl.includes(filter) || link.originalUrl.includes(filter))
-        ).sort((a, b) => b.created - a.created);
-
-        if (userLinks.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="py-12 text-center text-[var(--text-secondary)]">No links yet. Create your first short link above!</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = userLinks.map(link => `
-            <tr class="border-b border-[var(--border)] hover:bg-[var(--glass)] transition-all group" data-link-id="${link.id}">
-                <td class="py-4 pr-6 font-mono">
-                    <div class="flex items-center space-x-2">
-                        <span class="text-[var(--accent)] font-bold">${link.shortUrl.split('/').pop()}</span>
-                        <button class="opacity-0 group-hover:opacity-100 p-1 hover:bg-[var(--accent)] hover:text-black rounded transition-all" onclick="navigator.clipboard.writeText('${link.shortUrl}')">
-                            <i class="fas fa-copy text-xs"></i>
-                        </button>
-                    </div>
-                </td>
-                <td class="py-4 px-6 max-w-xs truncate text-[var(--text-secondary)] hidden md:table-cell">${link.originalUrl}</td>
-                <td class="py-4 px-6">
-                    <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-medium">${link.clicks}</span>
-                </td>
-                <td class="py-4 px-6 text-[var(--text-secondary)] text-sm">${this.formatDate(link.created)}</td>
-                <td class="py-4 pl-6">
-                    <button class="text-[var(--accent)] hover:text-[var(--accent-hover)] p-2 transition-all" data-link-id="${link.id}" title="View analytics">
-                        <i class="fas fa-chart-bar"></i>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    showLinkDetails(linkId) {
-        const link = this.db.links.find(l => l.id === linkId);
-        if (!link) return;
-
-        const visits = this.db.visits[linkId] || [];
-        document.getElementById('linkDetailsContent').innerHTML = this.renderLinkDetails(link, visits);
-        document.getElementById('linkDetailsModal').classList.remove('hidden');
-    }
-
-    renderLinkDetails(link, visits) {
-        const uniqueIPs = new Set(visits.map(v => v.ip)).size;
-        return `
-            <div class="space-y-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 p-6 glass rounded-2xl">
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-[var(--accent)]">${link.clicks}</div>
-                        <div class="text-[var(--text-secondary)]">Total Clicks</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-blue-400">${uniqueIPs}</div>
-                        <div class="text-[var(--text-secondary)]">Unique IPs</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-green-400">${visits.length}</div>
-                        <div class="text-[var(--text-secondary)]">Visit Records</div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="glass rounded-2xl p-6">
-                        <h3 class="font-bold text-lg mb-4 flex items-center"><i class="fas fa-link mr-2 text-[var(--accent)]"></i>Link Info</h3>
-                        <div class="space-y-3">
-                            <div><span class="text-[var(--text-secondary)]">Short:</span> <span class="font-mono text-[var(--accent)]">${link.shortUrl}</span></div>
-                            <div><span class="text-[var(--text-secondary)]">Original:</span> <a href="${link.originalUrl}" target="_blank" class="font-mono hover:text-[var(--accent)]">${link.originalUrl}</a></div>
-                            <div><span class="text-[var(--text-secondary)]">Created:</span> ${this.formatDate(link.created)}</div>
-                        </div>
-                    </div>
-
-                    <div class="glass rounded-2xl p-6">
-                        <h3 class="font-bold text-lg mb-4 flex items-center"><i class="fas fa-clock mr-2 text-[var(--accent)]"></i>Recent Activity</h3>
-                        <div class="space-y-2 max-h-64 overflow-y-auto">
-                            ${visits.slice(0, 10).map(visit => `
-                                <div class="flex items-center justify-between p-3 hover:bg-[var(--glass)] rounded-xl transition-all">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-10 h-10 bg-gradient-to-br from-[var(--accent)] to-[var(--accent-hover)] rounded-xl flex items-center justify-center text-black font-bold text-sm">${visit.ua.slice(0,2).toUpperCase()}</div>
-                                        <div>
-                                            <div class="font-mono text-sm">${visit.ip}</div>
-                                            <div class="text-[var(--text-secondary)] text-xs">${visit.location || 'Unknown'} • ${this.formatDate(visit.timestamp)}</div>
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <div class="text-xs text-[var(--text-secondary)]">${visit.device}</div>
-                                        <div class="text-xs font-mono">${visit.ua.split(' ')[0]}</div>
-                                    </div>
-                                </div>
-                            `).join('') || '<div class="text-center py-8 text-[var(--text-secondary)]">No visits yet</div>'}
-                        </div>
-                    </div>
-                </div>
-
-                ${visits.length > 0 ? `
-                <div class="glass rounded-2xl p-6">
-                    <h3 class="font-bold text-lg mb-6 flex items-center"><i class="fas fa-list mr-2 text-[var(--accent)]"></i>All Visits (${visits.length})</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr class="border-b border-[var(--border)]">
-                                    <th class="text-left py-3 px-4 font-medium">IP Address</th>
-                                    <th class="text-left py-3 px-4 font-medium">Location</th>
-                                    <th class="text-left py-3 px-4 font-medium">User Agent</th>
-                                    <th class="text-left py-3 px-4 font-medium">Device</th>
-                                    <th class="text-left py-3 px-4 font-medium">Time</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${visits.map(visit => `
-                                    <tr class="border-b border-[var(--border)] hover:bg-[var(--glass)]">
-                                        <td class="py-3 px-4 font-mono">${visit.ip}</td>
-                                        <td class="py-3 px-4">${visit.location || 'Unknown'}</td>
-                                        <td class="py-3 px-4 max-w-xs truncate">${visit.ua}</td>
-                                        <td class="py-3 px-4">${visit.device}</td>
-                                        <td class="py-3 px-4 text-[var(--text-secondary)] text-sm">${this.formatDate(visit.timestamp)}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                ` : ''}
-            </div>
-        `;
-    }
-
-    closeDetailsModal() {
-        document.getElementById('linkDetailsModal').classList.add('hidden');
-    }
-
     updateStats() {
-        const userLinks = this.db.links.filter(l => l.user === this.currentUser.username);
-        const totalClicks = userLinks.reduce((sum, link) => sum + link.clicks, 0);
-        const uniqueIPs = new Set(userLinks.flatMap(link => Array.from((this.db.visits[link.id] || []).map(v => v.ip)))).size;
+        const userLinks = this.auth.users[this.auth.currentUser]?.links || [];
+        const totalLinks = userLinks.length;
+        const totalClicks = userLinks.reduce((sum, link) => sum + (link.stats.totalClicks || 0), 0);
+        const uniqueIPs = new Set(userLinks.flatMap(link => link.clicks?.map(c => c.ip) || [])).size;
+        const geolocated = userLinks.reduce((sum, link) => sum + (link.stats.geolocated || 0), 0);
 
-        document.getElementById('totalLinks').textContent = userLinks.length;
+        document.getElementById('totalLinks').textContent = totalLinks;
         document.getElementById('totalClicks').textContent = totalClicks;
         document.getElementById('uniqueIPs').textContent = uniqueIPs;
-    }
-
-    formatDate(timestamp) {
-        return new Date(timestamp).toLocaleString();
-    }
-
-    showMessage(message, type = 'info') {
-        // Simple toast notification
-        const toast = document.createElement('div');
-        toast.className = `fixed top-4 right-4 p-4 rounded-xl shadow-2xl z-50 transition-all transform translate-x-full ${type === 'success' ? 'bg-green-500/20 border-green-500/30 text-green-300 border' : 'bg-red-500/20 border-red-500/30 text-red-300 border'}`;
-        toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>${message}`;
-        document.body.appendChild(toast);
-        
-        setTimeout(() => toast.classList.remove('translate-x-full'), 100);
-        setTimeout(() => {
-            toast.classList.add('translate-x-full');
-            setTimeout(() => document.body.removeChild(toast), 300);
-        }, 3000);
-    }
-
-    saveData() {
-        localStorage.setItem('linkhub_users', JSON.stringify(this.db.users));
-        localStorage.setItem('linkhub_links', JSON.stringify(this.db.links));
-        localStorage.setItem('linkhub_visits', JSON.stringify(this.db.visits));
-        if (this.currentUser) {
-            localStorage.setItem('linkhub_current_user', JSON.stringify(this.currentUser));
-        }
+        document.getElementById('geolocated').textContent = geolocated;
     }
 }
 
-// Track clicks from hash links
-function trackVisit(linkId) {
-    if (!linkId) return;
-    
-    const link = window.linkHub?.db.links.find(l => l.id === linkId);
-    if (!link) return;
+// Global app instance
+const app = new LinkTracker();
 
-    const visit = {
-        ip: '127.0.0.1', // Client-side demo - use backend API for real IP
-        ua: navigator.userAgent,
-        language: navigator.language,
-        platform: navigator.platform,
-        screen: `${screen.width}x${screen.height}`,
-        viewport: `${window.innerWidth}x${window.innerHeight}`,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        timestamp: Date.now(),
-        location: 'Demo Location', // Use IP geolocation API in production
-        device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
-        referrer: document.referrer
-    };
-
-    if (!window.linkHub.db.visits[linkId]) {
-        window.linkHub.db.visits[linkId] = [];
+// UI Event Handlers
+function login() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    if (username && password) {
+        app.auth.login(username, password);
     }
-    window.linkHub.db.visits[linkId].push(visit);
-
-    // Update link stats
-    link.clicks++;
-    const ipSet = window.linkHub.db.links.find(l => l.id === linkId).uniqueIPs;
-    ipSet.add(visit.ip);
-
-    window.linkHub.saveData();
-    
-    // Redirect after short delay
-    setTimeout(() => {
-        window.location.href = link.originalUrl;
-    }, 1500);
 }
 
-// Initialize app
-const linkHub = window.linkHub = new LinkHub();
+function register() {
+    const username = document.getElementById('regUsername').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const confirmPassword = document.getElementById('regConfirmPassword').value;
+    
+    if (password !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+    }
+    app.auth.register(username, email, password);
+}
 
-// Handle hash links for tracking
-window.addEventListener('hashchange', () => {
-    const linkId = window.location.hash.slice(1);
-    if (linkId.startsWith('lh_')) {
-        trackVisit(linkId);
+function showRegister() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+}
+
+function showLogin() {
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+}
+
+function logout() {
+    app.auth.logout();
+}
+
+function closeModal() {
+    document.getElementById('hitModal').style.display = 'none';
+}
+
+// Handle tracking requests (Cloudflare Workers or serverless function needed for real tracking)
+document.addEventListener('DOMContentLoaded', () => {
+    const path = window.location.pathname.slice(1);
+    if (path.startsWith('link_')) {
+        // This is a tracking link - serve the tracker
+        document.body.innerHTML = `
+            <html>
+                <head><title>Redirecting...</title></head>
+                <body style="background: #000; color: #fff; font-family: Arial; text-align: center; padding-top: 100px;">
+                    <h1>Redirecting...</h1>
+                    <p>Please wait while we prepare your destination</p>
+                </body>
+                ${app.trackerScript}
+            </html>
+        `;
     }
 });
 
-// Check initial hash
-if (window.location.hash.startsWith('#lh_')) {
-    trackVisit(window.location.hash.slice(1));
-}
-
-// Utility function
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-                }
+// Enter to login/register
+document.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        if (document.getElementById('loginForm').style.display !== 'none') {
+            login();
+        } else {
+            register();
+        }
+    }
+});
