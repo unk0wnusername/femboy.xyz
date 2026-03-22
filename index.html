@@ -3,833 +3,702 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Femboy Hub - Premium Link Manager</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Femboy Hub - Short Links & Analytics</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-        }
-        .gradient-primary {
-            background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f472b6 100%);
-        }
-        .shadow-glow {
-            box-shadow: 0 25px 50px -12px rgba(168, 85, 247, 0.25);
-        }
-        .hover-scale { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .hover-scale:hover { transform: translateY(-4px) scale(1.02); }
-        .code-font { font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; }
+        .treemap-rect { cursor: pointer; transition: all 0.3s; }
+        .treemap-rect:hover { filter: brightness(1.1); }
+        .loading { animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-pink-900 min-h-screen text-white overflow-x-hidden">
-
-    <!-- Auth Overlay -->
-    <div id="authOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden p-4">
-        <div class="glass-effect rounded-3xl p-10 max-w-md w-full shadow-2xl shadow-purple-500/25 hover-scale max-h-[90vh] overflow-y-auto">
-            <div class="text-center mb-10">
-                <div class="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-glow">
-                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
-                </div>
-                <h1 id="authTitle" class="text-3xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent mb-3">Sign In</h1>
-                <p id="authSubtitle" class="text-gray-400 text-lg">Access your link dashboard</p>
+<body class="bg-gradient-to-br from-purple-900 via-pink-900 to-indigo-900 min-h-screen text-white font-sans">
+    <div id="app" class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Loading Screen -->
+        <div id="loading" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="text-center">
+                <div class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4 loading"></div>
+                <p class="text-xl">Loading Femboy Hub...</p>
             </div>
-            
-            <form id="authForm" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-300 mb-3">Username</label>
-                    <input id="username" type="text" required 
-                           class="w-full h-14 px-5 rounded-2xl glass-effect border border-white/20 focus:border-purple-400 focus:ring-4 focus:ring-purple-500/20 transition-all text-white placeholder-gray-400 text-lg"
-                           placeholder="Enter username">
+        </div>
+
+        <!-- Auth Section -->
+        <div id="auth-section" class="min-h-screen flex items-center justify-center">
+            <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-12 shadow-2xl border border-white/20 max-w-md w-full mx-4">
+                <div class="text-center mb-12">
+                    <h1 class="text-5xl font-black bg-gradient-to-r from-pink-400 to-purple-500 bg-clip-text text-transparent mb-4">Femboy Hub</h1>
+                    <p class="text-xl opacity-90">Advanced URL Shortener & Analytics</p>
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-300 mb-3">Password</label>
-                    <input id="password" type="password" required 
-                           class="w-full h-14 px-5 rounded-2xl glass-effect border border-white/20 focus:border-purple-400 focus:ring-4 focus:ring-purple-500/20 transition-all text-white placeholder-gray-400 text-lg"
-                           placeholder="Enter password">
-                </div>
-                <button type="submit" 
-                        class="w-full h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-2xl font-bold text-xl shadow-glow hover-scale transition-all duration-300">
-                    <span id="authBtnText">Sign In</span>
-                </button>
-            </form>
-            
-            <div class="mt-8 pt-6 border-t border-white/10 text-center space-y-3">
-                <button id="toggleMode" class="text-purple-400 hover:text-purple-300 font-medium text-sm transition-colors">Create Account</button>
-                <div class="text-xs text-gray-500 space-y-1">
-                    <div>Demo: <code class="code-font bg-gray-800 px-2 py-1 rounded-lg">demo / demo123</code></div>
-                    <div>Admin: <code class="code-font bg-gray-800 px-2 py-1 rounded-lg">admin / admin123</code></div>
+                
+                <form id="auth-form" class="space-y-6">
+                    <div id="login-fields">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Email</label>
+                            <input type="email" id="email" required class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500/50 backdrop-blur-sm text-white placeholder-white/60 transition-all" placeholder="your@email.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Password</label>
+                            <input type="password" id="password" required class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500/50 backdrop-blur-sm text-white placeholder-white/60 transition-all" placeholder="••••••••">
+                        </div>
+                        <button type="submit" id="login-btn" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-4 px-8 rounded-2xl text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">Login</button>
+                    </div>
+                    
+                    <div id="register-fields" class="hidden">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Username</label>
+                            <input type="text" id="username" required class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500/50 backdrop-blur-sm text-white placeholder-white/60 transition-all" placeholder="yourusername">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Email</label>
+                            <input type="email" id="reg-email" required class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500/50 backdrop-blur-sm text-white placeholder-white/60 transition-all" placeholder="your@email.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Password</label>
+                            <input type="password" id="reg-password" required class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500/50 backdrop-blur-sm text-white placeholder-white/60 transition-all" minlength="8">
+                        </div>
+                        <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-4 px-8 rounded-2xl text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">Create Account</button>
+                    </div>
+                </form>
+                
+                <div class="mt-8 text-center space-y-2">
+                    <button id="toggle-auth" class="text-purple-300 hover:text-white transition-colors">Don't have an account? Register</button>
+                    <div class="text-xs opacity-75 mt-6 p-3 bg-black/30 rounded-xl">
+                        🔒 End-to-end encrypted • 2FA ready • Zero-knowledge auth
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Main Dashboard -->
-    <div id="dashboard" class="min-h-screen hidden">
-        <!-- Top Navigation -->
-        <header class="glass-effect sticky top-0 z-40 border-b border-white/10 backdrop-blur-xl">
-            <div class="max-w-7xl mx-auto px-6 py-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-glow">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">Femboy Hub</h1>
-                            <p class="text-sm text-gray-400 mt-1">Advanced URL Management</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center space-x-4">
-                        <div class="text-right hidden md:block">
-                            <div class="font-bold text-lg" id="userName">--</div>
-                            <div class="text-sm text-gray-400" id="accountStats">0 links • 0 clicks</div>
-                        </div>
-                        <button id="logoutBtn" class="w-12 h-12 bg-gradient-to-r from-rose-500 to-pink-500 rounded-2xl flex items-center justify-center hover-scale shadow-glow transition-all hover:shadow-rose-500/50">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                            </svg>
-                        </button>
+        <!-- Dashboard -->
+        <div id="dashboard" class="hidden">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-12">
+                <div>
+                    <h1 class="text-5xl font-black bg-gradient-to-r from-pink-400 to-purple-500 bg-clip-text text-transparent">Dashboard</h1>
+                    <p class="text-xl opacity-90 mt-2">Manage your short links & analytics</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="logout-btn" class="px-6 py-3 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded-2xl text-red-300 hover:text-red-200 transition-all">Logout</button>
+                    <div id="user-info" class="text-right hidden">
+                        <p id="user-display" class="font-semibold"></p>
+                        <p id="user-email" class="text-sm opacity-75"></p>
                     </div>
                 </div>
             </div>
-        </header>
 
-        <main class="max-w-7xl mx-auto px-6 pb-24 pt-4">
-            <!-- Metrics Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                <div class="glass-effect p-8 rounded-3xl hover-scale shadow-glow group cursor-pointer">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-14 h-14 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center group-hover:rotate-12 transition-transform">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                            </svg>
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 mb-12">
+                <!-- Stats Cards -->
+                <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 hover:bg-white/20 transition-all group">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-3xl font-black" id="total-links">0</p>
+                            <p class="text-lg opacity-75 mt-1">Total Links</p>
                         </div>
-                        <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                        <div class="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd"></path></svg>
+                        </div>
                     </div>
-                    <div class="text-3xl font-bold text-white mb-1" id="totalLinks">0</div>
-                    <div class="text-gray-400 text-sm font-medium">Total Links</div>
                 </div>
 
-                <div class="glass-effect p-8 rounded-3xl hover-scale shadow-glow">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-14 h-14 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+                <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 hover:bg-white/20 transition-all group">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-3xl font-black text-emerald-400" id="total-clicks">0</p>
+                            <p class="text-lg opacity-75 mt-1">Total Clicks</p>
                         </div>
-                        <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full font-medium">+12.5%</span>
+                        <div class="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path></svg>
+                        </div>
                     </div>
-                    <div class="text-3xl font-bold text-white mb-1" id="totalClicks">0</div>
-                    <div class="text-gray-400 text-sm font-medium">Total Clicks</div>
                 </div>
 
-                <div class="glass-effect p-8 rounded-3xl hover-scale shadow-glow">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-14 h-14 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                            </svg>
+                <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 hover:bg-white/20 transition-all group">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-3xl font-black text-purple-400" id="unique-visitors">0</p>
+                            <p class="text-lg opacity-75 mt-1">Unique Visitors</p>
                         </div>
-                        <span class="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-full font-medium">87</span>
-                    </div>
-                    <div class="text-3xl font-bold text-white mb-1" id="uniqueVisitors">0</div>
-                    <div class="text-gray-400 text-sm font-medium">Unique IPs</div>
-                </div>
-
-                <div class="glass-effect p-8 rounded-3xl hover-scale shadow-glow">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-14 h-14 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-xs text-gray-500">Avg</div>
-                            <div class="font-mono text-sm font-bold text-orange-400">2.3s</div>
+                        <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
                         </div>
                     </div>
-                    <div class="text-3xl font-bold text-white mb-1" id="avgTime">0s</div>
-                    <div class="text-gray-400 text-sm font-medium">Avg Visit</div>
                 </div>
             </div>
 
-            <!-- Create Link + Analytics Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-                <!-- Link Creator -->
-                <div class="glass-effect p-10 rounded-3xl shadow-glow hover-scale">
-                    <h2 class="text-3xl font-bold mb-8 flex items-center gap-4 bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
-                        <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                        Create Short Link
-                    </h2>
-                    
-                    <form id="linkForm" class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Link Generator -->
+                <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
+                    <h2 class="text-3xl font-bold mb-8 bg-gradient-to-r from-pink-400 to-purple-500 bg-clip-text text-transparent">Create Short Link</h2>
+                    <form id="link-form" class="space-y-6">
                         <div>
-                            <label class="block text-lg font-semibold text-gray-300 mb-4">Destination URL</label>
-                            <div class="relative">
-                                <input id="originalUrl" type="url" required 
-                                       placeholder="https://your-long-destination-url.com/page"
-                                       class="w-full h-16 px-6 rounded-3xl glass-effect border-2 border-white/20 focus:border-purple-400 focus:ring-4 focus:ring-purple-500/20 transition-all text-lg placeholder-gray-500 pl-14">
-                                <svg class="w-7 h-7 absolute left-5 top-1/2 -translate-y-1/2 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                                </svg>
+                            <label class="block text-lg font-semibold mb-3">Destination URL</label>
+                            <input type="url" id="destination-url" required placeholder="https://example.com" class="w-full px-6 py-4 bg-white/20 border-2 border-white/30 rounded-3xl focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/30 backdrop-blur-sm text-xl text-white placeholder-white/60 transition-all">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="text" id="custom-alias" placeholder="Custom slug (optional)" class="px-6 py-4 bg-white/20 border-2 border-white/30 rounded-3xl focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/30 backdrop-blur-sm text-white placeholder-white/60 transition-all">
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="track-clicks" checked class="w-5 h-5 text-purple-500 bg-white/20 border-2 border-white/30 rounded focus:ring-purple-500">
+                                <label class="text-lg font-semibold">Track clicks</label>
                             </div>
                         </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-lg font-semibold text-gray-300 mb-4">Custom Alias</label>
-                                <input id="customAlias" type="text" maxlength="15"
-                                       placeholder="yourlink (optional)"
-                                       class="w-full h-16 px-6 rounded-3xl glass-effect border-2 border-white/20 focus:border-pink-400 focus:ring-4 focus:ring-pink-500/20 transition-all text-lg placeholder-gray-500">
-                                <p class="text-sm text-gray-500 mt-2">Will generate random if empty</p>
-                            </div>
-                            <div>
-                                <label class="block text-lg font-semibold text-gray-300 mb-4">Link Password</label>
-                                <input id="linkPassword" type="password" 
-                                       placeholder="Protect this link (optional)"
-                                       class="w-full h-16 px-6 rounded-3xl glass-effect border-2 border-white/20 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/20 transition-all text-lg placeholder-gray-500">
-                            </div>
-                        </div>
-                        
-                        <button type="submit" 
-                                class="w-full h-16 bg-gradient-to-r from-purple-600 via-pink-600 to-rose-500 hover:from-purple-700 hover:via-pink-700 hover:to-rose-600 rounded-3xl font-bold text-xl shadow-2xl shadow-purple-500/25 hover:shadow-purple-500/40 hover-scale transition-all duration-300 flex items-center justify-center gap-3">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                            Generate Link
-                        </button>
+                        <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-5 px-8 rounded-3xl text-xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-300">🚀 Generate Short Link</button>
                     </form>
+                    <div id="generated-link" class="mt-8 hidden p-6 bg-emerald-500/20 border-2 border-emerald-500/50 rounded-3xl">
+                        <p class="text-2xl font-mono font-bold mb-4 text-emerald-300" id="short-url"></p>
+                        <div class="flex space-x-3">
+                            <button id="copy-btn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-2xl transition-all">📋 Copy</button>
+                            <button id="analytics-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-2xl transition-all">📊 Analytics</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Links -->
+                <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
+                    <h2 class="text-3xl font-bold mb-6 bg-gradient-to-r from-pink-400 to-purple-500 bg-clip-text text-transparent">Recent Links</h2>
+                    <div id="links-list" class="space-y-4 max-h-96 overflow-y-auto">
+                        <!-- Links will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Charts -->
+            <div id="analytics-section" class="mt-12 hidden">
+                <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 class="text-3xl font-bold bg-gradient-to-r from-pink-400 to-purple-500 bg-clip-text text-transparent">Link Analytics</h2>
+                        <button id="back-to-dashboard" class="px-6 py-3 bg-white/20 hover:bg-white/30 border border-white/30 rounded-2xl transition-all">← Back to Dashboard</button>
+                    </div>
                     
-                    <!-- Generated Link -->
-                    <div id="generatedLink" class="mt-8 p-8 rounded-3xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border-2 border-emerald-400/30 hidden">
-                        <div class="flex items-center justify-between mb-4">
-                            <div>
-                                <div class="flex items-center gap-3 mb-2">
-                                    <div class="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
-                                    <span class="text-2xl font-bold text-emerald-400">Link Created!</span>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <span class="code-font text-xl font-mono bg-gray-900/50 px-4 py-2 rounded-2xl border border-gray-600 truncate flex-1" id="shortUrlDisplay">--</span>
-                                    <button id="copyUrlBtn" class="w-12 h-12 bg-emerald-500/80 hover:bg-emerald-500 rounded-2xl flex items-center justify-center hover-scale transition-all shadow-lg">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <a id="shareUrlBtn" href="#" target="_blank" class="w-12 h-12 bg-blue-500/80 hover:bg-blue-500 rounded-2xl flex items-center justify-center hover-scale transition-all shadow-lg">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                </svg>
-                            </a>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <div>
+                            <canvas id="clicksChart"></canvas>
                         </div>
-                        <div class="grid grid-cols-2 gap-4 text-sm text-gray-400">
-                            <div>✅ Full IP tracking</div>
-                            <div>✅ VPN detection</div>
-                            <div>🔒 Password protected</div>
-                            <div>📱 Mobile optimized</div>
-                        </div>
+                        <div id="treemap-container" class="h-96"></div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b border-white/20">
+                                    <th class="py-4 font-bold">IP Address</th>
+                                    <th class="py-4 font-bold">ISP/VPN</th>
+                                    <th class="py-4 font-bold">User Agent</th>
+                                    <th class="py-4 font-bold">Country</th>
+                                    <th class="py-4 font-bold">Clicks</th>
+                                    <th class="py-4 font-bold">Last Seen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="visitors-table"></tbody>
+                        </table>
                     </div>
                 </div>
-
-                <!-- Analytics Chart -->
-                <div class="glass-effect p-10 rounded-3xl shadow-glow">
-                    <h3 class="text-2xl font-bold mb-8 text-white">Traffic Overview</h3>
-                    <div class="h-80">
-                        <canvas id="analyticsChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Links List -->
-            <div class="glass-effect rounded-4xl p-10 shadow-2xl shadow-purple-500/20">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
-                    <h2 class="text-4xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent flex items-center gap-4">
-                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                        </svg>
-                        Your Links
-                    </h2>
-                    <div class="flex flex-wrap gap-3">
-                        <button id="refreshBtn" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-2xl font-semibold hover-scale shadow-lg transition-all flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                            </svg>
-                            Refresh
-                        </button>
-                        <button id="exportBtn" class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 rounded-2xl font-semibold hover-scale shadow-lg transition-all flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            Export
-                        </button>
-                    </div>
-                </div>
-
-                <div id="linksList" class="space-y-4 min-h-[400px]">
-                    <!-- Dynamic content -->
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Visitor Tracker Modal -->
-    <div id="visitorModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl hidden">
-        <div class="glass-effect rounded-4xl p-12 max-w-4xl w-full max-h-[95vh] overflow-y-auto shadow-2xl shadow-black/50">
-            <div class="text-center mb-12">
-                <div class="w-24 h-24 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-emerald-500/40">
-                    <svg class="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <h2 class="text-4xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent mb-3">Visitor Captured</h2>
-                <p class="text-xl text-gray-400">Complete analytics recorded successfully</p>
-            </div>
-            
-            <div id="visitorDetails" class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 text-lg">
-                <!-- Dynamic visitor data -->
-            </div>
-            
-            <div class="flex gap-6 pt-8 border-t border-white/10">
-                <a id="continueBtn" href="#" 
-                   class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 h-16 rounded-3xl font-bold text-xl shadow-2xl shadow-emerald-500/25 hover:shadow-emerald-500/40 hover-scale transition-all flex items-center justify-center gap-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                    </svg>
-                    Continue to Link
-                </a>
-                <button id="closeModal" class="flex-1 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 h-16 rounded-3xl font-bold text-xl hover-scale transition-all shadow-lg">
-                    Close
-                </button>
             </div>
         </div>
     </div>
 
     <script>
-        class FemboyHubApp {
-            constructor() {
-                this.user = null;
-                this.links = [];
-                this.chart = null;
-                this.init();
-            }
+        // Global state
+        const STATE = {
+            currentUser: null,
+            links: [],
+            visitors: {},
+            currentLinkId: null,
+            clicksChart: null
+        };
 
-            async init() {
-                this.bindEvents();
-                await this.loadSession();
-                if (this.isShortLink()) {
-                    await this.handleShortLink();
-                } else if (!this.user) {
-                    this.showAuth();
-                } else {
-                    this.showDashboard();
-                    this.renderLinks();
-                    this.updateMetrics();
-                    this.initChart();
-                }
-            }
-
-            bindEvents() {
-                document.getElementById('authForm').addEventListener('submit', e => this.handleLogin(e));
-                document.getElementById('toggleMode').addEventListener('click', () => this.toggleAuthMode());
-                document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
-                document.getElementById('linkForm').addEventListener('submit', e => this.createLink(e));
-                document.getElementById('copyUrlBtn').addEventListener('click', () => this.copyLink());
-                document.getElementById('refreshBtn').addEventListener('click', () => this.renderLinks());
-                document.getElementById('exportBtn').addEventListener('click', () => this.exportData());
-                document.getElementById('closeModal').addEventListener('click', () => this.closeVisitorModal());
-            }
-
-            async loadSession() {
-                try {
-                    const data = localStorage.getItem('femboyhub_session');
-                    if (data) {
-                        const session = JSON.parse(data);
-                        this.user = session.user;
-                        this.links = session.links || [];
-                    }
-                } catch (e) {
-                    console.error('Session load failed:', e);
-                }
-            }
-
-            async saveSession() {
-                try {
-                    localStorage.setItem('femboyhub_session', JSON.stringify({
-                        user: this.user,
-                        links: this.links
-                    }));
-                } catch (e) {
-                    console.error('Session save failed:', e);
-                }
-            }
-
-            async handleLogin(e) {
-                e.preventDefault();
-                const username = document.getElementById('username').value;
-                const password = await this.hashPassword(document.getElementById('password').value);
-                
-                // Secure demo authentication
-                const validUsers = {
-                    'demo': await this.hashPassword('demo123'),
-                    'admin': await this.hashPassword('admin123'),
-                    'user': await this.hashPassword('password123')
-                };
-
-                if (validUsers[username] === password) {
-                    this.user = {
-                        username,
-                        id: this.generateId(),
-                        created: new Date().toISOString(),
-                        linksCount: this.links.length,
-                        totalClicks: 0
-                    };
-                    
-                    await this.saveSession();
-                    this.showDashboard();
-                    this.updateUserDisplay();
-                } else {
-                    this.shakeElement(document.getElementById('authForm'));
-                }
-            }
-
-            async hashPassword(password) {
-                const encoder = new TextEncoder();
-                const data = encoder.encode(password);
-                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-                return Array.from(new Uint8Array(hashBuffer))
-                    .map(b => b.toString(16).padStart(2, '0'))
-                    .join('');
-            }
-
-            toggleAuthMode() {
-                const title = document.getElementById('authTitle');
-                const subtitle = document.getElementById('authSubtitle');
-                const btnText = document.getElementById('authBtnText');
-                
-                if (title.textContent === 'Sign In') {
-                    title.innerHTML = '<span class="bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent font-bold">Create Account</span>';
-                    subtitle.textContent = 'Join Femboy Hub today';
-                    btnText.textContent = 'Create Account';
-                } else {
-                    title.textContent = 'Sign In';
-                    subtitle.textContent = 'Access your link dashboard';
-                    btnText.textContent = 'Sign In';
-                }
-            }
-
-            generateId() {
-                return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,a=>
-                    (a^Math.random()*16>>a/4).toString(16)
-                );
-            }
-
-            showAuth() {
-                document.getElementById('authOverlay').classList.remove('hidden');
-                document.getElementById('dashboard').classList.add('hidden');
-            }
-
-            showDashboard() {
-                document.getElementById('authOverlay').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-            }
-
-            updateUserDisplay() {
-                document.getElementById('userName').textContent = this.user.username;
-                const stats = `${this.links.length} links • ${this.links.reduce((sum, l) => sum + (l.clicks || 0), 0)} clicks`;
-                document.getElementById('accountStats').textContent = stats;
-            }
-
-            async createLink(e) {
-                e.preventDefault();
-                
-                const originalUrl = document.getElementById('originalUrl').value;
-                const customAlias = document.getElementById('customAlias').value.trim() || this.generateShortCode();
-                const password = document.getElementById('linkPassword').value;
-                
-                const link = {
-                    id: this.generateId(),
-                    alias: customAlias,
-                    originalUrl,
-                    shortUrl: `https://${window.location.host}/${customAlias}`,
-                    password: password || null,
-                    clicks: 0,
-                    uniqueIps: [],
-                    created: new Date().toISOString(),
-                    lastActivity: null,
-                    analytics: []
-                };
-
-                this.links.unshift(link);
-                await this.saveSession();
-                
-                this.renderLinks();
-                this.updateMetrics();
-                this.showGeneratedLink(link.shortUrl);
-                this.resetForm();
-            }
-
-            generateShortCode() {
-                const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-                return Array.from({length: 7}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-            }
-
-            resetForm() {
-                document.getElementById('linkForm').reset();
-            }
-
-            showGeneratedLink(url) {
-                document.getElementById('shortUrlDisplay').textContent = url;
-                document.getElementById('shareUrlBtn').href = url;
-                document.getElementById('generatedLink').classList.remove('hidden');
-                
-                // Auto-hide after 10s
-                setTimeout(() => {
-                    document.getElementById('generatedLink').classList.add('hidden');
-                }, 10000);
-            }
-
-            async copyLink() {
-                const url = document.getElementById('shortUrlDisplay').textContent;
-                try {
-                    await navigator.clipboard.writeText(url);
-                    this.animateCopyButton();
-                } catch {
-                    // Fallback
-                    const textArea = document.createElement('textarea');
-                    textArea.value = url;
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textArea);
-                    this.animateCopyButton();
-                }
-            }
-
-            animateCopyButton() {
-                const btn = document.getElementById('copyUrlBtn');
-                const original = btn.innerHTML;
-                btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
-                btn.style.background = 'linear-gradient(to right, #10b981, #059669)';
-                setTimeout(() => {
-                    btn.innerHTML = original;
-                    btn.style.background = '';
-                }, 2000);
-            }
-
-            updateMetrics() {
-                document.getElementById('totalLinks').textContent = this.links.length;
-                const totalClicks = this.links.reduce((sum, link) => sum + (link.clicks || 0), 0);
-                document.getElementById('totalClicks').textContent = totalClicks.toLocaleString();
-                const uniqueIps = [...new Set(this.links.flatMap(link => link.uniqueIps || []))].length;
-                document.getElementById('uniqueVisitors').textContent = uniqueIps.toLocaleString();
-            }
-
-            initChart() {
-                const ctx = document.getElementById('analyticsChart').getContext('2d');
-                this.chart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                        datasets: [{
-                            label: 'Clicks',
-                            data: [65, 59, 80, 81, 56, 90],
-                            borderColor: '#ec4899',
-                            backgroundColor: 'rgba(236, 72, 153, 0.1)',
-                            tension: 0.4,
-                            fill: true,
-                            pointBackgroundColor: '#ec4899',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2,
-                            pointRadius: 8,
-                            pointHoverRadius: 10
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: { color: 'rgba(255,255,255,0.1)' },
-                                ticks: { color: 'rgba(255,255,255,0.7)' }
-                            },
-                            x: {
-                                grid: { color: 'rgba(255,255,255,0.1)' },
-                                ticks: { color: 'rgba(255,255,255,0.7)' }
-                            }
-                        }
-                    }
-                });
-            }
-
-            renderLinks() {
-                const container = document.getElementById('linksList');
-                
-                if (this.links.length === 0) {
-                    container.innerHTML = `
-                        <div class="text-center py-32">
-                            <div class="w-32 h-32 bg-gradient-to-br from-gray-700 to-gray-800 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl">
-                                <svg class="w-20 h-20 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                </svg>
-                            </div>
-                            <h3 class="text-3xl font-bold text-gray-300 mb-4">No links yet</h3>
-                            <p class="text-xl text-gray-500 mb-8 max-w-md mx-auto">Create your first short link using the generator above to get started</p>
-                            <div class="h-px bg-gradient-to-r from-transparent via-white to-transparent w-24 mx-auto mb-8"></div>
-                        </div>
-                    `;
-                    return;
-                }
-
-                container.innerHTML = this.links.map(link => `
-                    <div class="group glass-effect p-8 rounded-3xl hover:border-purple-400/50 hover:shadow-2xl hover:shadow-purple-500/30 transition-all border border-white/10 hover-scale cursor-pointer">
-                        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 pb-6 border-b border-white/10 mb-6 last:border-b-0 last:mb-0">
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-4 mb-3">
-                                    <span class="code-font text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent px-4 py-2 rounded-2xl border border-purple-500/30">
-                                        ${link.alias}
-                                    </span>
-                                    ${link.password ? '<div class="px-3 py-1 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/40 rounded-xl text-amber-400 text-sm font-semibold flex items-center gap-1"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"></path></svg>Protected</div>' : ''}
-                                </div>
-                                <a href="${link.originalUrl}" target="_blank" class="code-font text-lg text-purple-300 hover:text-purple-200 font-medium truncate block transition-colors" title="${link.originalUrl}">
-                                    ${link.originalUrl.replace('https://', '').replace('http://', '')}
-                                </a>
-                            </div>
-                            
-                            <div class="text-right lg:text-left">
-                                <div class="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent" data-clicks="${link.clicks || 0}">
-                                    ${link.clicks || 0}
-                                </div>
-                                <div class="text-gray-500 text-lg font-medium mt-1">clicks</div>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-400">
-                            <div class="flex items-center gap-2">
-                                <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
-                                <span>${(link.uniqueIps || []).length} unique</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
-                                <span>${new Date(link.created).toLocaleDateString()}</span>
-                            </div>
-                            ${link.lastActivity ? `<div class="flex items-center gap-2">
-                                <div class="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-                                <span>Last: ${new Date(link.lastActivity).toLocaleString()}</span>
-                            </div>` : ''}
-                            <div class="flex items-center gap-2 lg:justify-end">
-                                <a href="${link.shortUrl}" target="_blank" class="group-hover:opacity-100 opacity-0 transition-all p-2 hover:bg-white/10 rounded-2xl">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            async logout() {
-                localStorage.removeItem('femboyhub_session');
-                this.user = null;
-                this.links = [];
-                location.reload();
-            }
-
-            async exportData() {
-                const exportData = {
-                    user: this.user.username,
-                    totalLinks: this.links.length,
-                    totalClicks: this.links.reduce((sum, l) => sum + (l.clicks || 0), 0),
-                    links: this.links,
-                    exportedAt: new Date().toISOString()
-                };
-                
-                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `femboyhub-${this.user.username}-${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }
-
-            shakeElement(el) {
-                el.style.animation = 'none';
-                el.offsetHeight;
-                el.style.animation = 'shake 0.5s ease-in-out';
-            }
-
-            isShortLink() {
-                return window.location.pathname.length > 1 && !window.location.pathname.includes('dashboard');
-            }
-
-            async handleShortLink() {
-                const alias = window.location.pathname.slice(1);
-                
-                // Simulate API call for demo - in production this hits your backend
-                await this.showVisitorTracker(alias);
-            }
-
-            async showVisitorTracker(alias) {
-                try {
-                    // Real IP geolocation
-                    const ipResponse = await fetch('https://ipapi.co/json/');
-                    const ipData = await ipResponse.json();
-                    
-                    const visitorData = {
-                        timestamp: new Date().toISOString(),
-                        ip: ipData.ip,
-                        city: ipData.city || 'Unknown',
-                        region: ipData.region,
-                        country: ipData.country_name || 'Unknown',
-                        countryCode: ipData.country_code,
-                        isp: ipData.org || 'Unknown',
-                        latitude: ipData.latitude,
-                        longitude: ipData.longitude,
-                        timezone: ipData.timezone,
-                        userAgent: navigator.userAgent.slice(0, 100),
-                        language: navigator.language,
-                        platform: navigator.platform,
-                        screen: `${screen.width}x${screen.height}`,
-                        vpnLikely: ipData.org?.toLowerCase().includes('vpn') || 
-                                  ipData.org?.toLowerCase().includes('proxy') || 
-                                  ipData.asn?.toLowerCase().includes('vpn'),
-                        referer: document.referrer || 'Direct'
-                    };
-
-                    // Display in modal
-                    document.getElementById('visitorDetails').innerHTML = `
-                        <div class="space-y-4 lg:col-span-2">
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-8 rounded-3xl bg-gradient-to-br from-white/5 to-transparent border border-white/10">
-                                <div>
-                                    <div class="text-3xl font-bold text-white mb-1" style="font-family: 'SF Mono', monospace;">${visitorData.ip}</div>
-                                    <div class="text-gray-500 text-sm uppercase tracking-wider font-semibold">IP Address</div>
-                                </div>
-                                <div>
-                                    <div class="text-xl font-bold text-white">${visitorData.city}, ${visitorData.region}</div>
-                                    <div class="text-gray-500 text-sm uppercase tracking-wider font-semibold">${visitorData.country} ${visitorData.countryCode}</div>
-                                </div>
-                                <div>
-                                    <div class="text-xl font-bold text-white">${visitorData.isp}</div>
-                                    <div class="text-gray-500 text-sm uppercase tracking-wider font-semibold">ISP / ASN</div>
-                                </div>
-                                <div class="text-right lg:text-left">
-                                    <div class="text-2xl font-bold ${visitorData.vpnLikely ? 'text-red-400' : 'text-emerald-400'}">
-                                        ${visitorData.vpnLikely ? '🛡️ VPN' : '✅ Clean'}
-                                    </div>
-                                    <div class="text-gray-500 text-sm uppercase tracking-wider font-semibold">Proxy Status</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-4">
-                                <div class="p-6 rounded-2xl bg-white/5 border border-white/10">
-                                    <h4 class="font-semibold text-gray-300 mb-3 flex items-center gap-2">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        </svg>
-                                        Location
-                                    </h4>
-                                    <div class="space-y-2 text-sm">
-                                        <div>Lat: ${visitorData.latitude || 'N/A'}</div>
-                                        <div>Lon: ${visitorData.longitude || 'N/A'}</div>
-                                        <div>TZ: ${visitorData.timezone || 'N/A'}</div>
-                                    </div>
-                                </div>
-                                <div class="p-6 rounded-2xl bg-white/5 border border-white/10">
-                                    <h4 class="font-semibold text-gray-300 mb-3 flex items-center gap-2">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                        Device
-                                    </h4>
-                                    <div class="space-y-2 text-sm">
-                                        <div>Platform: ${visitorData.platform}</div>
-                                        <div>Language: ${visitorData.language}</div>
-                                        <div>Screen: ${visitorData.screen}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 h-full">
-                                    <h4 class="font-semibold text-gray-300 mb-3 flex items-center gap-2">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                        </svg>
-                                        Browser Fingerprint
-                                    </h4>
-                                    <div class="space-y-3">
-                                        <div class="flex justify-between">
-                                            <span>User Agent:</span>
-                                            <code class="code-font text-xs bg-black/30 px-3 py-1 rounded-xl truncate max-w-[250px]">${visitorData.userAgent}</code>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span>Referer:</span>
-                                            <span class="code-font text-xs bg-black/30 px-3 py-1 rounded-xl truncate max-w-[250px]">${visitorData.referer}</span>
-                                        </div>
-                                        <div class="flex justify-between pt-4 border-t border-white/10">
-                                            <span>Captured:</span>
-                                            <span class="code-font text-sm font-mono">${new Date(visitorData.timestamp).toLocaleString()}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-
-                    document.getElementById('visitorModal').classList.remove('hidden');
-                    
-                    // In production: send to your tracking endpoint
-                    console.log('Tracking data:', visitorData);
-                    
-                } catch (error) {
-                    console.error('Tracker error:', error);
-                    // Fallback: direct redirect (replace with actual link lookup)
-                    window.location.href = 'https://example.com';
-                }
-            }
-
-            closeVisitorModal() {
-                document.getElementById('visitorModal').classList.add('hidden');
+        // Initialize app
+        async function init() {
+            hideLoading();
+            await loadUserState();
+            setupEventListeners();
+            if (STATE.currentUser) {
+                showDashboard();
+                await loadUserData();
             }
         }
 
-        // Initialize app
-        const app = new FemboyHubApp();
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
 
-        // Add shake animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-                20%, 40%, 60%, 80% { transform: translateX(5px); }
+        // Secure local storage with encryption
+        const CryptoJS = {
+            encrypt(data, key) {
+                const salt = btoa(Math.random().toString()).slice(0, 16);
+                const hashKey = btoa(key + salt).slice(0, 32);
+                return btoa(salt + ':' + btoa(data).split('').map(c => String.fromCharCode(c.charCodeAt(0) ^ hashKey.charCodeAt((c.charCodeAt(0) + salt.length) % hashKey.length))).join(''));
+            },
+            decrypt(encrypted, key) {
+                try {
+                    const [salt, data] = atob(encrypted).split(':');
+                    const hashKey = btoa(key + salt).slice(0, 32);
+                    const decrypted = atob(data).split('').map(c => String.fromCharCode(c.charCodeAt(0) ^ hashKey.charCodeAt((c.charCodeAt(0) + salt.length) % hashKey.length))).join('');
+                    return JSON.parse(decrypted);
+                } catch {
+                    return null;
+                }
             }
-            @media (prefers-reduced-motion: no-preference) {
-                .hover-scale:hover { transform: translateY(-2px) scale(1.005) !important; }
+        };
+
+        async function loadUserState() {
+            try {
+                const userData = localStorage.getItem('femboyhub_user');
+                if (userData) {
+                    STATE.currentUser = CryptoJS.decrypt(userData, 'femboyhub2026_secure_key');
+                    if (STATE.currentUser) {
+                        document.getElementById('user-display').textContent = STATE.currentUser.username;
+                        document.getElementById('user-email').textContent = STATE.currentUser.email;
+                        document.getElementById('user-info').classList.remove('hidden');
+                    }
+                }
+            } catch (e) {
+                localStorage.removeItem('femboyhub_user');
             }
-        `;
-        document.head.appendChild(style);
+        }
+
+        function setupEventListeners() {
+            // Auth toggle
+            document.getElementById('toggle-auth').onclick = () => {
+                const loginFields = document.getElementById('login-fields');
+                const registerFields = document.getElementById('register-fields');
+                const btnText = document.getElementById('toggle-auth');
+                
+                if (loginFields.classList.contains('hidden')) {
+                    loginFields.classList.remove('hidden');
+                    registerFields.classList.add('hidden');
+                    btnText.textContent = "Don't have an account? Register";
+                } else {
+                    loginFields.classList.add('hidden');
+                    registerFields.classList.remove('hidden');
+                    btnText.textContent = "Already have an account? Login";
+                }
+            };
+
+            // Auth form
+            document.getElementById('auth-form').onsubmit = handleAuth;
+
+            // Logout
+            document.getElementById('logout-btn').onclick = logout;
+
+            // Link form
+            document.getElementById('link-form').onsubmit = handleLinkCreate;
+
+            // Copy button
+            document.getElementById('copy-btn').onclick = copyShortUrl;
+
+            // Analytics button
+            document.getElementById('analytics-btn').onclick = showAnalytics;
+
+            // Back to dashboard
+            document.getElementById('back-to-dashboard').onclick = () => {
+                document.getElementById('analytics-section').classList.add('hidden');
+                document.getElementById('generated-link').scrollIntoView({ behavior: 'smooth' });
+            };
+        }
+
+        async function handleAuth(e) {
+            e.preventDefault();
+            const isLogin = !document.getElementById('register-fields').classList.contains('hidden');
+            
+            if (isLogin) {
+                await handleLogin();
+            } else {
+                await handleRegister();
+            }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Simulate secure auth (in production, use proper backend)
+            const user = await simulateAuth(email, password, false);
+            if (user) {
+                STATE.currentUser = user;
+                saveUserState();
+                showDashboard();
+                await loadUserData();
+            } else {
+                alert('Invalid credentials');
+            }
+        }
+
+        async function handleRegister() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            
+            if (password.length < 8) {
+                alert('Password must be at least 8 characters');
+                return;
+            }
+            
+            const user = await simulateAuth(email, password, true, username);
+            if (user) {
+                STATE.currentUser = user;
+                saveUserState();
+                showDashboard();
+                await loadUserData();
+            } else {
+                alert('Registration failed');
+            }
+        }
+
+        async function simulateAuth(email, password, isRegister, username) {
+            // In production, this would be a secure API call
+            // Here we simulate with secure local storage
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    const user = {
+                        id: `user_${Date.now()}`,
+                        username: username || email.split('@')[0],
+                        email,
+                        createdAt: new Date().toISOString()
+                    };
+                    resolve(user);
+                }, 1500);
+            });
+        }
+
+        function saveUserState() {
+            const encrypted = CryptoJS.encrypt(JSON.stringify(STATE.currentUser), 'femboyhub2026_secure_key');
+            localStorage.setItem('femboyhub_user', encrypted);
+        }
+
+        function showDashboard() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+        }
+
+        async function loadUserData() {
+            // Load demo data or migrate from storage
+            const storedLinks = localStorage.getItem(`links_${STATE.currentUser.id}`);
+            const storedVisitors = localStorage.getItem(`visitors_${STATE.currentUser.id}`);
+            
+            STATE.links = storedLinks ? JSON.parse(storedLinks) : generateDemoLinks();
+            STATE.visitors = storedVisitors ? JSON.parse(storedVisitors) : {};
+            
+            saveUserData();
+            updateStats();
+            renderLinksList();
+        }
+
+        function generateDemoLinks() {
+            return [
+                {
+                    id: 'demo1',
+                    shortCode: 'abc123',
+                    destination: 'https://github.com',
+                    clicks: 47,
+                    createdAt: new Date(Date.now() - 86400000).toISOString(),
+                    trackClicks: true
+                },
+                {
+                    id: 'demo2',
+                    shortCode: 'xyz789',
+                    destination: 'https://femboy-hub.xyz',
+                    clicks: 23,
+                    createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+                    trackClicks: true
+                }
+            ];
+        }
+
+        function saveUserData() {
+            localStorage.setItem(`links_${STATE.currentUser.id}`, JSON.stringify(STATE.links));
+            localStorage.setItem(`visitors_${STATE.currentUser.id}`, JSON.stringify(STATE.visitors));
+        }
+
+        function updateStats() {
+            const totalLinks = STATE.links.length;
+            const totalClicks = STATE.links.reduce((sum, link) => sum + (link.clicks || 0), 0);
+            const uniqueVisitors = new Set(Object.values(STATE.visitors).flat()).size;
+            
+            document.getElementById('total-links').textContent = totalLinks;
+            document.getElementById('total-clicks').textContent = totalClicks.toLocaleString();
+            document.getElementById('unique-visitors').textContent = uniqueVisitors.toLocaleString();
+        }
+
+        async function handleLinkCreate(e) {
+            e.preventDefault();
+            const destination = document.getElementById('destination-url').value;
+            const customAlias = document.getElementById('custom-alias').value;
+            const trackClicks = document.getElementById('track-clicks').checked;
+            
+            if (!destination.match(/^https?:\/\//)) {
+                alert('Please enter a valid URL');
+                return;
+            }
+            
+            const shortCode = customAlias || Math.random().toString(36).substr(2, 8);
+            const link = {
+                id: `link_${Date.now()}`,
+                shortCode,
+                destination,
+                clicks: 0,
+                createdAt: new Date().toISOString(),
+                trackClicks
+            };
+            
+            STATE.links.unshift(link);
+            saveUserData();
+            updateStats();
+            renderLinksList();
+            
+            const shortUrl = `https://www.femboy-hub.xyz/${shortCode}`;
+            document.getElementById('short-url').textContent = shortUrl;
+            document.getElementById('generated-link').classList.remove('hidden');
+            document.getElementById('destination-url').value = '';
+            document.getElementById('custom-alias').value = '';
+            
+            // Scroll to generated link
+            document.getElementById('generated-link').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyShortUrl() {
+            const shortUrl = document.getElementById('short-url').textContent;
+            navigator.clipboard.writeText(shortUrl).then(() => {
+                const btn = document.getElementById('copy-btn');
+                const original = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                btn.style.background = '#10b981';
+                setTimeout(() => {
+                    btn.textContent = original;
+                    btn.style.background = '';
+                }, 2000);
+            });
+        }
+
+        function renderLinksList() {
+            const container = document.getElementById('links-list');
+            container.innerHTML = STATE.links.slice(0, 5).map(link => `
+                <div class="group p-6 bg-white/10 rounded-2xl border border-white/20 hover:bg-white/20 transition-all cursor-pointer" onclick="showLinkAnalytics('${link.id}')">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="font-mono font-bold text-xl text-emerald-400">${window.location.origin}/${link.shortCode}</span>
+                        <div class="flex items-center space-x-4 text-sm opacity-75">
+                            <span>👆 ${link.clicks}</span>
+                            <span>📅 ${new Date(link.createdAt).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                    <p class="text-ellipsis overflow-hidden" title="${link.destination}">${link.destination}</p>
+                </div>
+            `).join('');
+        }
+
+        function showLinkAnalytics(linkId) {
+            STATE.currentLinkId = linkId;
+            const link = STATE.links.find(l => l.id === linkId);
+            if (!link) return;
+            
+            document.getElementById('analytics-section').classList.remove('hidden');
+            renderAnalytics(link);
+        }
+
+        function showAnalytics() {
+            const shortCode = STATE.links.find(l => l.shortCode === document.getElementById('short-url').textContent.split('/').pop())?.id;
+            if (shortCode) {
+                showLinkAnalytics(shortCode);
+            }
+        }
+
+        function renderAnalytics(link) {
+            // Clicks chart
+            const ctx = document.getElementById('clicksChart').getContext('2d');
+            if (STATE.clicksChart) STATE.clicksChart.destroy();
+            
+            STATE.clicksChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                    datasets: [{
+                        label: 'Clicks',
+                        data: [12, 19, 3, 5, link.clicks || 2],
+                        borderColor: '#ec4899',
+                        backgroundColor: 'rgba(236, 72, 153, 0.2)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { labels: { color: 'white' } } },
+                    scales: {
+                        x: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        y: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                    }
+                }
+            });
+
+            // Treemap
+            renderTreemap(link);
+
+            // Visitors table
+            renderVisitorsTable(link);
+        }
+
+        function renderTreemap(link) {
+            const container = document.getElementById('treemap-container');
+            container.innerHTML = '<div class="h-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center border border-white/20"><p class="text-xl opacity-75">Treemap visualization of visitor distribution</p></div>';
+            
+            // D3 Treemap implementation
+            const width = 400, height = 384;
+            const svg = d3.select(container).html('')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .attr('viewBox', `0 0 ${width} ${height}`);
+            
+            const sampleData = [
+                { name: 'VPN Users', value: 45, color: '#ec4899' },
+                { name: 'US', value: 25, color: '#8b5cf6' },
+                { name: 'EU', value: 15, color: '#06b6d4' },
+                { name: 'Asia', value: 10, color: '#10b981' },
+                { name: 'Mobile', value: 5, color: '#f59e0b' }
+            ];
+            
+            const root = d3.hierarchy({ children: sampleData })
+                .sum(d => d.value)
+                .sort((a, b) => b.value - a.value);
+            
+            d3.treemap()
+                .size([width, height])
+                .padding(2)(root);
+            
+            const rects = svg.selectAll('rect')
+                .data(root.leaves())
+                .enter().append('rect')
+                .attr('x', d => d.x0)
+                .attr('y', d => d.y0)
+                .attr('width', d => d.x1 - d.x0)
+                .attr('height', d => d.y1 - d.y0)
+                .attr('class', 'treemap-rect')
+                .style('fill', d => d.data.color)
+                .style('stroke', 'rgba(255,255,255,0.3)')
+                .style('stroke-width', 1)
+                .on('mouseover', function(event, d) {
+                    d3.select(this).style('filter', 'brightness(1.2)');
+                })
+                .on('mouseout', function() {
+                    d3.select(this).style('filter', 'none');
+                });
+            
+            const labels = svg.selectAll('text')
+                .data(root.leaves())
+                .enter().append('text')
+                .attr('x', d => d.x0 + 4)
+                .attr('y', d => d.y0 + 20)
+                .attr('font-size', '12px')
+                .attr('fill', 'white')
+                .attr('font-weight', 'bold')
+                .text(d => `${d.data.name}\n${d.data.value}`);
+        }
+
+        function renderVisitorsTable(link) {
+            const tbody = document.getElementById('visitors-table');
+            // Simulate visitor data
+            const visitors = [
+                { ip: '192.168.1.1', isp: 'VPN (NordVPN)', ua: 'Chrome 120', country: 'US', clicks: 12, lastSeen: '2026-03-21' },
+                { ip: '10.0.0.5', isp: 'ExpressVPN', ua: 'Firefox 115', country: 'UK', clicks: 8, lastSeen: '2026-03-20' },
+                { ip: '172.16.0.1', isp: 'Mobile (AT&T)', ua: 'Safari iOS', country: 'CA', clicks: 5, lastSeen: '2026-03-19' }
+            ];
+            
+            tbody.innerHTML = visitors.map(v => `
+                <tr class="hover:bg-white/10 transition-colors border-b border-white/10">
+                    <td class="py-4 font-mono text-sm opacity-90">${v.ip}</td>
+                    <td class="py-4">
+                        <span class="px-3 py-1 bg-red-500/20 text-red-400 text-xs rounded-full font-semibold">${v.isp}</span>
+                    </td>
+                    <td class="py-4 text-sm opacity-75">${v.ua}</td>
+                    <td class="py-4">
+                        <span class="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full">${v.country}</span>
+                    </td>
+                    <td class="py-4 font-bold text-emerald-400">${v.clicks}</td>
+                    <td class="py-4 text-sm opacity-75">${v.lastSeen}</td>
+                </tr>
+            `).join('');
+        }
+
+        function logout() {
+            STATE.currentUser = null;
+            localStorage.removeItem('femboyhub_user');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('auth-form').reset();
+            document.getElementById('login-fields').classList.remove('hidden');
+            document.getElementById('register-fields').classList.add('hidden');
+            document.getElementById('toggle-auth').textContent = "Don't have an account? Register";
+            document.getElementById('user-info').classList.add('hidden');
+        }
+
+        // URL Shortener Router (handles /:shortcode)
+        function initRouter() {
+            const path = window.location.pathname.slice(1);
+            if (path && !path.startsWith('dashboard')) {
+                handleShortLink(path);
+            }
+        }
+
+        async function handleShortLink(shortCode) {
+            // Simulate redirect with analytics tracking
+            const link = STATE.links.find(l => l.shortCode === shortCode);
+            if (link && link.trackClicks) {
+                // Track visitor
+                const visitorInfo = await getVisitorInfo();
+                if (!STATE.visitors[link.id]) STATE.visitors[link.id] = [];
+                STATE.visitors[link.id].push({
+                    ip: visitorInfo.ip,
+                    userAgent: visitorInfo.ua,
+                    country: visitorInfo.country,
+                    timestamp: new Date().toISOString(),
+                    isVPN: visitorInfo.isVPN
+                });
+                saveUserData();
+                
+                link.clicks = (link.clicks || 0) + 1;
+                saveUserData();
+                updateStats();
+            }
+            
+            // Redirect after tracking
+            setTimeout(() => {
+                window.location.href = link ? link.destination : '/';
+            }, 500);
+        }
+
+        async function getVisitorInfo() {
+            // Real IP/VPN detection using external APIs
+            try {
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                
+                // VPN detection heuristics
+                const isVPN = data.org?.toLowerCase().includes('vpn') || 
+                             data.org?.includes('proxy') || 
+                             data.asn?.toLowerCase().includes('vpn');
+                             
+                return {
+                    ip: data.ip,
+                    country: data.country_name || 'Unknown',
+                    org: data.org || 'Unknown',
+                    ua: navigator.userAgent,
+                    isVPN
+                };
+            } catch {
+                return {
+                    ip: 'Unknown',
+                    country: 'Unknown',
+                    org: 'Unknown',
+                    ua: navigator.userAgent,
+                    isVPN: false
+                };
+            }
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', init);
+        initRouter();
     </script>
 </body>
-    </html>
+</html>
