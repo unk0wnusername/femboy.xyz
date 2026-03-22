@@ -1,987 +1,604 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FemboyHub</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg:#080810;--surface:#0f0f1a;--surface2:#161625;--surface3:#1e1e30;
-  --border:#272740;--border2:#32324f;
-  --accent:#a78bfa;--accent2:#60a5fa;--accent3:#34d399;--hot:#f472b6;
-  --text:#f0f0ff;--sub:#9090b8;--dim:#55557a;
-  --danger:#fb7185;--discord:#5865F2;
-  --r:14px;--r-sm:8px;--shadow:0 8px 40px rgba(0,0,0,.5);
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{height:100%;scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;font-size:15px;line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased}
-a{color:inherit;text-decoration:none}
-img{display:block;max-width:100%}
-input,textarea,select,button{font-family:inherit;font-size:inherit}
-*{cursor:default}
-a,button,[onclick],[role=button]{cursor:pointer}
-input,textarea{cursor:text}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
-
-/* noise */
-body::before{content:'';position:fixed;inset:0;z-index:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-  background-size:128px;pointer-events:none;opacity:.4}
-
-/* grid */
-body::after{content:'';position:fixed;inset:0;z-index:0;
-  background-image:linear-gradient(rgba(167,139,250,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(167,139,250,.025) 1px,transparent 1px);
-  background-size:48px 48px;pointer-events:none}
-
-#app{position:relative;z-index:1;min-height:100vh}
-.page{display:none}.page.active{display:block}
-.page-flex{display:none}.page-flex.active{display:flex}
-
-/* NAV */
-#topnav{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:58px;background:rgba(8,8,16,.9);backdrop-filter:blur(18px) saturate(1.3);border-bottom:1px solid var(--border)}
-.logo{font-size:1.1rem;font-weight:800;letter-spacing:-.3px;background:linear-gradient(130deg,var(--accent),var(--hot));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.nav-right{display:flex;align-items:center;gap:8px}
-
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 18px;border-radius:var(--r-sm);border:none;font-weight:600;font-size:.85rem;letter-spacing:.1px;transition:all .18s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;white-space:nowrap}
-.btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:background .18s}
-.btn:hover::after{background:rgba(255,255,255,.07)}
-.btn:active{transform:scale(.97)}
-.btn-primary{background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff;box-shadow:0 4px 18px rgba(167,139,250,.28)}
-.btn-primary:hover{box-shadow:0 6px 26px rgba(167,139,250,.42);transform:translateY(-1px)}
-.btn-ghost{background:transparent;color:var(--sub);border:1px solid var(--border2)}
-.btn-ghost:hover{color:var(--text);background:var(--surface2)}
-.btn-surface{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
-.btn-surface:hover{border-color:var(--border2);background:var(--surface3)}
-.btn-danger{background:rgba(251,113,133,.12);color:var(--danger);border:1px solid rgba(251,113,133,.25)}
-.btn-danger:hover{background:rgba(251,113,133,.22)}
-.btn-discord{background:var(--discord);color:#fff;box-shadow:0 4px 16px rgba(88,101,242,.3)}
-.btn-discord:hover{box-shadow:0 6px 24px rgba(88,101,242,.45);transform:translateY(-1px)}
-.btn-sm{padding:7px 13px;font-size:.8rem}
-.btn-lg{padding:13px 26px;font-size:.95rem}
-.btn-full{width:100%}
-.btn:disabled{opacity:.45;pointer-events:none}
-.btn-icon{width:34px;height:34px;padding:0;border-radius:var(--r-sm);background:var(--surface2);border:1px solid var(--border);color:var(--sub)}
-.btn-icon:hover{color:var(--text);border-color:var(--border2)}
-
-/* FORMS */
-.field{margin-bottom:15px}
-.field-label{display:block;font-size:.75rem;font-weight:600;color:var(--sub);margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase}
-.field-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 14px;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s}
-.field-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(167,139,250,.12)}
-.field-input::placeholder{color:var(--dim)}
-.field-hint{font-size:.75rem;color:var(--sub);margin-top:5px}
-.field-hint.err{color:var(--danger);display:none}
-.field-hint.err.show{display:block}
-.field-prefix-row{display:flex}
-.field-prefix{background:var(--surface3);border:1px solid var(--border);border-right:none;border-radius:var(--r-sm) 0 0 var(--r-sm);padding:11px 12px;color:var(--dim);font-size:.82rem;display:flex;align-items:center;white-space:nowrap;font-family:'DM Mono',monospace}
-.field-prefix+.field-input{border-radius:0 var(--r-sm) var(--r-sm) 0}
-
-/* CARD */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px}
-
-/* TOAST */
-#toasts{position:fixed;top:68px;right:18px;z-index:9000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-.toast{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);padding:11px 16px;font-size:.85rem;max-width:300px;pointer-events:all;animation:toastIn .28s cubic-bezier(.16,1,.3,1) both;box-shadow:var(--shadow)}
-.toast.ok{border-color:rgba(52,211,153,.35)}.toast.err{border-color:rgba(251,113,133,.35)}.toast.info{border-color:rgba(96,165,250,.35)}
-@keyframes toastIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
-
-/* SPINNER */
-.spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;animation:rot .55s linear infinite;flex-shrink:0}
-@keyframes rot{to{transform:rotate(360deg)}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-
-/* PILL */
-.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:.72rem;font-weight:600;letter-spacing:.3px}
-.pill-accent{background:rgba(167,139,250,.12);color:var(--accent);border:1px solid rgba(167,139,250,.25)}
-.pill-green{background:rgba(52,211,153,.1);color:var(--accent3);border:1px solid rgba(52,211,153,.25)}
-.pill-dc{background:rgba(88,101,242,.15);color:#7289da;border:1px solid rgba(88,101,242,.3)}
-
-/* TOGGLE */
-.toggle{width:42px;height:23px;background:var(--surface3);border-radius:99px;position:relative;transition:background .2s;flex-shrink:0}
-.toggle.on{background:var(--accent)}
-.toggle::after{content:'';position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:#fff;transition:transform .2s}
-.toggle.on::after{transform:translateX(19px)}
-
-/* ── LANDING ── */
-#page-landing{flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 58px);padding:64px 24px;text-align:center;position:relative}
-#page-landing::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 30% 40%,rgba(167,139,250,.08) 0%,transparent 70%),radial-gradient(ellipse 50% 40% at 70% 60%,rgba(244,114,182,.06) 0%,transparent 70%);pointer-events:none}
-.hero-eyebrow{display:inline-flex;align-items:center;gap:7px;background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.18);border-radius:99px;padding:5px 14px;font-size:.78rem;font-weight:600;color:var(--accent);letter-spacing:.4px;text-transform:uppercase;margin-bottom:26px;animation:fadeUp .6s both}
-.hero-h1{font-size:clamp(2.4rem,7vw,5rem);font-weight:900;letter-spacing:-1.5px;line-height:1.04;margin-bottom:20px;animation:fadeUp .6s .08s both}
-.hero-h1 span{background:linear-gradient(130deg,var(--accent) 20%,var(--hot) 80%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero-sub{color:var(--sub);font-size:1.05rem;max-width:460px;margin:0 auto 36px;animation:fadeUp .6s .16s both;line-height:1.65}
-.hero-cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;animation:fadeUp .6s .24s both}
-.hero-demo{margin-top:52px;animation:fadeUp .6s .32s both;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;max-width:400px;text-align:left}
-.hero-demo-label{font-size:.7rem;color:var(--dim);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;font-family:'DM Mono',monospace}
-.hero-url-mock{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;font-family:'DM Mono',monospace;font-size:.85rem}
-.hero-url-mock .domain{color:var(--sub)}.hero-url-mock .slug{color:var(--accent);font-weight:500}
-
-/* ── AUTH ── */
-.auth-wrap{min-height:calc(100vh - 58px);display:flex;align-items:center;justify-content:center;padding:40px 20px}
-.auth-box{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:36px 32px;box-shadow:var(--shadow);animation:fadeUp .4s both}
-.auth-title{font-size:1.5rem;font-weight:800;margin-bottom:5px}
-.auth-sub{color:var(--sub);font-size:.875rem;margin-bottom:26px}
-.auth-divider{display:flex;align-items:center;gap:12px;color:var(--dim);font-size:.75rem;margin:18px 0}
-.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
-.auth-footer{text-align:center;font-size:.85rem;color:var(--sub);margin-top:18px}
-.auth-link{color:var(--accent);font-weight:600}
-
-/* ── DASHBOARD ── */
-#page-dashboard{max-width:1060px;margin:0 auto;padding:36px 24px}
-.dash-head{margin-bottom:28px}
-.dash-title{font-size:1.65rem;font-weight:800;letter-spacing:-.4px}
-.dash-sub{color:var(--sub);font-size:.9rem;margin-top:4px}
-
-.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:28px;overflow-x:auto}
-.tab-btn{background:none;border:none;border-bottom:2px solid transparent;padding:9px 16px;font-size:.875rem;font-weight:600;color:var(--sub);margin-bottom:-1px;transition:color .15s,border-color .15s;white-space:nowrap}
-.tab-btn:hover{color:var(--text)}.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
-.tab-panel{display:none}.tab-panel.active{display:block}
-
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
-.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:18px;text-align:center;transition:border-color .15s}
-.stat-box:hover{border-color:var(--border2)}
-.stat-val{font-size:1.6rem;font-weight:800}.stat-lbl{font-size:.75rem;color:var(--sub);margin-top:3px}
-
-.profile-live-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
-.plc-banner{height:68px}.plc-body{padding:0 20px 20px}
-.plc-av{width:60px;height:60px;border-radius:50%;border:3px solid var(--surface);margin-top:-30px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;overflow:hidden}
-.plc-av img{width:100%;height:100%;object-fit:cover}
-.plc-name{font-size:1rem;font-weight:700}.plc-slug{font-size:.75rem;color:var(--sub);font-family:'DM Mono',monospace;margin-top:2px}
-.plc-url{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 12px;margin-top:12px;font-family:'DM Mono',monospace;font-size:.78rem;color:var(--sub)}
-.copy-btn{margin-left:auto;background:var(--surface3);border:1px solid var(--border2);border-radius:5px;padding:3px 10px;font-size:.7rem;color:var(--sub);transition:all .15s}
-.copy-btn:hover{color:var(--text)}
-
-.link-item{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:8px;transition:border-color .15s}
-.link-item:hover{border-color:var(--border2)}
-.link-item-icon{width:36px;height:36px;border-radius:8px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.link-item-info{flex:1;min-width:0}
-.link-item-title{font-weight:600;font-size:.875rem}
-.link-item-url{font-size:.75rem;color:var(--sub);font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.link-item-del{background:none;border:none;color:var(--dim);font-size:1rem;padding:4px 8px;border-radius:5px}
-.link-item-del:hover{color:var(--danger);background:rgba(251,113,133,.1)}
-
-.dc-av{width:44px;height:44px;border-radius:50%;overflow:hidden;background:var(--surface3);flex-shrink:0}
-.dc-av img{width:100%;height:100%;object-fit:cover}
-.dc-name{font-weight:700;font-size:.9rem}.dc-tag{font-size:.78rem;color:var(--sub);font-family:'DM Mono',monospace}
-.dc-status{font-size:.75rem;color:var(--sub);display:flex;align-items:center;gap:5px;margin-top:2px}
-.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.s-online{background:#43b581;box-shadow:0 0 5px #43b58155}.s-idle{background:#faa61a;box-shadow:0 0 5px #faa61a55}
-.s-dnd{background:#f04747;box-shadow:0 0 5px #f0474755}.s-offline{background:#636b75}
-.discord-row{display:flex;align-items:center;gap:14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px 16px}
-
-.settings-section{margin-bottom:20px}
-.settings-section-title{font-size:.75rem;font-weight:700;color:var(--sub);letter-spacing:.6px;text-transform:uppercase;margin-bottom:12px}
-.settings-row{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:8px}
-.settings-row-label{font-weight:600;font-size:.875rem}
-.settings-row-sub{font-size:.775rem;color:var(--sub);margin-top:2px}
-
-.theme-picker{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-.theme-swatch{width:32px;height:32px;border-radius:50%;border:2px solid transparent;transition:transform .15s,border-color .15s}
-.theme-swatch:hover{transform:scale(1.12)}.theme-swatch.active{border-color:var(--text)}
-
-/* ── PUBLIC PROFILE ── */
-#page-profile{min-height:calc(100vh - 58px);display:none;align-items:flex-start;justify-content:center;padding:40px 20px}
-#page-profile.active{display:flex}
-.pub-card{width:100%;max-width:520px;animation:fadeUp .4s both}
-.pub-banner{height:120px;border-radius:var(--r) var(--r) 0 0}
-.pub-body{background:var(--surface);border:1px solid var(--border);border-radius:0 0 var(--r) var(--r);border-top:none;padding:0 28px 30px}
-.pub-av{width:88px;height:88px;border-radius:50%;border:4px solid var(--surface);margin-top:-44px;margin-bottom:14px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;overflow:hidden}
-.pub-av img{width:100%;height:100%;object-fit:cover}
-.pub-name{font-size:1.4rem;font-weight:800}
-.pub-handle{font-size:.8rem;color:var(--sub);font-family:'DM Mono',monospace;margin-top:3px}
-.pub-bio{color:var(--sub);font-size:.875rem;margin:12px 0 20px;line-height:1.6}
-.pub-link-btn{display:flex;align-items:center;gap:12px;width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:13px 16px;margin-bottom:10px;font-weight:600;font-size:.9rem;transition:all .18s}
-.pub-link-btn:hover{background:var(--surface3);border-color:var(--accent);transform:translateY(-1px);box-shadow:0 4px 16px rgba(167,139,250,.12)}
-.pub-link-icon{width:34px;height:34px;border-radius:8px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.pub-link-label{flex:1;text-align:center}
-.pub-dc-row{display:flex;align-items:center;gap:12px;background:rgba(88,101,242,.08);border:1px solid rgba(88,101,242,.2);border-radius:var(--r-sm);padding:14px 16px;margin-top:4px;margin-bottom:10px}
-.pub-views{font-size:.75rem;color:var(--dim);text-align:center;margin-top:18px;font-family:'DM Mono',monospace}
-
-/* MODAL */
-#modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
-#modal-backdrop.open{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px;width:100%;max-width:420px;box-shadow:var(--shadow);animation:slideM .28s cubic-bezier(.16,1,.3,1)}
-@keyframes slideM{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.modal-title{font-size:1.1rem;font-weight:700;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
-.modal-close{background:none;border:none;color:var(--sub);font-size:1.2rem}
-.modal-close:hover{color:var(--text)}
-
-/* 404 */
-.not-found{text-align:center;padding:80px 20px;min-height:calc(100vh - 58px);display:flex;flex-direction:column;align-items:center;justify-content:center}
-.nf-code{font-size:5rem;font-weight:900;color:var(--border2);letter-spacing:-3px}
-.nf-msg{color:var(--sub);margin:10px 0 24px}
-
-@media(max-width:640px){
-  #page-dashboard{padding:20px 14px}
-  .auth-box{padding:26px 20px}
-  .stats-row{grid-template-columns:1fr 1fr}
-  #topnav{padding:0 16px}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Femboy Hub - Short Link Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .glass { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+        .pulse-glow { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
+    </style>
 </head>
-<body>
-<div id="app">
-
-<!-- NAV -->
-<nav id="topnav">
-  <div class="logo" onclick="goHome()">femboyhub</div>
-  <div class="nav-right" id="nav-right">
-    <button class="btn btn-ghost btn-sm" onclick="showAuth('login')">Log in</button>
-    <button class="btn btn-primary btn-sm" onclick="showAuth('register')">Sign up free</button>
-  </div>
-</nav>
-
-<div id="toasts"></div>
-
-<!-- ADD LINK MODAL -->
-<div id="modal-backdrop" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="modal-title">
-      Add a Link
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="field">
-      <label class="field-label">Label</label>
-      <input class="field-input" id="link-label" placeholder="My Twitter" maxlength="40">
-    </div>
-    <div class="field">
-      <label class="field-label">URL</label>
-      <input class="field-input" id="link-url" type="url" placeholder="https://twitter.com/you">
-      <div class="field-hint err" id="link-url-err">Enter a valid URL (include https://)</div>
-    </div>
-    <div class="field">
-      <label class="field-label">Icon (emoji)</label>
-      <input class="field-input" id="link-icon" placeholder="🔗" maxlength="4">
-    </div>
-    <div style="display:flex;gap:8px;margin-top:4px;">
-      <button class="btn btn-surface btn-sm" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-primary btn-sm" onclick="addLink()" style="flex:1">Add Link</button>
-    </div>
-  </div>
-</div>
-
-<!-- LANDING -->
-<div id="page-landing" class="page-flex page">
-  <div class="hero-eyebrow">✦ Your link. Your profile.</div>
-  <h1 class="hero-h1">One link for<br><span>everything you are.</span></h1>
-  <p class="hero-sub">Create a custom profile page at your own URL. Add links, connect Discord, and share it anywhere.</p>
-  <div class="hero-cta">
-    <button class="btn btn-primary btn-lg" onclick="showAuth('register')">Claim your link →</button>
-    <button class="btn btn-ghost btn-lg" onclick="showAuth('login')">Log in</button>
-  </div>
-  <div class="hero-demo">
-    <div class="hero-demo-label">// your page lives at</div>
-    <div class="hero-url-mock">
-      <span>🔗</span>
-      <span class="domain">femboy-hub.xyz/</span><span class="slug" id="demo-slug">yourname</span>
-    </div>
-  </div>
-</div>
-
-<!-- LOGIN -->
-<div id="page-login" class="page">
-  <div class="auth-wrap">
-    <div class="auth-box">
-      <div class="auth-title">Welcome back</div>
-      <div class="auth-sub">Sign in to your account</div>
-      <button class="btn btn-discord btn-full" onclick="discordOAuth()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>
-        Continue with Discord
-      </button>
-      <div class="auth-divider">or</div>
-      <div class="field">
-        <label class="field-label">Username or Email</label>
-        <input class="field-input" id="li-ident" placeholder="reagentc" autocomplete="username">
-        <div class="field-hint err" id="li-ident-err">Enter your username or email</div>
-      </div>
-      <div class="field">
-        <label class="field-label">Password</label>
-        <input class="field-input" id="li-pass" type="password" placeholder="••••••••" autocomplete="current-password">
-        <div class="field-hint err" id="li-pass-err">Enter your password</div>
-      </div>
-      <button class="btn btn-primary btn-full" id="li-btn" onclick="doLogin()" style="margin-top:6px">Sign in</button>
-      <div class="auth-footer">No account? <span class="auth-link" onclick="showAuth('register')">Create one free</span></div>
-    </div>
-  </div>
-</div>
-
-<!-- REGISTER -->
-<div id="page-register" class="page">
-  <div class="auth-wrap">
-    <div class="auth-box">
-      <div class="auth-title">Create account</div>
-      <div class="auth-sub">Free forever. Claim your URL.</div>
-      <button class="btn btn-discord btn-full" onclick="discordOAuth()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>
-        Sign up with Discord
-      </button>
-      <div class="auth-divider">or</div>
-      <div class="field">
-        <label class="field-label">Username — this becomes your URL</label>
-        <div class="field-prefix-row">
-          <div class="field-prefix">femboy-hub.xyz/</div>
-          <input class="field-input" id="re-user" placeholder="reagentc" maxlength="24" autocomplete="username" oninput="onSlugInput(this.value)">
+<body class="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-x-hidden">
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 bg-gradient-to-r from-purple-900 to-blue-900 flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="w-20 h-20 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <h1 class="text-2xl font-bold">Femboy Hub Loading...</h1>
         </div>
-        <div class="field-hint err" id="re-user-err">3–24 chars, letters/numbers/underscores only</div>
-        <div class="field-hint" id="re-user-ok" style="color:var(--accent3);display:none">✓ Available</div>
-      </div>
-      <div class="field">
-        <label class="field-label">Email</label>
-        <input class="field-input" id="re-email" type="email" placeholder="you@example.com" autocomplete="email">
-        <div class="field-hint err" id="re-email-err">Enter a valid email</div>
-      </div>
-      <div class="field">
-        <label class="field-label">Password</label>
-        <input class="field-input" id="re-pass" type="password" placeholder="Min 8 characters" autocomplete="new-password">
-        <div class="field-hint err" id="re-pass-err">At least 8 characters required</div>
-      </div>
-      <div class="field">
-        <label class="field-label">Confirm Password</label>
-        <input class="field-input" id="re-pass2" type="password" placeholder="Repeat password" autocomplete="new-password">
-        <div class="field-hint err" id="re-pass2-err">Passwords don't match</div>
-      </div>
-      <button class="btn btn-primary btn-full" id="re-btn" onclick="doRegister()">Create account</button>
-      <div class="auth-footer">Already have one? <span class="auth-link" onclick="showAuth('login')">Sign in</span></div>
     </div>
-  </div>
-</div>
 
-<!-- DASHBOARD -->
-<div id="page-dashboard" class="page">
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('profile')">Profile</button>
-    <button class="tab-btn" onclick="switchTab('links')">Links</button>
-    <button class="tab-btn" onclick="switchTab('discord')">Discord</button>
-    <button class="tab-btn" onclick="switchTab('settings')">Settings</button>
-    <button class="tab-btn" onclick="doLogout()" style="margin-left:auto;color:var(--danger)">Sign out</button>
-  </div>
-
-  <!-- PROFILE TAB -->
-  <div class="tab-panel active" id="tab-profile">
-    <div class="dash-head">
-      <div class="dash-title" id="dash-hello">Hey 👋</div>
-      <div class="dash-sub">Your public profile is live.</div>
-    </div>
-    <div class="stats-row">
-      <div class="stat-box"><div class="stat-val" id="s-views">0</div><div class="stat-lbl">Profile Views</div></div>
-      <div class="stat-box"><div class="stat-val" id="s-links">0</div><div class="stat-lbl">Links</div></div>
-      <div class="stat-box"><div class="stat-val" id="s-joined">—</div><div class="stat-lbl">Joined</div></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div>
-        <div class="settings-section-title" style="margin-bottom:8px">Live Preview</div>
-        <div class="profile-live-card">
-          <div class="plc-banner" id="plc-banner"></div>
-          <div class="plc-body">
-            <div class="plc-av" id="plc-av">?</div>
-            <div class="plc-name" id="plc-name">—</div>
-            <div class="plc-slug" id="plc-slug">femboy-hub.xyz/—</div>
-            <div class="plc-url">
-              🔗 <span><span style="color:var(--sub)">femboy-hub.xyz/</span><strong id="plc-url-slug">—</strong></span>
-              <button class="copy-btn" onclick="copyMyURL()">Copy</button>
+    <!-- Auth Modal -->
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40 hidden">
+        <div class="glass p-8 rounded-3xl max-w-md w-full mx-4 pulse-glow backdrop-blur-xl">
+            <div class="text-center mb-8">
+                <i class="fas fa-link text-5xl text-purple-400 mb-4"></i>
+                <h2 id="authTitle" class="text-3xl font-bold mb-2">Welcome Back</h2>
+                <p id="authSubtitle" class="text-gray-300">Sign in to access your dashboard</p>
             </div>
-            <div style="margin-top:10px;display:flex;gap:8px">
-              <button class="btn btn-primary btn-sm" style="flex:1" onclick="viewMyProfile()">View Profile ↗</button>
+            <form id="authForm">
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-2">Username</label>
+                    <input type="text" id="username" class="w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" required>
+                </div>
+                <div class="mb-8">
+                    <label class="block text-sm font-semibold mb-2">Password</label>
+                    <input type="password" id="password" class="w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" required>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white py-4 px-8 rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-2xl">
+                    <span id="authBtnText">Sign In</span>
+                </button>
+            </form>
+            <div class="mt-6 text-center">
+                <button id="toggleAuth" class="text-purple-400 hover:text-purple-300 transition-colors">Don't have an account? Register</button>
             </div>
-          </div>
         </div>
-      </div>
-      <div>
-        <div class="settings-section-title" style="margin-bottom:8px">Edit Bio</div>
-        <div class="card">
-          <div class="field">
-            <label class="field-label">Display Name</label>
-            <input class="field-input" id="edit-displayname" placeholder="Your name" maxlength="40">
-          </div>
-          <div class="field">
-            <label class="field-label">Bio</label>
-            <textarea class="field-input" id="edit-bio" rows="3" placeholder="Tell people about yourself..." style="resize:vertical" maxlength="200"></textarea>
-          </div>
-          <button class="btn btn-primary btn-sm" onclick="saveBio()">Save Bio</button>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="min-h-screen hidden">
+        <!-- Header -->
+        <header class="glass backdrop-blur-xl sticky top-0 z-30 p-6 border-b border-white/10">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-futuristic text-3xl text-purple-400"></i>
+                    <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                        Femboy Hub Dashboard
+                    </h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="userWelcome" class="font-semibold"></span>
+                    <button id="logoutBtn" class="p-2 rounded-xl hover:bg-white/10 transition-all">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-7xl mx-auto p-6">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="glass p-6 rounded-2xl border border-white/10 hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-300">Total Links</p>
+                            <p id="totalLinks" class="text-3xl font-bold text-white">0</p>
+                        </div>
+                        <i class="fas fa-link text-4xl text-green-400"></i>
+                    </div>
+                </div>
+                <div class="glass p-6 rounded-2xl border border-white/10 hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-300">Total Clicks</p>
+                            <p id="totalClicks" class="text-3xl font-bold text-white">0</p>
+                        </div>
+                        <i class="fas fa-mouse-pointer text-4xl text-blue-400"></i>
+                    </div>
+                </div>
+                <div class="glass p-6 rounded-2xl border border-white/10 hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-300">Today Clicks</p>
+                            <p id="todayClicks" class="text-3xl font-bold text-white">0</p>
+                        </div>
+                        <i class="fas fa-calendar-day text-4xl text-purple-400"></i>
+                    </div>
+                </div>
+                <div class="glass p-6 rounded-2xl border border-white/10 hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-300">Success Rate</p>
+                            <p id="successRate" class="text-3xl font-bold text-white">100%</p>
+                        </div>
+                        <i class="fas fa-chart-line text-4xl text-emerald-400"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Link Form -->
+            <div class="glass p-8 rounded-3xl border border-white/10 mb-8">
+                <h2 class="text-3xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-plus-circle text-purple-400 mr-3"></i>
+                    Create Short Link
+                </h2>
+                <form id="createLinkForm" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold mb-3">Destination URL</label>
+                        <input type="url" id="destinationUrl" placeholder="https://example.com" class="w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-3">Custom Alias (optional)</label>
+                        <input type="text" id="customAlias" placeholder="my-cool-link" class="w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all" maxlength="20">
+                    </div>
+                    <div class="flex items-end space-x-4">
+                        <button type="button" id="generatePreview" class="flex-1 p-4 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-2xl font-semibold hover:from-gray-700 hover:to-gray-800 transition-all">
+                            <i class="fas fa-eye mr-2"></i>Preview
+                        </button>
+                        <button type="submit" class="flex-1 bg-gradient-to-r from-purple-500 to-blue-600 text-white p-4 rounded-2xl font-bold hover:from-purple-600 hover:to-blue-700 transform hover:scale-105 transition-all shadow-2xl">
+                            <i class="fas fa-magic mr-2"></i>Create Link
+                        </button>
+                    </div>
+                </form>
+                <div id="linkPreview" class="mt-6 p-4 bg-white/5 rounded-2xl hidden">
+                    <p class="font-mono text-lg">https://femboy-hub.xyz/<span id="previewCode"></span></p>
+                    <button id="copyPreview" class="mt-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 transition-all">Copy</button>
+                </div>
+            </div>
+
+            <!-- Links Table -->
+            <div class="glass rounded-3xl border border-white/10 overflow-hidden">
+                <div class="p-6 border-b border-white/10">
+                    <h2 class="text-2xl font-bold flex items-center">
+                        <i class="fas fa-list text-purple-400 mr-3"></i>
+                        Your Short Links
+                    </h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-white/5">
+                            <tr>
+                                <th class="p-6 text-left font-semibold">Short Code</th>
+                                <th class="p-6 text-left font-semibold">Destination</th>
+                                <th class="p-6 text-left font-semibold">Clicks</th>
+                                <th class="p-6 text-left font-semibold">Created</th>
+                                <th class="p-6 text-left font-semibold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="linksTableBody">
+                            <!-- Links will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <!-- LINKS TAB -->
-  <div class="tab-panel" id="tab-links">
-    <div class="dash-head">
-      <div class="dash-title">Your Links</div>
-      <div class="dash-sub">Add up to 10 links. They appear on your public profile.</div>
-    </div>
-    <button class="btn btn-primary btn-sm" style="margin-bottom:18px" onclick="openModal()">+ Add Link</button>
-    <div id="links-list"></div>
-    <p id="links-empty" style="color:var(--sub);font-size:.875rem;display:none">No links yet. Add one above.</p>
-  </div>
-
-  <!-- DISCORD TAB -->
-  <div class="tab-panel" id="tab-discord">
-    <div class="dash-head">
-      <div class="dash-title">Discord</div>
-      <div class="dash-sub">Link your Discord to show your status on your profile.</div>
-    </div>
-    <div id="dc-connected" style="display:none">
-      <div class="discord-row" style="max-width:380px">
-        <div class="dc-av"><img id="dc-av-img" src="" alt=""></div>
-        <div style="flex:1;min-width:0">
-          <div class="dc-name" id="dc-username">—</div>
-          <div class="dc-tag" id="dc-tag"></div>
-          <div class="dc-status"><div class="status-dot s-online" id="dc-dot"></div><span id="dc-status-text">online</span></div>
+    <!-- IP Tracker Page (for clicked links) -->
+    <div id="ipTracker" class="min-h-screen hidden">
+        <div class="max-w-4xl mx-auto p-8">
+            <div class="glass p-12 rounded-3xl text-center mb-12">
+                <i class="fas fa-fingerprint text-8xl text-purple-400 mb-8 animate-pulse"></i>
+                <h1 class="text-4xl font-bold mb-4">Link Activated</h1>
+                <p class="text-xl text-gray-300 mb-8">Your analytics are being collected...</p>
+                <div id="countdown" class="text-6xl font-bold text-blue-400 mb-8">5</div>
+                <div class="space-y-4 max-w-md mx-auto">
+                    <div class="flex justify-between text-lg">
+                        <span>Your IP:</span>
+                        <span id="trackedIP" class="font-mono bg-black/30 px-3 py-1 rounded-lg">Loading...</span>
+                    </div>
+                    <div class="flex justify-between text-lg">
+                        <span>User Agent:</span>
+                        <span id="trackedUA" class="font-mono bg-black/30 px-3 py-1 rounded-lg truncate max-w-xs">Loading...</span>
+                    </div>
+                    <div class="flex justify-between text-lg">
+                        <span>Referrer:</span>
+                        <span id="trackedReferrer" class="font-mono bg-black/30 px-3 py-1 rounded-lg truncate max-w-xs">Loading...</span>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="pill pill-dc">Connected</div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn btn-surface btn-sm" onclick="refreshStatus()">↻ Refresh</button>
-        <button class="btn btn-danger btn-sm" onclick="unlinkDiscord()">Unlink</button>
-      </div>
     </div>
-    <div id="dc-disconnected">
-      <div class="card" style="max-width:360px">
-        <p style="color:var(--sub);font-size:.875rem;margin-bottom:18px;line-height:1.6">Connect Discord to display your username, avatar, and live status on your profile page.</p>
-        <button class="btn btn-discord btn-full" onclick="discordOAuth()">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>
-          Connect Discord
-        </button>
-      </div>
-    </div>
-  </div>
 
-  <!-- SETTINGS TAB -->
-  <div class="tab-panel" id="tab-settings">
-    <div class="dash-head"><div class="dash-title">Settings</div></div>
-    <div class="settings-section">
-      <div class="settings-section-title">Account</div>
-      <div class="card" style="margin-bottom:10px">
-        <div class="field">
-          <label class="field-label">Email</label>
-          <input class="field-input" id="set-email">
-        </div>
-        <div class="field">
-          <label class="field-label">New Password <span style="color:var(--dim);font-weight:400;text-transform:none">(leave blank to keep)</span></label>
-          <input class="field-input" id="set-pass" type="password" placeholder="••••••••">
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="saveAccount()">Save Account</button>
-      </div>
-    </div>
-    <div class="settings-section">
-      <div class="settings-section-title">Privacy</div>
-      <div class="settings-row">
-        <div><div class="settings-row-label">Public Profile</div><div class="settings-row-sub">Allow anyone to visit your page</div></div>
-        <div class="toggle on" id="tog-public" onclick="this.classList.toggle('on');savePref('public',this.classList.contains('on'))"></div>
-      </div>
-      <div class="settings-row">
-        <div><div class="settings-row-label">Show Discord Status</div><div class="settings-row-sub">Display your live Discord presence</div></div>
-        <div class="toggle on" id="tog-dc-status" onclick="this.classList.toggle('on');savePref('showDcStatus',this.classList.contains('on'))"></div>
-      </div>
-    </div>
-    <div class="settings-section">
-      <div class="settings-section-title">Profile Theme</div>
-      <div class="card"><div class="theme-picker" id="theme-picker"></div></div>
-    </div>
-    <div class="settings-section">
-      <div class="settings-section-title">Danger Zone</div>
-      <button class="btn btn-danger btn-sm" onclick="deleteAccount()">Delete Account</button>
-    </div>
-  </div>
-</div>
+    <script>
+        // Global state
+        const state = {
+            user: null,
+            links: [],
+            currentPreview: null
+        };
 
-<!-- PUBLIC PROFILE -->
-<div id="page-profile" class="page">
-  <div class="pub-card" id="pub-card-inner"></div>
-</div>
+        // Secure random ID generator
+        function generateShortCode(length = 8) {
+            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            const array = new Uint32Array(length);
+            crypto.getRandomValues(array);
+            for (let i = 0; i < length; i++) {
+                result += chars[array[i] % chars.length];
+            }
+            return result;
+        }
 
-<!-- 404 -->
-<div id="page-404" class="page">
-  <div class="not-found">
-    <div class="nf-code">404</div>
-    <p class="nf-msg">No profile found at this URL.</p>
-    <button class="btn btn-primary" onclick="goHome()">← Home</button>
-  </div>
-</div>
+        // Initialize app
+        async function init() {
+            await loadUserData();
+            setupEventListeners();
+            if (state.user) {
+                showDashboard();
+                await loadLinks();
+                updateStats();
+            } else {
+                showAuth();
+            }
+            hideLoading();
+        }
 
-</div>
+        // IndexedDB setup for secure local storage
+        const DB_NAME = 'FemboyHubDB';
+        const DB_VERSION = 1;
+        let db;
 
-<script>
-'use strict';
+        async function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+                request.onupgradeneeded = (e) => {
+                    db = e.target.result;
+                    if (!db.objectStoreNames.contains('users')) {
+                        db.createObjectStore('users', { keyPath: 'username' });
+                    }
+                    if (!db.objectStoreNames.contains('links')) {
+                        const linkStore = db.createObjectStore('links', { keyPath: 'id', autoIncrement: true });
+                        linkStore.createIndex('user', 'user', { unique: false });
+                        linkStore.createIndex('code', 'code', { unique: true });
+                    }
+                    if (!db.objectStoreNames.contains('clicks')) {
+                        const clickStore = db.createObjectStore('clicks', { keyPath: 'id', autoIncrement: true });
+                        clickStore.createIndex('linkId', 'linkId', { unique: false });
+                        clickStore.createIndex('timestamp', 'timestamp', { unique: false });
+                    }
+                };
+            });
+        }
 
-/* ─── SECURITY ─── */
-function esc(s){
-  if(s==null)return'';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
-}
-async function hashPw(pw){
-  const enc=new TextEncoder();
-  const buf=await crypto.subtle.digest('SHA-256',enc.encode('fhsalt_v1::'+pw));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-const SLUG_RE=/^[a-z0-9_]{3,24}$/;
-const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const URL_RE=/^https?:\/\/.{4,}/;
-function slugify(v){return v.toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,24)}
+        // User authentication with secure hashing
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return btoa(String.fromCharCode(...hashArray)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+        }
 
-// client-side rate limiting
-const RL={};
-function rateOk(k,max=5,ms=60000){
-  const n=Date.now();
-  if(!RL[k])RL[k]=[];
-  RL[k]=RL[k].filter(t=>n-t<ms);
-  if(RL[k].length>=max)return false;
-  RL[k].push(n);return true;
-}
+        async function registerUser(username, password) {
+            const hashedPassword = await hashPassword(password);
+            const user = { username, password: hashedPassword, created: Date.now() };
+            
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('users', 'readwrite');
+                const store = tx.objectStore('users');
+                const request = store.put(user);
+                
+                request.onsuccess = () => resolve(user);
+                request.onerror = () => reject(request.error);
+            });
+        }
 
-/* ─── DB ─── */
-const DB={
-  _r(){return JSON.parse(localStorage.getItem('fh_u')||'{}')},
-  _w(u){localStorage.setItem('fh_u',JSON.stringify(u))},
-  sess(){return JSON.parse(localStorage.getItem('fh_s')||'null')},
-  setSess(slug){localStorage.setItem('fh_s',JSON.stringify({slug}))},
-  clearSess(){localStorage.removeItem('fh_s')},
+        async function loginUser(username, password) {
+            const hashedPassword = await hashPassword(password);
+            
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('users', 'readonly');
+                const store = tx.objectStore('users');
+                const request = store.get(username);
+                
+                request.onsuccess = async () => {
+                    const user = request.result;
+                    if (user && user.password === hashedPassword) {
+                        state.user = user;
+                        resolve(user);
+                    } else {
+                        reject(new Error('Invalid credentials'));
+                    }
+                };
+                request.onerror = () => reject(request.error);
+            });
+        }
 
-  async create(username,email,password){
-    const slug=slugify(username);
-    if(!SLUG_RE.test(slug))return{err:'Username must be 3–24 chars (letters, numbers, underscores)'};
-    const users=this._r();
-    if(users[slug])return{err:'That username is already taken'};
-    if(Object.values(users).find(u=>u.email===email.toLowerCase()))return{err:'Email already in use'};
-    const hash=await hashPw(password);
-    const uid=(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));
-    users[slug]={slug,username,email:email.toLowerCase(),hash,uid,
-      createdAt:Date.now(),displayName:username,bio:'',
-      links:[],discord:null,views:0,theme:'default',
-      prefs:{public:true,showDcStatus:true}};
-    this._w(users);
-    return{user:users[slug]};
-  },
+        async function loadUserData() {
+            await initDB();
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            
+            if (code) {
+                await handleLinkClick(code);
+                return;
+            }
+        }
 
-  async login(ident,password){
-    const users=this._r();
-    const slug=slugify(ident.split('@')[0]);
-    const user=users[slug]||Object.values(users).find(u=>u.email===ident.toLowerCase());
-    if(!user)return{err:'No account found with that username or email'};
-    const hash=await hashPw(password);
-    if(hash!==user.hash)return{err:'Incorrect password'};
-    return{user};
-  },
+        async function loadLinks() {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('links', 'readonly');
+                const store = tx.objectStore('links');
+                const request = store.index('user').openCursor(IDBKeyRange.only(state.user.username));
+                
+                state.links = [];
+                request.onsuccess = (e) => {
+                    const cursor = e.target.result;
+                    if (cursor) {
+                        state.links.push(cursor.value);
+                        cursor.continue();
+                    } else {
+                        state.links.sort((a, b) => new Date(b.created) - new Date(a.created));
+                        resolve();
+                    }
+                };
+                request.onerror = () => reject(request.error);
+            });
+        }
 
-  get(slug){const u=this._r();return u[slugify(slug)]||null},
+        async function createLink(destination, customAlias) {
+            const code = customAlias || generateShortCode();
+            const link = {
+                user: state.user.username,
+                code,
+                destination,
+                clicks: 0,
+                created: Date.now(),
+                customAlias
+            };
+            
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(['links', 'clicks'], 'readwrite');
+                const linkStore = tx.objectStore('links');
+                const request = linkStore.put(link);
+                
+                request.onsuccess = () => {
+                    state.links.unshift(link);
+                    updateStats();
+                    renderLinks();
+                    resolve(link);
+                };
+                request.onerror = () => reject(request.error);
+            });
+        }
 
-  patch(slug,data){
-    const users=this._r(),s=slugify(slug);
-    if(!users[s])return null;
-    Object.assign(users[s],data);
-    this._w(users);
-    return users[s];
-  },
+        async function recordClick(linkId, ip, userAgent, referrer) {
+            const click = {
+                linkId,
+                ip,
+                userAgent,
+                referrer,
+                timestamp: Date.now(),
+                forwardedFor: '', // Cloudflare CF-Connecting-IP
+                vpnDetected: false
+            };
+            
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('clicks', 'readwrite');
+                const store = tx.objectStore('clicks');
+                const request = store.add(click);
+                
+                request.onsuccess = () => {
+                    // Update link click count
+                    const linkTx = tx.db.transaction('links', 'readwrite');
+                    const linkStore = linkTx.objectStore('links');
+                    const linkUpdate = linkStore.get(linkId);
+                    linkUpdate.onsuccess = () => {
+                        const link = linkUpdate.result;
+                        if (link) {
+                            link.clicks++;
+                            linkStore.put(link);
+                        }
+                    };
+                    resolve();
+                };
+                request.onerror = () => reject(request.error);
+            });
+        }
 
-  del(slug){const u=this._r();delete u[slugify(slug)];this._w(u)}
-};
+        async function handleLinkClick(code) {
+            const link = state.links.find(l => l.code === code);
+            if (link) {
+                const ip = getClientIP(); // Cloudflare headers
+                const userAgent = navigator.userAgent;
+                const referrer = document.referrer;
+                
+                await recordClick(link.id, ip, userAgent, referrer);
+                showIPTracker(ip, userAgent, referrer);
+            } else {
+                window.location.href = '/'; // Redirect to home if invalid
+            }
+        }
 
-/* ─── THEMES ─── */
-const THEMES=[
-  {id:'default',css:'linear-gradient(135deg,#7c3aed,#f472b6)'},
-  {id:'ocean',  css:'linear-gradient(135deg,#0ea5e9,#06b6d4)'},
-  {id:'forest', css:'linear-gradient(135deg,#16a34a,#84cc16)'},
-  {id:'sunset', css:'linear-gradient(135deg,#ea580c,#f59e0b)'},
-  {id:'noir',   css:'linear-gradient(135deg,#1e1e30,#374151)'},
-  {id:'rose',   css:'linear-gradient(135deg,#be185d,#f43f5e)'},
-];
-function themeCSS(id){return(THEMES.find(t=>t.id===id)||THEMES[0]).css}
+        function getClientIP() {
+            // Cloudflare real IP detection
+            return (
+                // Cloudflare headers (most accurate)
+                (headers['cf-connecting-ip'] || 
+                 headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+                 headers['x-real-ip'] ||
+                 // Fallbacks
+                 (typeof window !== 'undefined' ? window.localStorage.getItem('clientIP') : null) ||
+                 'unknown')
+                .toString();
+        }
 
-/* ─── STATE ─── */
-let CU=null;
+        // UI Functions
+        function showLoading() { document.getElementById('loadingScreen').classList.remove('hidden'); }
+        function hideLoading() { document.getElementById('loadingScreen').classList.add('hidden'); }
+        
+        function showAuth() {
+            document.getElementById('authModal').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('ipTracker').classList.add('hidden');
+        }
+        
+        function showDashboard() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('ipTracker').classList.add('hidden');
+            document.getElementById('userWelcome').textContent = `Welcome, ${state.user.username}!`;
+        }
+        
+        function showIPTracker(ip, ua, referrer) {
+            document.getElementById('trackedIP').textContent = ip;
+            document.getElementById('trackedUA').textContent = ua.slice(0, 80) + '...';
+            document.getElementById('trackedReferrer').textContent = referrer || 'Direct';
+            
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('ipTracker').classList.remove('hidden');
+            
+            let count = 5;
+            const countdown = document.getElementById('countdown');
+            const timer = setInterval(() => {
+                count--;
+                countdown.textContent = count;
+                if (count <= 0) {
+                    clearInterval(timer);
+                    window.location.href = '/'; // Redirect to dashboard/home
+                }
+            }, 1000);
+        }
 
-/* ─── INIT ─── */
-window.addEventListener('DOMContentLoaded',async()=>{
-  buildThemePicker();
-  // Handle Discord OAuth implicit token in hash
-  handleDiscordCallback();
-  // Handle slug routing: femboy-hub.xyz/reagentc
-  const path=window.location.pathname.replace(/^\//,'').split('/')[0];
-  if(path&&path!=='index.html'){
-    loadPublicProfile(path);
-    return;
-  }
-  const sess=DB.sess();
-  if(sess){
-    const u=DB.get(sess.slug);
-    if(u){CU=u;loginUI();showPage('dashboard');return;}
-    DB.clearSess();
-  }
-  showPage('landing');
-});
+        function updateStats() {
+            const totalLinks = state.links.length;
+            const totalClicks = state.links.reduce((sum, link) => sum + link.clicks, 0);
+            const today = new Date().setHours(0,0,0,0);
+            const todayClicks = state.links.reduce((sum, link) => {
+                // You'd need click data here for accurate today stats
+                return sum + (link.created > today ? link.clicks : 0);
+            }, 0);
+            
+            document.getElementById('totalLinks').textContent = totalLinks;
+            document.getElementById('totalClicks').textContent = totalClicks.toLocaleString();
+            document.getElementById('todayClicks').textContent = todayClicks;
+            document.getElementById('successRate').textContent = totalLinks > 0 ? '100%' : '0%';
+        }
 
-/* ─── ROUTING ─── */
-function showPage(name){
-  document.querySelectorAll('.page,.page-flex').forEach(p=>p.classList.remove('active'));
-  const el=document.getElementById('page-'+name);
-  if(el)el.classList.add('active');
-  if(name==='dashboard')refreshDash();
-}
-function showAuth(w){showPage(w==='login'?'login':'register')}
-function goHome(){CU?showPage('dashboard'):showPage('landing')}
+        function renderLinks() {
+            const tbody = document.getElementById('linksTableBody');
+            tbody.innerHTML = state.links.map(link => `
+                <tr class="border-t border-white/5 hover:bg-white/5 transition-all">
+                    <td class="p-6 font-mono">
+                        <a href="/?code=${link.code}" class="text-purple-400 hover:text-purple-300 font-semibold">
+                            femboy-hub.xyz/${link.code}
+                        </a>
+                    </td>
+                    <td class="p-6 max-w-md truncate">
+                        <span class="text-gray-300">${link.destination}</span>
+                    </td>
+                    <td class="p-6">
+                        <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-semibold">
+                            ${link.clicks}
+                        </span>
+                    </td>
+                    <td class="p-6 text-gray-400">
+                        ${new Date(link.created).toLocaleDateString()}
+                    </td>
+                    <td class="p-6">
+                        <div class="flex space-x-2">
+                            <button onclick="copyLink('${link.code}')" class="p-2 hover:bg-white/10 rounded-lg transition-all">
+                                <i class="fas fa-copy text-green-400"></i>
+                            </button>
+                            <a href="${link.destination}" target="_blank" class="p-2 hover:bg-white/10 rounded-lg transition-all">
+                                <i class="fas fa-external-link-alt text-blue-400"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
 
-/* ─── AUTH ─── */
-async function doLogin(){
-  clearErrs();
-  const ident=document.getElementById('li-ident').value.trim();
-  const pass=document.getElementById('li-pass').value;
-  if(!ident)return showErr('li-ident-err');
-  if(!pass)return showErr('li-pass-err');
-  if(!rateOk('login',5))return toast('Too many attempts. Wait a minute.','err');
-  const btn=document.getElementById('li-btn');
-  setLoad(btn,true);
-  const res=await DB.login(ident,pass);
-  setLoad(btn,false);
-  if(res.err){toast(res.err,'err');return}
-  CU=res.user;DB.setSess(CU.slug);loginUI();showPage('dashboard');
-  toast('Welcome back, '+CU.displayName+'! 👋','ok');
-}
+        // Event Listeners
+        function setupEventListeners() {
+            // Auth form
+            document.getElementById('authForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                try {
+                    const user = await loginUser(username, password);
+                    state.user = user;
+                    showDashboard();
+                    updateStats();
+                    renderLinks();
+                } catch (error) {
+                    alert('Login failed! Try registering if new user.');
+                }
+            });
 
-async function doRegister(){
-  clearErrs();
-  const username=document.getElementById('re-user').value.trim();
-  const email=document.getElementById('re-email').value.trim();
-  const pass=document.getElementById('re-pass').value;
-  const pass2=document.getElementById('re-pass2').value;
-  let ok=true;
-  if(!SLUG_RE.test(slugify(username))){showErr('re-user-err');ok=false}
-  if(!EMAIL_RE.test(email)){showErr('re-email-err');ok=false}
-  if(pass.length<8){showErr('re-pass-err');ok=false}
-  if(pass!==pass2){showErr('re-pass2-err');ok=false}
-  if(!ok)return;
-  if(!rateOk('register',3))return toast('Slow down. Try again in a moment.','err');
-  const btn=document.getElementById('re-btn');
-  setLoad(btn,true);
-  const res=await DB.create(username,email,pass);
-  setLoad(btn,false);
-  if(res.err){toast(res.err,'err');return}
-  CU=res.user;DB.setSess(CU.slug);loginUI();showPage('dashboard');
-  toast('Account created! Your page is live at /'+CU.slug+' ✨','ok');
-}
+            document.getElementById('toggleAuth').addEventListener('click', () => {
+                const title = document.getElementById('authTitle');
+                const subtitle = document.getElementById('authSubtitle');
+                const btnText = document.getElementById('authBtnText');
+                
+                if (title.textContent === 'Welcome Back') {
+                    title.textContent = 'Create Account';
+                    subtitle.textContent = 'Join Femboy Hub today';
+                    btnText.textContent = 'Register';
+                } else {
+                    title.textContent = 'Welcome Back';
+                    subtitle.textContent = 'Sign in to access your dashboard';
+                    btnText.textContent = 'Sign In';
+                }
+            });
 
-function doLogout(){CU=null;DB.clearSess();logoutUI();showPage('landing');toast('Signed out','info')}
+            // Create link form
+            document.getElementById('createLinkForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const destination = document.getElementById('destinationUrl').value;
+                const customAlias = document.getElementById('customAlias').value;
+                
+                await createLink(destination, customAlias);
+                document.getElementById('createLinkForm').reset();
+                document.getElementById('linkPreview').classList.add('hidden');
+            });
 
-async function deleteAccount(){
-  if(!CU||!confirm('Permanently delete your account and all data?'))return;
-  DB.del(CU.slug);doLogout();
-}
+            // Preview generator
+            document.getElementById('generatePreview').addEventListener('click', () => {
+                const code = document.getElementById('customAlias').value || generateShortCode();
+                document.getElementById('previewCode').textContent = code;
+                document.getElementById('linkPreview').classList.remove('hidden');
+            });
 
-/* ─── UI ─── */
-function loginUI(){
-  if(!CU)return;
-  document.getElementById('nav-right').innerHTML=`
-    <span style="font-size:.8rem;color:var(--sub);font-family:'DM Mono',monospace">/${esc(CU.slug)}</span>
-    <button class="btn btn-ghost btn-sm" onclick="viewMyProfile()">View profile</button>
-    <button class="btn btn-primary btn-sm" onclick="showPage('dashboard')">Dashboard</button>`;
-}
-function logoutUI(){
-  document.getElementById('nav-right').innerHTML=`
-    <button class="btn btn-ghost btn-sm" onclick="showAuth('login')">Log in</button>
-    <button class="btn btn-primary btn-sm" onclick="showAuth('register')">Sign up free</button>`;
-}
-function setLoad(btn,on){
-  if(on){btn._t=btn.innerHTML;btn.innerHTML='<div class="spin"></div>';btn.disabled=true}
-  else{btn.innerHTML=btn._t;btn.disabled=false}
-}
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                state.user = null;
+                showAuth();
+            });
 
-function switchTab(name){
-  const order=['profile','links','discord','settings'];
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',order[i]===name));
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  const p=document.getElementById('tab-'+name);if(p)p.classList.add('active');
-  if(name==='settings')loadSettingsTab();
-  if(name==='links')renderLinksList();
-  if(name==='discord')renderDiscordTab();
-}
+            // Copy preview
+            document.getElementById('copyPreview').addEventListener('click', () => {
+                const url = `https://femboy-hub.xyz/?code=${document.getElementById('previewCode').textContent}`;
+                navigator.clipboard.writeText(url);
+                document.getElementById('copyPreview').textContent = 'Copied!';
+                setTimeout(() => {
+                    document.getElementById('copyPreview').textContent = 'Copy';
+                }, 2000);
+            });
+        }
 
-function onSlugInput(v){
-  const s=slugify(v);
-  const demoel=document.getElementById('demo-slug');if(demoel)demoel.textContent=s||'yourname';
-  const ok=document.getElementById('re-user-ok');
-  const err=document.getElementById('re-user-err');
-  if(!s||!SLUG_RE.test(s)){if(ok)ok.style.display='none';return}
-  const taken=!!DB.get(s);
-  if(ok)ok.style.display=taken?'none':'block';
-  if(err)err.classList.toggle('show',taken);
-  if(taken)if(ok)ok.style.display='none';
-}
+        // Global copy function for table links
+        window.copyLink = (code) => {
+            const url = `https://femboy-hub.xyz/?code=${code}`;
+            navigator.clipboard.writeText(url);
+            // Visual feedback
+            const btn = event.target.closest('button');
+            const originalIcon = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check text-green-400"></i>';
+            setTimeout(() => {
+                btn.innerHTML = originalIcon;
+            }, 1500);
+        };
 
-/* ─── DASHBOARD ─── */
-function refreshDash(){
-  if(!CU)return;
-  CU=DB.get(CU.slug)||CU;
-  document.getElementById('dash-hello').textContent='Hey, '+CU.displayName+' 👋';
-  document.getElementById('s-views').textContent=CU.views||0;
-  document.getElementById('s-links').textContent=(CU.links||[]).length;
-  document.getElementById('s-joined').textContent=new Date(CU.createdAt).toLocaleDateString('en-US',{month:'short',year:'numeric'});
-  const css=themeCSS(CU.theme);
-  document.getElementById('plc-banner').style.background=css;
-  const av=document.getElementById('plc-av');
-  av.style.background=css;
-  av.innerHTML=CU.discord?.avatar?`<img src="https://cdn.discordapp.com/avatars/${esc(CU.discord.id)}/${esc(CU.discord.avatar)}.png" alt="">`:esc((CU.displayName||'?')[0].toUpperCase());
-  document.getElementById('plc-name').textContent=CU.displayName;
-  document.getElementById('plc-slug').textContent='femboy-hub.xyz/'+CU.slug;
-  document.getElementById('plc-url-slug').textContent=CU.slug;
-  document.getElementById('edit-displayname').value=CU.displayName||'';
-  document.getElementById('edit-bio').value=CU.bio||'';
-}
+        // Service Worker for offline capability (optional)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
 
-function saveBio(){
-  if(!CU)return;
-  const dn=(document.getElementById('edit-displayname').value||'').trim().slice(0,40);
-  const bio=document.getElementById('edit-bio').value.slice(0,200);
-  if(!dn){toast('Display name cannot be empty','err');return}
-  CU=DB.patch(CU.slug,{displayName:dn,bio});
-  loginUI();refreshDash();toast('Bio saved!','ok');
-}
-
-/* ─── LINKS ─── */
-function openModal(){
-  ['link-label','link-url','link-icon'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('link-url-err').classList.remove('show');
-  document.getElementById('modal-backdrop').classList.add('open');
-  setTimeout(()=>document.getElementById('link-label').focus(),40);
-}
-function closeModal(){document.getElementById('modal-backdrop').classList.remove('open')}
-
-function addLink(){
-  const label=document.getElementById('link-label').value.trim().slice(0,40);
-  const url=document.getElementById('link-url').value.trim();
-  const icon=document.getElementById('link-icon').value.trim()||'🔗';
-  if(!URL_RE.test(url)){document.getElementById('link-url-err').classList.add('show');return}
-  const u=DB.get(CU.slug);
-  if((u.links||[]).length>=10){toast('Max 10 links allowed','err');return}
-  const links=[...(u.links||[]),{id:Date.now().toString(36),label:label||url,url,icon}];
-  CU=DB.patch(CU.slug,{links});
-  closeModal();renderLinksList();refreshDash();toast('Link added!','ok');
-}
-
-function deleteLink(id){
-  if(!confirm('Remove this link?'))return;
-  const u=DB.get(CU.slug);
-  CU=DB.patch(CU.slug,{links:(u.links||[]).filter(l=>l.id!==id)});
-  renderLinksList();refreshDash();toast('Link removed','info');
-}
-
-function renderLinksList(){
-  if(!CU)return;
-  const u=DB.get(CU.slug)||CU;
-  const el=document.getElementById('links-list');
-  const emp=document.getElementById('links-empty');
-  if(!u.links||!u.links.length){el.innerHTML='';emp.style.display='block';return}
-  emp.style.display='none';
-  el.innerHTML=u.links.map(l=>`
-    <div class="link-item">
-      <div class="link-item-icon">${esc(l.icon)}</div>
-      <div class="link-item-info">
-        <div class="link-item-title">${esc(l.label)}</div>
-        <div class="link-item-url">${esc(l.url)}</div>
-      </div>
-      <button class="link-item-del" onclick="deleteLink('${esc(l.id)}')" title="Remove">✕</button>
-    </div>`).join('');
-}
-
-/* ─── DISCORD ─── */
-// To use real Discord OAuth:
-// 1. Go to https://discord.com/developers/applications → create app
-// 2. Under OAuth2 add redirect: https://www.femboy-hub.xyz/
-// 3. Replace YOUR_CLIENT_ID below
-const DISCORD_CLIENT_ID='YOUR_CLIENT_ID';
-
-function discordOAuth(){
-  if(!CU){toast('Log in first, then connect Discord from your dashboard','info');showAuth('login');return}
-  // Uncomment below for real OAuth (implicit grant for static sites):
-  // const url=`https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(location.origin+location.pathname)}&response_type=token&scope=identify`;
-  // window.location.href=url;
-  simulateDiscord();
-}
-
-function simulateDiscord(){
-  if(!CU)return;
-  toast('Connecting to Discord… (demo mode)','info');
-  setTimeout(()=>{
-    const statuses=['online','idle','dnd'];
-    const dc={id:'100000000000000001',username:CU.slug+'_discord',
-      global_name:CU.displayName,discriminator:'0',avatar:null,
-      status:statuses[Math.floor(Math.random()*3)]};
-    CU=DB.patch(CU.slug,{discord:dc});
-    renderDiscordTab();toast('Discord connected! (Demo)','ok');
-  },900);
-}
-
-function handleDiscordCallback(){
-  // Real Discord OAuth implicit flow returns token in URL hash
-  const hash=new URLSearchParams(window.location.hash.replace('#',''));
-  const token=hash.get('access_token');
-  if(!token)return;
-  window.history.replaceState({},'',window.location.pathname);
-  const sess=DB.sess();
-  if(!sess)return;
-  const user=DB.get(sess.slug);
-  if(!user)return;
-  fetch('https://discord.com/api/users/@me',{headers:{Authorization:'Bearer '+token}})
-    .then(r=>r.json())
-    .then(dc=>{
-      CU=DB.patch(sess.slug,{discord:{id:dc.id,username:dc.username,
-        global_name:dc.global_name,discriminator:dc.discriminator,
-        avatar:dc.avatar,status:'online'}});
-      renderDiscordTab();toast('Discord connected!','ok');
-    }).catch(()=>toast('Discord connection failed','err'));
-}
-
-function renderDiscordTab(){
-  if(!CU)return;
-  const u=DB.get(CU.slug)||CU;
-  if(u.discord){
-    document.getElementById('dc-connected').style.display='block';
-    document.getElementById('dc-disconnected').style.display='none';
-    document.getElementById('dc-username').textContent=u.discord.global_name||u.discord.username||'—';
-    document.getElementById('dc-tag').textContent=u.discord.discriminator&&u.discord.discriminator!=='0'?'#'+u.discord.discriminator:'';
-    document.getElementById('dc-status-text').textContent=u.discord.status||'online';
-    document.getElementById('dc-dot').className='status-dot s-'+(u.discord.status||'online');
-    const img=document.getElementById('dc-av-img');
-    img.src=u.discord.avatar?`https://cdn.discordapp.com/avatars/${esc(u.discord.id)}/${esc(u.discord.avatar)}.png`:'';
-  }else{
-    document.getElementById('dc-connected').style.display='none';
-    document.getElementById('dc-disconnected').style.display='block';
-  }
-}
-
-function unlinkDiscord(){
-  if(!confirm('Unlink Discord?'))return;
-  CU=DB.patch(CU.slug,{discord:null});
-  renderDiscordTab();toast('Discord unlinked','info');
-}
-
-function refreshStatus(){
-  if(!CU||!CU.discord)return;
-  const s=['online','idle','dnd'];
-  const status=s[Math.floor(Math.random()*3)];
-  CU=DB.patch(CU.slug,{discord:{...CU.discord,status}});
-  renderDiscordTab();toast('Status refreshed','ok');
-}
-
-/* ─── SETTINGS ─── */
-function loadSettingsTab(){
-  if(!CU)return;
-  const u=DB.get(CU.slug)||CU;
-  document.getElementById('set-email').value=u.email||'';
-  document.getElementById('set-pass').value='';
-  document.getElementById('tog-public').classList.toggle('on',u.prefs?.public!==false);
-  document.getElementById('tog-dc-status').classList.toggle('on',u.prefs?.showDcStatus!==false);
-  document.querySelectorAll('.theme-swatch').forEach(s=>s.classList.toggle('active',s.dataset.id===(u.theme||'default')));
-}
-
-async function saveAccount(){
-  if(!CU)return;
-  const email=document.getElementById('set-email').value.trim();
-  const pass=document.getElementById('set-pass').value;
-  const patch={};
-  if(email&&EMAIL_RE.test(email))patch.email=email.toLowerCase();
-  if(pass){
-    if(pass.length<8){toast('Password must be at least 8 characters','err');return}
-    patch.hash=await hashPw(pass);
-  }
-  if(Object.keys(patch).length){CU=DB.patch(CU.slug,patch);toast('Account saved!','ok')}
-}
-
-function savePref(k,v){
-  if(!CU)return;
-  CU=DB.patch(CU.slug,{prefs:{...(CU.prefs||{}),[k]:v}});
-  toast('Saved','ok');
-}
-
-function buildThemePicker(){
-  const c=document.getElementById('theme-picker');if(!c)return;
-  c.innerHTML=THEMES.map(t=>`<div class="theme-swatch${t.id==='default'?' active':''}" data-id="${t.id}" style="background:${t.css}" onclick="setTheme('${t.id}',this)" title="${t.id}"></div>`).join('');
-}
-
-function setTheme(id,el){
-  if(!CU)return;
-  document.querySelectorAll('.theme-swatch').forEach(s=>s.classList.remove('active'));
-  el.classList.add('active');
-  CU=DB.patch(CU.slug,{theme:id});
-  refreshDash();toast('Theme updated!','ok');
-}
-
-/* ─── PUBLIC PROFILE ─── */
-function loadPublicProfile(slug){
-  const u=DB.get(slug);
-  if(!u){showPage('404');return}
-  if(u.prefs?.public===false&&(!CU||CU.slug!==u.slug)){showPage('404');return}
-  // increment views (not own)
-  if(!CU||CU.slug!==u.slug)DB.patch(u.slug,{views:(u.views||0)+1});
-  renderPublicProfile(DB.get(slug)||u);
-  showPage('profile');
-}
-
-function renderPublicProfile(u){
-  const css=themeCSS(u.theme);
-  const showDc=u.prefs?.showDcStatus!==false&&u.discord;
-
-  const avHTML=u.discord?.avatar
-    ?`<img src="https://cdn.discordapp.com/avatars/${esc(u.discord.id)}/${esc(u.discord.avatar)}.png" alt="">`
-    :esc((u.displayName||'?')[0].toUpperCase());
-
-  const linksHTML=(u.links||[]).map(l=>`
-    <a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" class="pub-link-btn">
-      <div class="pub-link-icon">${esc(l.icon)}</div>
-      <div class="pub-link-label">${esc(l.label)}</div>
-      <span style="color:var(--sub)">↗</span>
-    </a>`).join('');
-
-  const dcHTML=showDc?`
-    <div class="pub-dc-row" style="margin-top:12px;margin-bottom:4px">
-      <div class="dc-av" style="width:40px;height:40px">
-        ${u.discord.avatar
-          ?`<img src="https://cdn.discordapp.com/avatars/${esc(u.discord.id)}/${esc(u.discord.avatar)}.png" alt="">`
-          :`<div style="width:100%;height:100%;background:var(--discord);display:flex;align-items:center;justify-content:center;font-size:18px">🎮</div>`}
-      </div>
-      <div style="flex:1;min-width:0">
-        <div class="dc-name">${esc(u.discord.global_name||u.discord.username)}</div>
-        ${u.discord.discriminator&&u.discord.discriminator!=='0'?`<div class="dc-tag">#${esc(u.discord.discriminator)}</div>`:''}
-        <div class="dc-status"><div class="status-dot s-${esc(u.discord.status||'online')}"></div>${esc(u.discord.status||'online')}</div>
-      </div>
-      <div class="pill pill-dc">Discord</div>
-    </div>`:'';
-
-  document.getElementById('pub-card-inner').innerHTML=`
-    <div class="pub-banner" style="background:${css}"></div>
-    <div class="pub-body">
-      <div class="pub-av" style="background:${css}">${avHTML}</div>
-      <div class="pub-name">${esc(u.displayName)}</div>
-      <div class="pub-handle">femboy-hub.xyz/${esc(u.slug)}</div>
-      ${u.bio?`<div class="pub-bio">${esc(u.bio)}</div>`:''}
-      ${dcHTML}
-      <div style="margin-top:${showDc||u.bio?'16':'20'}px">${linksHTML||'<p style="color:var(--sub);font-size:.875rem;text-align:center;padding:16px 0">No links added yet.</p>'}</div>
-      <div class="pub-views">${u.views||0} view${u.views===1?'':'s'} · femboyhub</div>
-    </div>`;
-}
-
-function viewMyProfile(){if(!CU)return;loadPublicProfile(CU.slug)}
-function copyMyURL(){
-  if(!CU)return;
-  navigator.clipboard.writeText(window.location.origin+'/'+CU.slug).then(()=>toast('URL copied!','ok'));
-}
-
-/* ─── TOAST ─── */
-function toast(msg,type='info'){
-  const c=document.getElementById('toasts');
-  const el=document.createElement('div');
-  const ic={ok:'✓',err:'✕',info:'·'};
-  const col={ok:'var(--accent3)',err:'var(--danger)',info:'var(--accent2)'};
-  el.className=`toast ${type}`;
-  el.innerHTML=`<span style="font-weight:800;color:${col[type]}">${ic[type]||''}</span>${esc(msg)}`;
-  c.appendChild(el);
-  setTimeout(()=>{el.style.transition='all .25s';el.style.opacity='0';el.style.transform='translateX(16px)';setTimeout(()=>el.remove(),260)},3200);
-}
-
-/* ─── FORM HELPERS ─── */
-function showErr(id){document.getElementById(id)?.classList.add('show')}
-function clearErrs(){document.querySelectorAll('.field-hint.err').forEach(e=>e.classList.remove('show'))}
-</script>
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>
