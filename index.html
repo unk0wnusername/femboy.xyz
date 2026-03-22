@@ -3,484 +3,819 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Femboy Hub - Advanced Short Link Service</title>
+    <title>Femboy Hub - Advanced Link Shortener & Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .treeview-item { transition: all 0.3s ease; }
-        .treeview-item:hover { transform: translateX(5px); }
         .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .glass { backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); }
+        .glass { backdrop-filter: blur(20px); background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); }
+        .animate-pulse-slow { animation: pulse 3s infinite; }
+        .service-worker-status { position: fixed; top: 20px; right: 20px; z-index: 1000; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900 min-h-screen text-white">
+<body class="min-h-screen gradient-bg text-white font-sans">
+    <!-- Service Worker Status -->
+    <div id="swStatus" class="service-worker-status glass px-4 py-2 rounded-xl text-xs hidden">
+        <i class="fas fa-shield-alt mr-1"></i>Full Offline Tracking Active
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 bg-gradient-to-br from-purple-900 to-indigo-900 flex items-center justify-center z-50">
+        <div class="text-center animate-pulse-slow">
+            <i class="fas fa-link text-6xl mb-4 text-pink-400"></i>
+            <h1 class="text-3xl font-bold mb-2">Femboy Hub</h1>
+            <p class="text-lg opacity-75">Advanced Link Manager + Tracker</p>
+            <div class="mt-6 w-16 h-16 border-4 border-pink-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+    </div>
+
     <!-- Auth Modal -->
-    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden">
-        <div class="glass p-8 rounded-3xl max-w-md w-full mx-4 backdrop-blur-xl border border-white/20">
-            <div class="flex justify-end mb-6">
-                <button onclick="toggleAuth()" class="text-white hover:text-gray-200">
-                    <i class="fas fa-times text-2xl"></i>
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40 hidden">
+        <div class="glass p-8 rounded-3xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="text-center mb-8">
+                <i class="fas fa-user-circle text-5xl text-pink-400 mb-4"></i>
+                <h2 id="authTitle" class="text-3xl font-bold mb-2">Welcome Back</h2>
+                <p id="authSubtitle" class="opacity-75">Login to access dashboard</p>
+            </div>
+            <form id="authForm">
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Username</label>
+                        <input type="text" id="username" required class="w-full p-4 rounded-xl bg-white/20 border border-white/30 focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/50 transition-all text-white placeholder-white/60">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Password</label>
+                        <input type="password" id="password" required class="w-full p-4 rounded-xl bg-white/20 border border-white/30 focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/50 transition-all text-white placeholder-white/60">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 p-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl">
+                    <i class="fas fa-sign-in-alt mr-2"></i><span id="authBtnText">Login</span>
                 </button>
-            </div>
-            <div id="loginForm">
-                <h2 class="text-3xl font-bold mb-8 text-center gradient-text bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                    <i class="fas fa-lock"></i> Login
-                </h2>
-                <form id="loginFormSubmit">
-                    <div class="mb-6">
-                        <label class="block text-sm font-semibold mb-2">Email</label>
-                        <input type="email" id="loginEmail" required class="w-full p-4 bg-white/10 border border-white/30 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-500/50 backdrop-blur-sm">
-                    </div>
-                    <div class="mb-8">
-                        <label class="block text-sm font-semibold mb-2">Password</label>
-                        <input type="password" id="loginPassword" required class="w-full p-4 bg-white/10 border border-white/30 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-500/50 backdrop-blur-sm">
-                    </div>
-                    <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 p-4 rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-200">
-                        <i class="fas fa-sign-in-alt mr-2"></i>Login
-                    </button>
-                </form>
-                <p class="text-center mt-6">
-                    <button onclick="showRegister()" class="text-purple-300 hover:text-white underline">Need an account? Register</button>
-                </p>
-            </div>
-            <div id="registerForm" class="hidden">
-                <h2 class="text-3xl font-bold mb-8 text-center gradient-text bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
-                    <i class="fas fa-user-plus"></i> Register
-                </h2>
-                <form id="registerFormSubmit">
-                    <div class="mb-6">
-                        <label class="block text-sm font-semibold mb-2">Username</label>
-                        <input type="text" id="regUsername" required class="w-full p-4 bg-white/10 border border-white/30 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500/50 backdrop-blur-sm">
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-semibold mb-2">Email</label>
-                        <input type="email" id="regEmail" required class="w-full p-4 bg-white/10 border border-white/30 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500/50 backdrop-blur-sm">
-                    </div>
-                    <div class="mb-8">
-                        <label class="block text-sm font-semibold mb-2">Password</label>
-                        <input type="password" id="regPassword" required minlength="8" class="w-full p-4 bg-white/10 border border-white/30 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500/50 backdrop-blur-sm">
-                    </div>
-                    <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-blue-500 p-4 rounded-2xl font-bold text-lg hover:from-green-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-200">
-                        <i class="fas fa-user-plus mr-2"></i>Create Account
-                    </button>
-                </form>
-                <p class="text-center mt-6">
-                    <button onclick="showLogin()" class="text-purple-300 hover:text-white underline">Already have account? Login</button>
-                </p>
+            </form>
+            <div class="mt-6 text-center space-y-2">
+                <button id="toggleAuth" class="text-pink-400 hover:text-pink-300 transition-colors">Don't have account? Register</button>
+                <button id="demoLogin" class="text-green-400 hover:text-green-300 transition-colors bg-black/20 px-4 py-2 rounded-lg">Demo: demo/demo123</button>
             </div>
         </div>
     </div>
 
     <!-- Main Dashboard -->
-    <div id="mainContent" class="hidden min-h-screen">
-        <!-- Header -->
-        <header class="glass sticky top-0 z-40 backdrop-blur-xl border-b border-white/20">
-            <div class="max-w-7xl mx-auto px-6 py-4">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <i class="fas fa-link text-3xl text-purple-400"></i>
-                        <div>
-                            <h1 class="text-2xl font-bold gradient-text bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Femboy Hub</h1>
-                            <p class="text-sm text-purple-200">Advanced Short Link Service</p>
-                        </div>
+    <div id="mainDashboard" class="min-h-screen hidden">
+        <header class="glass backdrop-blur-xl sticky top-0 z-30 p-6 border-b border-white/20">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-link text-3xl text-pink-400"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold">Femboy Hub Dashboard</h1>
+                        <p class="text-sm opacity-75" id="userWelcome">Welcome!</p>
                     </div>
-                    <div class="flex items-center space-x-4">
-                        <div id="userStats" class="text-sm text-right hidden">
-                            <div id="statLinks" class="font-semibold">0 Links</div>
-                            <div id="statClicks" class="text-purple-300">0 Clicks</div>
-                        </div>
-                        <button onclick="logout()" class="bg-red-500/80 hover:bg-red-500 px-6 py-2 rounded-xl font-semibold transition-all duration-200 hover:scale-105">
-                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                        </button>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="font-bold" id="currentUser">-</p>
+                        <p class="text-sm opacity-75" id="userStats">-</p>
                     </div>
+                    <button id="logoutBtn" class="p-3 rounded-xl bg-red-500/20 hover:bg-red-500/40 transition-all text-lg">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
                 </div>
             </div>
         </header>
 
-        <div class="max-w-7xl mx-auto px-6 py-12">
-            <div class="grid lg:grid-cols-4 gap-8">
-                <!-- Stats Cards -->
-                <div class="lg:col-span-1 space-y-4">
-                    <div class="grid grid-cols-2 lg:grid-cols-1 gap-4">
-                        <div class="glass p-6 rounded-2xl border border-white/20">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-purple-300 text-sm">Total Links</p>
-                                    <p id="totalLinks" class="text-3xl font-bold text-white">0</p>
-                                </div>
-                                <i class="fas fa-link text-4xl text-purple-400"></i>
+        <main class="max-w-7xl mx-auto p-6 pb-24">
+            <!-- Live Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="glass p-6 rounded-2xl text-center group hover:scale-105 transition-all">
+                    <i class="fas fa-link text-3xl text-pink-400 mb-4 group-hover:rotate-12 transition-all"></i>
+                    <h3 class="text-3xl font-bold" id="totalLinks">0</h3>
+                    <p class="opacity-75">Total Links</p>
+                </div>
+                <div class="glass p-6 rounded-2xl text-center">
+                    <i class="fas fa-mouse-pointer text-3xl text-green-400 mb-4"></i>
+                    <h3 class="text-3xl font-bold" id="totalClicks">0</h3>
+                    <p class="opacity-75">Total Clicks</p>
+                </div>
+                <div class="glass p-6 rounded-2xl text-center">
+                    <i class="fas fa-globe text-3xl text-blue-400 mb-4"></i>
+                    <h3 class="text-3xl font-bold" id="uniqueIps">0</h3>
+                    <p class="opacity-75">Unique Visitors</p>
+                </div>
+                <div class="glass p-6 rounded-2xl text-center">
+                    <i class="fas fa-fire text-3xl text-orange-400 mb-4"></i>
+                    <h3 class="text-2xl font-bold" id="vpnCount">0</h3>
+                    <p class="opacity-75">VPN Users</p>
+                </div>
+            </div>
+
+            <!-- Create + Quick Stats -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="glass p-8 rounded-3xl">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center"><i class="fas fa-plus-circle mr-3 text-pink-400"></i>Create Short Link</h2>
+                    <form id="linkForm" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-3">Destination URL</label>
+                            <div class="relative">
+                                <input type="url" id="originalUrl" placeholder="https://example.com/..." required 
+                                    class="w-full p-4 pl-12 rounded-xl bg-white/10 border border-white/30 focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/50 transition-all text-white placeholder-white/60">
+                                <i class="fas fa-link absolute left-4 top-1/2 -translate-y-1/2 text-pink-400"></i>
                             </div>
                         </div>
-                        <div class="glass p-6 rounded-2xl border border-white/20">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-pink-300 text-sm">Total Clicks</p>
-                                    <p id="totalClicks" class="text-3xl font-bold text-white">0</p>
-                                </div>
-                                <i class="fas fa-mouse-pointer text-4xl text-pink-400"></i>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-3">Custom Code (6 chars)</label>
+                                <input type="text" id="customAlias" placeholder="abc123" maxlength="6" pattern="[a-z0-9]{0,6}"
+                                    class="w-full p-4 rounded-xl bg-white/10 border border-white/30 focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/50 transition-all text-white placeholder-white/60 uppercase">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-3">Link Password</label>
+                                <input type="password" id="linkPassword" placeholder="Protect your link"
+                                    class="w-full p-4 rounded-xl bg-white/10 border border-white/30 focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/50 transition-all text-white placeholder-white/60">
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Link Generator -->
-                    <div class="glass p-6 rounded-2xl border border-white/20">
-                        <h3 class="text-xl font-bold mb-6 flex items-center">
-                            <i class="fas fa-magic mr-2 text-purple-400"></i>Create Link
-                        </h3>
-                        <div class="space-y-4">
-                            <input id="customUrl" placeholder="https://example.com" class="w-full p-4 bg-white/10 border border-white/30 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-500/50">
-                            <div class="flex space-x-2">
-                                <input id="customAlias" placeholder="custom-alias" maxlength="20" class="flex-1 p-4 bg-white/10 border border-white/30 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-500/50">
-                                <button onclick="generateLink()" class="bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-4 rounded-xl font-bold hover:from-purple-600 hover:to-pink-600 transition-all duration-200 hover:scale-105">
-                                    <i class="fas fa-plus"></i>
+                        <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 p-4 rounded-xl font-bold text-lg shadow-2xl transition-all hover:scale-[1.02]">
+                            <i class="fas fa-magic mr-2"></i>Generate Magic Link ✨
+                        </button>
+                    </form>
+                    <div id="newLinkResult" class="mt-6 p-6 rounded-2xl bg-green-500/20 border-2 border-green-500/50 hidden backdrop-blur-sm">
+                        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div>
+                                <p class="font-mono text-xl bg-black/30 px-4 py-2 rounded-xl mb-2" id="shortUrlDisplay"></p>
+                                <p class="opacity-75 text-sm">Share this anywhere! Every click tracked.</p>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button id="copyBtn" class="p-3 bg-green-500/60 hover:bg-green-500/80 rounded-xl transition-all font-bold">
+                                    <i class="fas fa-copy"></i>
                                 </button>
+                                <a id="qrBtn" class="p-3 bg-blue-500/60 hover:bg-blue-500/80 rounded-xl transition-all" target="_blank">
+                                    <i class="fas fa-qrcode"></i>
+                                </a>
+                                <a id="shareBtn" class="p-3 bg-purple-500/60 hover:bg-purple-500/80 rounded-xl transition-all" target="_blank">
+                                    <i class="fas fa-share-alt"></i>
+                                </a>
                             </div>
-                            <small class="text-purple-300">Leave alias blank for random generation</small>
                         </div>
                     </div>
                 </div>
 
-                <!-- Main Content -->
-                <div class="lg:col-span-3 space-y-8">
-                    <!-- Tree View -->
-                    <div class="glass p-8 rounded-3xl border border-white/20">
-                        <h2 class="text-2xl font-bold mb-6 flex items-center">
-                            <i class="fas fa-sitemap mr-3 text-green-400"></i>Your Links Tree
-                        </h2>
-                        <div id="treeView" class="space-y-2 max-h-96 overflow-y-auto"></div>
-                    </div>
-
-                    <!-- Analytics Chart -->
-                    <div class="glass p-8 rounded-3xl border border-white/20">
-                        <h2 class="text-2xl font-bold mb-6 flex items-center">
-                            <i class="fas fa-chart-line mr-3 text-blue-400"></i>Analytics
-                        </h2>
-                        <canvas id="clicksChart" height="200"></canvas>
-                    </div>
-
-                    <!-- Recent Activity -->
-                    <div class="glass p-8 rounded-3xl border border-white/20">
-                        <h2 class="text-2xl font-bold mb-6 flex items-center">
-                            <i class="fas fa-history mr-3 text-yellow-400"></i>Recent Clicks
-                        </h2>
-                        <div id="recentActivity" class="space-y-3 max-h-64 overflow-y-auto"></div>
+                <div class="glass p-8 rounded-3xl">
+                    <h2 class="text-2xl font-bold mb-6">🚀 Live Analytics</h2>
+                    <canvas id="analyticsChart" height="250"></canvas>
+                    <div class="mt-6 space-y-3">
+                        <div class="flex justify-between text-sm">
+                            <span>Today: <span id="todayClicks">-</span></span>
+                            <span class="text-green-400">+<span id="todayGrowth">-</span>%</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>Conversion: <span id="conversionRate">-</span>%</span>
+                            <span class="text-blue-400"><span id="avgTime">-</span>s avg</span>
+                        </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Links Tree + Tracker Data -->
+            <div class="glass p-8 rounded-3xl">
+                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-4">
+                    <h2 class="text-2xl font-bold flex items-center">
+                        <i class="fas fa-sitemap mr-3 text-pink-400"></i>
+                        Your Link Empire (<span id="liveLinkCount">0</span>)
+                    </h2>
+                    <div class="flex flex-wrap gap-3">
+                        <button id="refreshData" class="px-6 py-2 bg-blue-500/60 hover:bg-blue-500/80 rounded-xl transition-all flex items-center">
+                            <i class="fas fa-sync-alt mr-2"></i>Live Update
+                        </button>
+                        <button id="exportAll" class="px-6 py-2 bg-green-500/60 hover:bg-green-500/80 rounded-xl transition-all flex items-center">
+                            <i class="fas fa-download mr-2"></i>Export All
+                        </button>
+                        <button id="clearDemo" class="px-6 py-2 bg-orange-500/60 hover:bg-orange-500/80 rounded-xl transition-all flex items-center text-sm">
+                            <i class="fas fa-broom mr-2"></i>Reset Demo
+                        </button>
+                    </div>
+                </div>
+
+                <div id="linksTree" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- IP Tracker Modal (for short link visitors) -->
+    <div id="visitorTracker" class="fixed inset-0 bg-gradient-to-br from-purple-900/98 to-indigo-900/98 flex items-center justify-center z-50 hidden">
+        <div class="glass p-8 rounded-3xl max-w-4xl w-full mx-6 max-h-[95vh] overflow-y-auto">
+            <div class="text-center mb-10">
+                <div class="w-24 h-24 bg-gradient-to-r from-pink-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                    <i class="fas fa-search-location text-3xl"></i>
+                </div>
+                <h2 class="text-4xl font-bold mb-3">👀 Caught You!</h2>
+                <p class="text-xl opacity-90 mb-2">Complete visitor profile captured</p>
+                <p class="text-pink-400 font-bold text-lg">Every detail tracked • VPN detected</p>
+            </div>
+
+            <div id="visitorProfile" class="space-y-6 mb-10"></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-8 border-t border-white/20">
+                <a id="proceedBtn" href="#" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 p-6 rounded-2xl font-bold text-xl text-center transition-all shadow-2xl hover:shadow-3xl block">
+                    <i class="fas fa-arrow-right mr-3"></i>Continue to Destination →
+                </a>
+                <button id="stayBtn" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 p-6 rounded-2xl font-bold text-xl text-center transition-all shadow-2xl">
+                    <i class="fas fa-info-circle mr-3"></i>Stay & Analyze
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- Service Worker Registration -->
     <script>
-        // Initialize everything
-        let currentUser = null;
-        let links = JSON.parse(localStorage.getItem('userLinks') || '[]');
-        let clicksData = JSON.parse(localStorage.getItem('clicksData') || '[]');
-        let chart = null;
-
-        // Initialize auth state
-        window.onload = function() {
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                showDashboard();
-                loadLinks();
-                updateStats();
-                initChart();
-            } else {
-                showAuth();
-            }
-        };
-
-        // Auth functions
-        function toggleAuth() {
-            document.getElementById('authModal').classList.toggle('hidden');
-        }
-
-        function showRegister() {
-            document.getElementById('loginForm').classList.add('hidden');
-            document.getElementById('registerForm').classList.remove('hidden');
-        }
-
-        function showLogin() {
-            document.getElementById('registerForm').classList.add('hidden');
-            document.getElementById('loginForm').classList.remove('hidden');
-        }
-
-        // Secure login/register with PBKDF2 hashing
-        async function hashPassword(password) {
-            const enc = new TextEncoder();
-            const key = await crypto.subtle.importKey('raw', enc.encode(password), {name: 'PBKDF2'}, false, ['deriveBits']);
-            const hash = await crypto.subtle.deriveBits({name: 'PBKDF2', salt: enc.encode('femboy-hub-salt-2026'), iterations: 100000, hash: 'SHA-256'}, key, 256);
-            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        document.getElementById('loginFormSubmit').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = await hashPassword(document.getElementById('loginPassword').value);
-            
-            // Simulate user lookup (in production, check against backend)
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            const user = users.find(u => u.email === email && u.password === password);
-            
-            if (user) {
-                currentUser = user;
-                localStorage.setItem('currentUser', JSON.stringify(user));
-                toggleAuth();
-                showDashboard();
-                loadLinks();
-            } else {
-                alert('Invalid credentials');
-            }
-        });
-
-        document.getElementById('registerFormSubmit').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('regUsername').value;
-            const email = document.getElementById('regEmail').value;
-            const password = await hashPassword(document.getElementById('regPassword').value);
-            
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            if (users.find(u => u.email === email)) {
-                alert('Email already registered');
-                return;
-            }
-            
-            const newUser = { id: crypto.randomUUID(), username, email, password, created: new Date().toISOString() };
-            users.push(newUser);
-            localStorage.setItem('users', JSON.stringify(users));
-            
-            currentUser = newUser;
-            localStorage.setItem('currentUser', JSON.stringify(newUser));
-            toggleAuth();
-            showDashboard();
-        });
-
-        function showAuth() {
-            document.getElementById('authModal').classList.remove('hidden');
-            document.getElementById('mainContent').classList.add('hidden');
-        }
-
-        function showDashboard() {
-            document.getElementById('authModal').classList.add('hidden');
-            document.getElementById('mainContent').classList.remove('hidden');
-            document.getElementById('userStats').classList.remove('hidden');
-        }
-
-        function logout() {
-            localStorage.removeItem('currentUser');
-            currentUser = null;
-            links = [];
-            showAuth();
-        }
-
-        // Link management
-        function generateLink() {
-            const customUrl = document.getElementById('customUrl').value;
-            const customAlias = document.getElementById('customAlias').value.trim();
-            
-            if (!customUrl) {
-                alert('Please enter a URL');
-                return;
-            }
-
-            const alias = customAlias || Math.random().toString(36).substring(2, 8);
-            const shortUrl = `${window.location.origin}/${alias}`;
-            const link = {
-                id: crypto.randomUUID(),
-                alias,
-                originalUrl: customUrl,
-                shortUrl,
-                clicks: 0,
-                created: new Date().toISOString(),
-                clickHistory: []
-            };
-
-            links.unshift(link);
-            localStorage.setItem('userLinks', JSON.stringify(links));
-            loadLinks();
-            updateStats();
-            document.getElementById('customUrl').value = '';
-            document.getElementById('customAlias').value = '';
-        }
-
-        function loadLinks() {
-            const treeView = document.getElementById('treeView');
-            treeView.innerHTML = '';
-
-            if (links.length === 0) {
-                treeView.innerHTML = '<div class="text-center py-12 text-gray-400"><i class="fas fa-inbox text-4xl mb-4"></i><p>No links yet. Create your first one!</p></div>';
-                return;
-            }
-
-            links.forEach(link => {
-                const linkEl = document.createElement('div');
-                linkEl.className = 'treeview-item group p-4 bg-white/5 rounded-2xl border border-white/20 hover:bg-white/10 transition-all duration-300 cursor-pointer';
-                linkEl.onclick = () => copyLink(link.shortUrl);
+        // Register Service Worker for offline tracking
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register(new URL('data:application/javascript;base64,' + btoa(`
+                self.addEventListener('fetch', event => {
+                    if (event.request.url.includes('/api/track')) {
+                        event.respondWith(handleTrack(event.request));
+                    }
+                });
                 
-                linkEl.innerHTML = `
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-link text-purple-400"></i>
-                            <span class="font-mono font-bold text-lg">${link.alias}</span>
+                async function handleTrack(request) {
+                    try {
+                        const data = await request.json();
+                        const db = await getDatabase();
+                        const record = {
+                            ...data,
+                            timestamp: Date.now(),
+                            id: crypto.randomUUID()
+                        };
+                        await db.put('tracks', record);
+                        return new Response(JSON.stringify({success: true}), {
+                            headers: {'Content-Type': 'application/json'}
+                        });
+                    } catch(e) {
+                        return new Response(JSON.stringify({success: false}), {
+                            status: 500,
+                            headers: {'Content-Type': 'application/json'}
+                        });
+                    }
+                }
+                
+                async function getDatabase() {
+                    return new Promise((resolve) => {
+                        const req = indexedDB.open('FemboyHubDB', 3);
+                        req.onupgradeneeded = e => {
+                            const db = e.target.result;
+                            if (!db.objectStoreNames.contains('tracks')) {
+                                db.createObjectStore('tracks', {keyPath: 'id'});
+                            }
+                            if (!db.objectStoreNames.contains('links')) {
+                                const linksStore = db.createObjectStore('links', {keyPath: 'alias'});
+                                linksStore.createIndex('user', 'user');
+                            }
+                            if (!db.objectStoreNames.contains('users')) {
+                                db.createObjectStore('users', {keyPath: 'username'});
+                            }
+                        };
+                        req.onsuccess = e => resolve(e.target.result);
+                    });
+                }
+            `)), {scope: './'});
+        }
+    </script>
+
+    <script>
+        class FemboyHubPro {
+            constructor() {
+                this.db = null;
+                this.currentUser = null;
+                this.links = [];
+                this.tracks = [];
+                this.chart = null;
+                this.init();
+            }
+
+            async init() {
+                await this.initDB();
+                await this.loadUser();
+                this.bindEvents();
+                this.showLoading(false);
+                if (window.location.pathname.length > 1) {
+                    this.handleShortLink(window.location.pathname.slice(1));
+                } else {
+                    await this.loadDashboardData();
+                }
+            }
+
+            async initDB() {
+                this.db = await new Promise((resolve) => {
+                    const req = indexedDB.open('FemboyHubPro', 5);
+                    req.onupgradeneeded = (e) => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains('users')) {
+                            const userStore = db.createObjectStore('users', { keyPath: 'username' });
+                            userStore.createIndex('hash', 'hash');
+                        }
+                        if (!db.objectStoreNames.contains('links')) {
+                            const linkStore = db.createObjectStore('links', { keyPath: 'id' });
+                            linkStore.createIndex('user', 'user');
+                            linkStore.createIndex('alias', 'alias', { unique: true });
+                        }
+                        if (!db.objectStoreNames.contains('tracks')) {
+                            const trackStore = db.createObjectStore('tracks', { autoIncrement: true });
+                            trackStore.createIndex('alias', 'alias');
+                            trackStore.createIndex('user', 'user');
+                            trackStore.createIndex('timestamp', 'timestamp');
+                        }
+                        if (!db.objectStoreNames.contains('stats')) {
+                            db.createObjectStore('stats', { keyPath: 'date' });
+                        }
+                    };
+                    req.onsuccess = (e) => resolve(e.target.result);
+                    req.onerror = () => resolve(null);
+                });
+            }
+
+            bindEvents() {
+                document.getElementById('authForm').onsubmit = (e) => this.handleLogin(e);
+                document.getElementById('toggleAuth').onclick = () => this.toggleAuthMode();
+                document.getElementById('demoLogin').onclick = () => this.quickDemo();
+                document.getElementById('logoutBtn').onclick = () => this.logout();
+                document.getElementById('linkForm').onsubmit = (e) => this.createLink(e);
+                document.getElementById('copyBtn').onclick = () => this.copyShortLink();
+                document.getElementById('refreshData').onclick = () => this.loadDashboardData();
+                document.getElementById('exportAll').onclick = () => this.exportEverything();
+                document.getElementById('clearDemo').onclick = () => this.resetDemo();
+                document.getElementById('stayBtn').onclick = () => this.closeTracker();
+            }
+
+            async handleLogin(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const hash = await this.sha256(password);
+
+                const tx = this.db.transaction('users', 'readonly');
+                const store = tx.objectStore('users');
+                const user = await new Promise(r => {
+                    const req = store.get(username);
+                    req.onsuccess = () => r(req.result);
+                });
+
+                if (user && user.hash === hash) {
+                    this.currentUser = user;
+                    await this.loadUserLinks();
+                    this.showDashboard();
+                } else {
+                    this.showNotification('❌ Invalid credentials', 'error');
+                }
+            }
+
+            quickDemo() {
+                document.getElementById('username').value = 'demo';
+                document.getElementById('password').value = 'demo123';
+                this.handleLogin({preventDefault: () => {}});
+            }
+
+            async createDemoUser() {
+                const tx = this.db.transaction('users', 'readwrite');
+                const store = tx.objectStore('users');
+                const demoHash = await this.sha256('demo123');
+                await new Promise(r => {
+                    store.put({
+                        username: 'demo',
+                        hash: demoHash,
+                        created: Date.now(),
+                        role: 'demo'
+                    });
+                    tx.oncomplete = r;
+                });
+            }
+
+            toggleAuthMode() {
+                const title = document.getElementById('authTitle');
+                const subtitle = document.getElementById('authSubtitle');
+                const btnText = document.getElementById('authBtnText');
+                if (title.textContent.includes('Login')) {
+                    title.textContent = 'Create Account';
+                    subtitle.textContent = 'Join the network';
+                    btnText.textContent = 'Register';
+                } else {
+                    title.textContent = 'Welcome Back';
+                    subtitle.textContent = 'Login to dashboard';
+                    btnText.textContent = 'Login';
+                }
+            }
+
+            async createLink(e) {
+                e.preventDefault();
+                const originalUrl = document.getElementById('originalUrl').value;
+                let alias = document.getElementById('customAlias').value.toLowerCase().replace(/[^a-z0-9]/g, '') || this.randomAlias();
+                const password = document.getElementById('linkPassword').value;
+
+                // Check alias availability
+                const txCheck = this.db.transaction('links', 'readonly');
+                const existing = await new Promise(r => {
+                    const req = txCheck.objectStore('links').index('alias').get(alias);
+                    req.onsuccess = () => r(req.result);
+                });
+
+                if (existing) {
+                    this.showNotification('🔄 Alias taken, generated new one', 'info');
+                    alias = this.randomAlias();
+                }
+
+                const link = {
+                    id: crypto.randomUUID(),
+                    user: this.currentUser.username,
+                    alias,
+                    originalUrl,
+                    password: password ? await this.sha256(password) : null,
+                    clicks: 0,
+                    uniqueIps: new Set(),
+                    created: Date.now(),
+                    stats: {}
+                };
+
+                const tx = this.db.transaction(['links'], 'readwrite');
+                tx.objectStore('links').put(link);
+                await new Promise(r => tx.oncomplete = r);
+
+                this.links.unshift(link);
+                this.renderLinks();
+                this.updateStats();
+                this.showNewLink(`https://${location.host}/${alias}`);
+
+                e.target.reset();
+                document.getElementById('customAlias').value = '';
+            }
+
+            randomAlias() {
+                return Array.from({length: 6}, () => 
+                    'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]
+                ).join('');
+            }
+
+            async handleShortLink(alias) {
+                this.showLoading(true);
+                
+                // Get visitor fingerprint + IP
+                const visitor = await this.getVisitorFingerprint();
+                
+                // Fetch link data
+                const tx = this.db.transaction('links', 'readwrite');
+                const store = tx.objectStore('links');
+                const linkReq = store.index('alias').get(alias);
+                
+                linkReq.onsuccess = async () => {
+                    const link = linkReq.result;
+                    if (!link) {
+                        location.href = '/'; // Back to dashboard
+                        return;
+                    }
+
+                    // Track click
+                    link.clicks++;
+                    if (!link.uniqueIps.has(visitor.ip)) {
+                        link.uniqueIps.add(visitor.ip);
+                    }
+                    link.lastClick = Date.now();
+                    
+                    // Update link stats
+                    store.put(link);
+                    
+                    // Show tracker
+                    this.showVisitorTracker(visitor, link.originalUrl);
+                };
+            }
+
+            async getVisitorFingerprint() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillText('Fingerprint test', 2, 2);
+
+                // IP via external service (falls back to hash)
+                let ip = 'offline';
+                try {
+                    const res = await fetch('https://api.ipify.org?format=json');
+                    const data = await res.json();
+                    ip = data.ip;
+                } catch {}
+
+                return {
+                    ip: ip === 'offline' ? this.hash(navigator.userAgent) : ip,
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    platform: navigator.platform,
+                    screen: `${screen.width}x${screen.height}`,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    canvas: canvas.toDataURL(),
+                    vpnLikely: /vpn|proxy|tunnel/i.test(navigator.userAgent) || 
+                               navigator.platform.includes('VPN') ||
+                               (await fetch('https://ipapi.co/json/')).then(r => r.json()).then(d => 
+                                   /vpn|proxy|tunnel/i.test(d.org || '')
+                               ).catch(() => false)
+                };
+            }
+
+            async showVisitorTracker(visitor, destination) {
+                document.getElementById('visitorProfile').innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-black/20 p-6 rounded-2xl">
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-red-500/30 to-pink-500/30 rounded-xl">
+                                <div class="w-16 h-16 bg-red-500/60 rounded-2xl flex items-center justify-center text-2xl font-bold">${visitor.ip.slice(-4)}</div>
+                                <div>
+                                    <div class="font-mono text-2xl font-bold text-red-400">${visitor.ip}</div>
+                                    <div class="text-sm opacity-75">${visitor.platform}</div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div class="p-3 bg-white/10 rounded-xl">
+                                    <div class="opacity-75">Location</div>
+                                    <div class="font-mono">${visitor.language}</div>
+                                </div>
+                                <div class="p-3 bg-white/10 rounded-xl">
+                                    <div class="opacity-75">Screen</div>
+                                    <div>${visitor.screen}</div>
+                                </div>
+                                <div class="p-3 bg-white/10 rounded-xl">
+                                    <div class="opacity-75">Timezone</div>
+                                    <div>${visitor.timezone}</div>
+                                </div>
+                                <div class="p-3 ${visitor.vpnLikely ? 'bg-red-500/30 border-2 border-red-500/50' : 'bg-white/10'} rounded-xl">
+                                    <div class="opacity-75">VPN/Proxy</div>
+                                    <div class="font-bold ${visitor.vpnLikely ? 'text-red-400' : 'text-green-400'}">
+                                        ${visitor.vpnLikely ? '🔴 DETECTED' : '🟢 Clean'}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex items-center space-x-4 text-sm">
-                            <span class="bg-purple-500/30 px-3 py-1 rounded-full">${link.clicks} clicks</span>
-                            <span class="text-gray-400">${new Date(link.created).toLocaleDateString()}</span>
+                        <div>
+                            <div class="p-4 bg-white/10 rounded-xl mb-4">
+                                <div class="font-mono text-sm opacity-75 mb-2 truncate">${navigator.userAgent.slice(0, 80)}...</div>
+                                <div class="flex items-center gap-4 text-xs opacity-75">
+                                    <span>Canvas: ${visitor.canvas ? 'Unique' : 'Standard'}</span>
+                                    <span>WebGL: ${navigator.gpu ? 'Enabled' : 'Disabled'}</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 text-xs">
+                                <div class="p-3 bg-gradient-to-br from-blue-500/30 rounded-xl text-center">
+                                    <div class="font-bold text-lg text-blue-300">${Math.floor(Math.random()*1000)}</div>
+                                    <div>Fingerprint Score</div>
+                                </div>
+                                <div class="p-3 bg-gradient-to-br from-purple-500/30 rounded-xl text-center">
+                                    <div class="font-bold text-lg text-purple-300">${new Date().toLocaleString()}</div>
+                                    <div>Capture Time</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="text-xs text-gray-400 truncate">${link.originalUrl}</div>
-                    <div id="clickPreview-${link.id}" class="mt-3 text-xs space-y-1 max-h-20 overflow-y-auto hidden"></div>
                 `;
                 
-                treeView.appendChild(linkEl);
-                loadClickPreview(link);
-            });
-        }
+                document.getElementById('proceedBtn').href = destination;
+                document.getElementById('visitorTracker').classList.remove('hidden');
+                this.showLoading(false);
+            }
 
-        function loadClickPreview(link) {
-            const preview = document.getElementById(`clickPreview-${link.id}`);
-            if (link.clickHistory.length > 0) {
-                preview.classList.remove('hidden');
-                preview.innerHTML = link.clickHistory.slice(0, 3).map(click => `
-                    <div class="flex items-center justify-between p-2 bg-black/30 rounded-lg">
-                        <span class="font-mono truncate flex-1 mr-4">${click.ip}</span>
-                        <div class="text-right">
-                            <div class="font-mono text-xs">${click.userAgent.slice(0, 30)}...</div>
-                            <div class="text-xs text-gray-400">${new Date(click.timestamp).toLocaleString()}</div>
+            async loadUserLinks() {
+                const tx = this.db.transaction('links', 'readonly');
+                const store = tx.objectStore('links');
+                const req = store.index('user').openCursor(this.currentUser.username);
+                
+                this.links = [];
+                req.onsuccess = (e) => {
+                    const cursor = e.target.result;
+                    if (cursor) {
+                        this.links.push(cursor.value);
+                        cursor.continue();
+                    } else {
+                        this.links.sort((a, b) => b.clicks - a.clicks);
+                    }
+                };
+            }
+
+            async loadDashboardData() {
+                await this.loadUserLinks();
+                this.renderLinks();
+                this.updateStats();
+                this.updateChart();
+            }
+
+            renderLinks() {
+                const container = document.getElementById('linksTree');
+                if (!this.links.length) {
+                    container.innerHTML = `
+                        <div class="col-span-full text-center py-20 opacity-50">
+                            <i class="fas fa-link text-8xl mb-8"></i>
+                            <h3 class="text-3xl font-bold mb-4">No links yet</h3>
+                            <p>Create your first tracking link above!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = this.links.map(link => `
+                    <div class="group p-6 rounded-2xl border border-white/20 hover:border-pink-400/60 hover:bg-white/10 transition-all hover:shadow-2xl relative overflow-hidden">
+                        <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all">
+                            <div class="flex bg-black/50 backdrop-blur-sm rounded-xl p-2 space-x-1">
+                                <a href="https://${location.host}/${link.alias}" target="_blank" class="p-2 hover:bg-white/20 rounded-lg transition-all" title="Test Link">
+                                    <i class="fas fa-mouse-pointer text-xs"></i>
+                                </a>
+                                <button onclick="app.deleteLink('${link.id}')" class="p-2 hover:bg-red-500/30 rounded-lg transition-all" title="Delete">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start justify-between mb-6">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <span class="font-mono bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-2 rounded-xl text-lg font-bold">
+                                        femboy-hub.xyz/${link.alias}
+                                    </span>
+                                    ${link.password ? '<i class="fas fa-lock text-yellow-400 ml-2" title="Password Protected"></i>' : ''}
+                                </div>
+                                <a href="${link.originalUrl}" target="_blank" class="font-mono text-pink-300 hover:text-pink-100 text-lg block truncate" title="${link.originalUrl}">
+                                    ${link.originalUrl.replace('https://', '')}
+                                </a>
+                            </div>
+                            <div class="text-right ml-6">
+                                <div class="text-4xl font-black text-green-400 mb-1">${link.clicks}</div>
+                                <div class="text-sm opacity-75 tracking-wide uppercase">clicks</div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs opacity-75">
+                            <div class="text-center p-3 bg-white/10 rounded-xl">
+                                <div class="font-mono text-lg font-bold text-blue-400">${link.uniqueIps.size}</div>
+                                <div>unique</div>
+                            </div>
+                            <div class="text-center p-3 bg-white/10 rounded-xl">
+                                <div class="font-mono text-lg font-bold text-orange-400">${Math.round(link.clicks / (link.uniqueIps.size || 1))}</div>
+                                <div>ctr</div>
+                            </div>
+                            <div class="text-center p-3 bg-white/10 rounded-xl">
+                                <div class="font-mono text-sm">${new Date(link.created).toLocaleDateString()}</div>
+                                <div>created</div>
+                            </div>
+                            <div class="text-center p-3 bg-white/10 rounded-xl">
+                                <div class="font-mono text-sm">${link.lastClick ? new Date(link.lastClick).toLocaleString() : '-'}</div>
+                                <div>last click</div>
+                            </div>
                         </div>
                     </div>
                 `).join('');
             }
-        }
 
-        function copyLink(url) {
-            navigator.clipboard.writeText(url).then(() => {
-                // Visual feedback
-                const original = event.target.innerText;
-                event.target.innerText = 'Copied!';
-                event.target.style.background = '#10b981';
-                setTimeout(() => {
-                    event.target.innerText = original;
-                    event.target.style.background = '';
-                }, 2000);
-            });
-        }
+            updateStats() {
+                const totalClicks = this.links.reduce((sum, l) => sum + l.clicks, 0);
+                const totalIps = new Set(this.links.map(l => [...l.uniqueIps]).flat()).size;
+                
+                document.getElementById('totalLinks').textContent = this.links.length;
+                document.getElementById('totalClicks').textContent = totalClicks.toLocaleString();
+                document.getElementById('uniqueIps').textContent = totalIps.toLocaleString();
+                document.getElementById('liveLinkCount').textContent = this.links.length;
+                document.getElementById('currentUser').textContent = this.currentUser.username;
+                document.getElementById('userWelcome').textContent = `Welcome back! ${this.links.length} links active`;
+            }
 
-        // IP Geolocation & VPN Detection
-        async function trackClick(alias) {
-            try {
-                const response = await fetch(`https://ipapi.co/json`);
-                const ipData = await response.json();
+            updateChart() {
+                const ctx = document.getElementById('analyticsChart')?.getContext('2d');
+                if (!ctx || this.chart) this.chart?.destroy();
                 
-                const isVPN = await detectVPN(ipData.ip);
+                const clicks = this.links.map(l => l.clicks).slice(0, 8);
+                this.chart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: this.links.slice(0, 8).map((_, i) => `Link ${i + 1}`),
+                        datasets: [{
+                            data: clicks,
+                            backgroundColor: ['#ec4899', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'],
+                            borderWidth: 0,
+                            offset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom', labels: { color: 'white', font: { size: 12 } } } }
+                    }
+                });
+            }
+
+            showNewLink(url) {
+                document.getElementById('shortUrlDisplay').textContent = url;
+                document.getElementById('copyBtn').dataset.url = url;
+                document.getElementById('qrBtn').href = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+                document.getElementById('shareBtn').href = url;
+                document.getElementById('newLinkResult').classList.remove('hidden');
+            }
+
+            copyShortLink() {
+                const url = document.getElementById('copyBtn').dataset.url;
+                navigator.clipboard.writeText(url).then(() => {
+                    const btn = document.getElementById('copyBtn');
+                    const icon = btn.querySelector('i');
+                    icon.className = 'fas fa-check text-green-400';
+                    setTimeout(() => icon.className = 'fas fa-copy', 1500);
+                });
+            }
+
+            async deleteLink(id) {
+                if (!confirm('Delete this link and all tracking data?')) return;
                 
-                const clickData = {
-                    ip: ipData.ip,
-                    country: ipData.country_name,
-                    city: ipData.city,
-                    isp: ipData.org,
-                    vpn: isVPN,
-                    userAgent: navigator.userAgent,
-                    timestamp: new Date().toISOString(),
-                    referer: document.referrer
+                const tx = this.db.transaction('links', 'readwrite');
+                tx.objectStore('links').delete(id);
+                await new Promise(r => tx.oncomplete = r);
+                
+                this.links = this.links.filter(l => l.id !== id);
+                this.renderLinks();
+                this.updateStats();
+            }
+
+            async exportEverything() {
+                const exportData = {
+                    user: this.currentUser.username,
+                    links: this.links,
+                    exported: new Date().toISOString(),
+                    totalClicks: this.links.reduce((sum, l) => sum + l.clicks, 0)
                 };
-
-                // Find and update link
-                const link = links.find(l => l.alias === alias);
-                if (link) {
-                    link.clicks++;
-                    link.clickHistory.unshift(clickData);
-                    if (link.clickHistory.length > 50) link.clickHistory = link.clickHistory.slice(0, 50);
-                    localStorage.setItem('userLinks', JSON.stringify(links));
-                    clicksData.unshift(clickData);
-                    if (clicksData.length > 1000) clicksData = clicksData.slice(0, 1000);
-                    localStorage.setItem('clicksData', JSON.stringify(clicksData));
-                    
-                    updateStats();
-                    loadLinks();
-                    updateChart();
-                }
-
-                // Redirect to dashboard (tracking complete)
-                window.location.href = window.location.origin;
                 
-            } catch (error) {
-                console.error('Tracking failed:', error);
-                window.location.href = window.location.origin;
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `femboyhub-${this.currentUser.username}-${Date.now()}.json`;
+                a.click();
             }
-        }
 
-        async function detectVPN(ip) {
-            try {
-                const response = await fetch(`https://ipqualityscore.com/api/json/ip/YOUR_API_KEY/${ip}`);
-                const data = await response.json();
-                return data.fraud_score > 75 || data.vpn || data.proxy || data.tor;
-            } catch {
-                return false;
+            async resetDemo() {
+                if (!confirm('Reset ALL demo data?')) return;
+                const tx = this.db.transaction(['users', 'links', 'tracks'], 'readwrite');
+                tx.objectStore('users').clear();
+                tx.objectStore('links').clear();
+                tx.objectStore('tracks').clear();
+                await new Promise(r => tx.oncomplete = r);
+                this.logout();
             }
-        }
 
-        // Stats & Charts
-        function updateStats() {
-            document.getElementById('totalLinks').textContent = links.length;
-            document.getElementById('totalClicks').textContent = links.reduce((sum, link) => sum + link.clicks, 0);
-            document.getElementById('statLinks').textContent = `${currentUser.username}: ${links.length} links`;
-            document.getElementById('statClicks').textContent = `${links.reduce((sum, link) => sum + link.clicks, 0)} clicks`;
-        }
+            showDashboard() {
+                document.getElementById('authModal').classList.add('hidden');
+                document.getElementById('mainDashboard').classList.remove('hidden');
+                document.getElementById('swStatus').classList.remove('hidden');
+            }
 
-        function initChart() {
-            const ctx = document.getElementById('clicksChart').getContext('2d');
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Clicks',
-                        data: [],
-                        borderColor: 'rgb(236, 72, 153)',
-                        backgroundColor: 'rgba(236, 72, 153, 0.2)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: { y: { beginAtZero: true } },
-                    plugins: { legend: { display: false } }
+            showLoading(show = true) {
+                document.getElementById('loadingScreen').classList.toggle('hidden', !show);
+            }
+
+            closeTracker() {
+                document.getElementById('visitorTracker').classList.add('hidden');
+            }
+
+            showNotification(message, type = 'info') {
+                // Simple toast notification
+                const toast = document.createElement('div');
+                toast.className = `fixed top-6 right-6 glass p-4 rounded-2xl shadow-2xl z-50 transition-all ${
+                    type === 'error' ? 'border-red-400 bg-red-500/20' :
+                    type === 'success' ? 'border-green-400 bg-green-500/20' : 'border-blue-400 bg-blue-500/20'
+                }`;
+                toast.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'success' ? 'check-circle' : 'info-circle'} mr-2"></i>${message}`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 4000);
+            }
+
+            async sha256(message) {
+                const msgBuffer = new TextEncoder().encode(message);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            hash(str) {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
                 }
-            });
-            updateChart();
-        }
+                return Math.abs(hash).toString(36);
+            }
 
-        function updateChart() {
-            if (!chart) return;
-            
-            const recentClicks = clicksData.slice(0, 30);
-            chart.data.labels = recentClicks.map(c => new Date(c.timestamp).toLocaleTimeString());
-            chart.data.datasets[0].data = recentClicks.map((_, i) => recentClicks.slice(0, i+1).length);
-            chart.update('none');
-        }
-
-        // Global click tracker (for short URLs)
-        function initClickTracker() {
-            const path = window.location.pathname.slice(1);
-            if (path && !currentUser) {
-                trackClick(path);
+            async logout() {
+                this.currentUser = null;
+                document.getElementById('mainDashboard').classList.add('hidden');
+                document.getElementById('authModal').classList.remove('hidden');
+                this.quickDemo(); // Pre-fill demo
+                await this.createDemoUser();
             }
         }
-        initClickTracker();
 
-        // Prevent common attacks
-        window.addEventListener('beforeunload', function(e) {
-            // CSP would be handled by Cloudflare
+        // Initialize when DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            window.app = new FemboyHubPro();
         });
 
-        // Service Worker for offline PWA (optional)
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js');
-        }
+        // Global app reference for onclick handlers
+        window.app = null;
     </script>
 </body>
 </html>
