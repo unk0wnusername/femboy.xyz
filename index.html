@@ -14,16 +14,8 @@
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-x-hidden">
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="fixed inset-0 bg-gradient-to-r from-purple-900 to-blue-900 flex items-center justify-center z-50">
-        <div class="text-center">
-            <div class="w-20 h-20 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <h1 class="text-2xl font-bold">Femboy Hub Loading...</h1>
-        </div>
-    </div>
-
     <!-- Auth Modal -->
-    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40 hidden">
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40">
         <div class="glass p-8 rounded-3xl max-w-md w-full mx-4 pulse-glow backdrop-blur-xl">
             <div class="text-center mb-8">
                 <i class="fas fa-link text-5xl text-purple-400 mb-4"></i>
@@ -199,7 +191,8 @@
         const state = {
             user: null,
             links: [],
-            currentPreview: null
+            currentPreview: null,
+            headers: {} // For client-side header simulation
         };
 
         // Secure random ID generator
@@ -216,16 +209,15 @@
 
         // Initialize app
         async function init() {
+            await initDB();
             await loadUserData();
             setupEventListeners();
             if (state.user) {
                 showDashboard();
                 await loadLinks();
                 updateStats();
-            } else {
-                showAuth();
             }
-            hideLoading();
+            // No loading screen to hide - auth modal shows immediately
         }
 
         // IndexedDB setup for secure local storage
@@ -247,9 +239,8 @@
                         db.createObjectStore('users', { keyPath: 'username' });
                     }
                     if (!db.objectStoreNames.contains('links')) {
-                        const linkStore = db.createObjectStore('links', { keyPath: 'id', autoIncrement: true });
+                        const linkStore = db.createObjectStore('links', { keyPath: 'code', autoIncrement: false });
                         linkStore.createIndex('user', 'user', { unique: false });
-                        linkStore.createIndex('code', 'code', { unique: true });
                     }
                     if (!db.objectStoreNames.contains('clicks')) {
                         const clickStore = db.createObjectStore('clicks', { keyPath: 'id', autoIncrement: true });
@@ -305,7 +296,6 @@
         }
 
         async function loadUserData() {
-            await initDB();
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
             
@@ -348,7 +338,7 @@
             };
             
             return new Promise((resolve, reject) => {
-                const tx = db.transaction(['links', 'clicks'], 'readwrite');
+                const tx = db.transaction(['links'], 'readwrite');
                 const linkStore = tx.objectStore('links');
                 const request = linkStore.put(link);
                 
@@ -362,14 +352,14 @@
             });
         }
 
-        async function recordClick(linkId, ip, userAgent, referrer) {
+        async function recordClick(linkCode, ip, userAgent, referrer) {
             const click = {
-                linkId,
+                linkId: linkCode,
                 ip,
                 userAgent,
                 referrer,
                 timestamp: Date.now(),
-                forwardedFor: '', // Cloudflare CF-Connecting-IP
+                forwardedFor: '',
                 vpnDetected: false
             };
             
@@ -380,9 +370,9 @@
                 
                 request.onsuccess = () => {
                     // Update link click count
-                    const linkTx = tx.db.transaction('links', 'readwrite');
+                    const linkTx = db.transaction('links', 'readwrite');
                     const linkStore = linkTx.objectStore('links');
-                    const linkUpdate = linkStore.get(linkId);
+                    const linkUpdate = linkStore.get(linkCode);
                     linkUpdate.onsuccess = () => {
                         const link = linkUpdate.result;
                         if (link) {
@@ -397,36 +387,32 @@
         }
 
         async function handleLinkClick(code) {
-            const link = state.links.find(l => l.code === code);
-            if (link) {
-                const ip = getClientIP(); // Cloudflare headers
-                const userAgent = navigator.userAgent;
-                const referrer = document.referrer;
-                
-                await recordClick(link.id, ip, userAgent, referrer);
-                showIPTracker(ip, userAgent, referrer);
-            } else {
-                window.location.href = '/'; // Redirect to home if invalid
-            }
+            const tx = db.transaction('links', 'readonly');
+            const store = tx.objectStore('links');
+            const request = store.get(code);
+            
+            request.onsuccess = async () => {
+                const link = request.result;
+                if (link) {
+                    const ip = getClientIP();
+                    const userAgent = navigator.userAgent;
+                    const referrer = document.referrer;
+                    
+                    await recordClick(link.code, ip, userAgent, referrer);
+                    showIPTracker(ip, userAgent, referrer);
+                } else {
+                    // Invalid link, show auth
+                    showAuth();
+                }
+            };
         }
 
         function getClientIP() {
-            // Cloudflare real IP detection
-            return (
-                // Cloudflare headers (most accurate)
-                (headers['cf-connecting-ip'] || 
-                 headers['x-forwarded-for']?.split(',')[0]?.trim() ||
-                 headers['x-real-ip'] ||
-                 // Fallbacks
-                 (typeof window !== 'undefined' ? window.localStorage.getItem('clientIP') : null) ||
-                 'unknown')
-                .toString();
+            // Simulate IP detection for demo (in production use server-side headers)
+            return '127.0.0.1 (Local Demo)' || 'unknown';
         }
 
         // UI Functions
-        function showLoading() { document.getElementById('loadingScreen').classList.remove('hidden'); }
-        function hideLoading() { document.getElementById('loadingScreen').classList.add('hidden'); }
-        
         function showAuth() {
             document.getElementById('authModal').classList.remove('hidden');
             document.getElementById('dashboard').classList.add('hidden');
@@ -442,9 +428,10 @@
         
         function showIPTracker(ip, ua, referrer) {
             document.getElementById('trackedIP').textContent = ip;
-            document.getElementById('trackedUA').textContent = ua.slice(0, 80) + '...';
+            document.getElementById('trackedUA').textContent = ua.slice(0, 80) + (ua.length > 80 ? '...' : '');
             document.getElementById('trackedReferrer').textContent = referrer || 'Direct';
             
+            document.getElementById('authModal').classList.add('hidden');
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('ipTracker').classList.remove('hidden');
             
@@ -455,7 +442,7 @@
                 countdown.textContent = count;
                 if (count <= 0) {
                     clearInterval(timer);
-                    window.location.href = '/'; // Redirect to dashboard/home
+                    showAuth(); // Back to auth after tracking
                 }
             }, 1000);
         }
@@ -465,7 +452,6 @@
             const totalClicks = state.links.reduce((sum, link) => sum + link.clicks, 0);
             const today = new Date().setHours(0,0,0,0);
             const todayClicks = state.links.reduce((sum, link) => {
-                // You'd need click data here for accurate today stats
                 return sum + (link.created > today ? link.clicks : 0);
             }, 0);
             
@@ -521,10 +507,21 @@
                     const user = await loginUser(username, password);
                     state.user = user;
                     showDashboard();
+                    await loadLinks();
                     updateStats();
                     renderLinks();
                 } catch (error) {
-                    alert('Login failed! Try registering if new user.');
+                    // Try register if login fails
+                    try {
+                        const user = await registerUser(username, password);
+                        state.user = user;
+                        showDashboard();
+                        await loadLinks();
+                        updateStats();
+                        renderLinks();
+                    } catch (regError) {
+                        alert('Login/Register failed! Please try again.');
+                    }
                 }
             });
 
@@ -594,10 +591,10 @@
 
         // Service Worker for offline capability (optional)
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js');
+            navigator.serviceWorker.register('/sw.js').catch(() => {}); // Silent fail
         }
 
-        // Initialize when DOM is loaded
+        // Initialize immediately when DOM is loaded
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
