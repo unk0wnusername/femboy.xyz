@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script>
+  // Save the full path to sessionStorage then redirect to /
+  // index.js will read this on load and route to the right page
+  sessionStorage.setItem('gh_redirect', location.pathname);
+  location.replace('/');
+</script>
+</head>
+<body></body>
+</html>
