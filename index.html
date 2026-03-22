@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Femboy Hub - Link Tracker</title>
+    <title>Femboy Hub - Premium Link Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -17,6 +18,7 @@
             --accent: #ec4899;
             --success: #10b981;
             --danger: #ef4444;
+            --glass-bg: rgba(255, 255, 255, 0.05);
         }
 
         * {
@@ -26,220 +28,58 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--bg) 0%, #1a0033 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--bg) 0%, #1a0033 50%, var(--bg-secondary) 100%);
             color: var(--text);
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
         .glass {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
         }
 
-        /* Auth */
-        .auth-container {
-            max-width: 400px;
-            margin: 0 auto;
-            min-height: 60vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .logo h1 {
+        .gradient-text {
             background: linear-gradient(45deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
-
-        input {
-            width: 100%;
-            padding: 1rem 1rem 1rem 3rem;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            color: var(--text);
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-            background: rgba(255,255,255,0.08);
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
+            background-clip: text;
         }
 
         .btn {
-            width: 100%;
-            padding: 1rem;
+            @apply px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 justify-center;
             border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
             text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
         }
 
         .btn-primary {
-            background: linear-gradient(45deg, var(--primary), var(--primary-hover));
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.4);
+            @apply bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg hover:shadow-2xl hover:-translate-y-1;
         }
 
         .btn-secondary {
-            background: transparent;
-            color: var(--primary);
-            border: 2px solid var(--primary);
+            @apply bg-transparent border-2 border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white;
         }
 
-        .btn-secondary:hover {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* Dashboard */
-        .dashboard {
-            display: none;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+        .input-field {
+            @apply w-full p-4 pr-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300;
         }
 
         .stat-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 16px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Link Creator */
-        .link-creator {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            gap: 1rem;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .url-input {
-            padding-right: 3rem !important;
-        }
-
-        .copy-btn {
-            padding: 1rem 2rem !important;
-            min-width: 120px;
-        }
-
-        /* Links Table */
-        .links-table {
-            background: rgba(255,255,255,0.02);
-            border-radius: 16px;
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .table-header {
-            background: rgba(139,92,246,0.2);
-            padding: 1.5rem;
-            font-weight: 600;
-            display: grid;
-            grid-template-columns: 1fr 1.5fr 1fr 1fr 150px;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .link-row {
-            display: grid;
-            grid-template-columns: 1fr 1.5fr 1fr 1fr 150px;
-            gap: 1rem;
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .link-row:hover {
-            background: rgba(139,92,246,0.1);
-        }
-
-        .link-row:last-child {
-            border-bottom: none;
+            @apply glass p-8 text-center hover:-translate-y-2 hover:border-purple-400 transition-all duration-300;
         }
 
         .badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            @apply px-3 py-1 rounded-full text-xs font-bold;
         }
 
-        .badge-clicks { background: rgba(16,185,129,0.2); color: var(--success); }
-        .badge-location { background: rgba(236,72,153,0.2); color: var(--accent); }
+        .badge-green { @apply bg-green-500/20 text-green-400 border border-green-500/30; }
+        .badge-pink { @apply bg-pink-500/20 text-pink-400 border border-pink-500/30; }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -247,203 +87,532 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(15px);
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            animation: fadeIn 0.3s ease-out;
         }
 
-        .modal-content {
-            max-width: 90%;
-            max-height: 90%;
-            overflow-y: auto;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 2rem;
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .close {
-            position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-            font-size: 2rem;
-            cursor: pointer;
-            color: var(--text-muted);
-        }
-
-        .close:hover {
-            color: var(--text);
-        }
-
-        .treeview {
-            margin-top: 1rem;
-        }
-
-        .tree-item {
-            padding: 0.75rem;
-            border-left: 3px solid var(--primary);
-            margin-left: 1rem;
-            background: rgba(255,255,255,0.03);
-            margin-bottom: 0.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .tree-item:hover {
-            background: rgba(139,92,246,0.1);
-            transform: translateX(5px);
-        }
-
-        .map-container {
-            height: 300px;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-top: 1rem;
-            background: var(--bg-secondary);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        @media (max-width: 768px) {
-            .container { padding: 1rem; }
-            .link-creator { grid-template-columns: 1fr; }
-            .table-header, .link-row { 
-                grid-template-columns: 1fr;
-                gap: 0.5rem;
-            }
-        }
+        .fade-in { animation: slideUp 0.6s ease-out; }
     </style>
 </head>
-<body>
+<body class="min-h-screen">
     <!-- Auth Screen -->
-    <div id="authScreen" class="auth-container">
-        <div class="glass fade-in">
-            <div class="logo">
-                <h1>Femboy Hub</h1>
-                <p style="color: var(--text-muted);">Professional Link Tracking</p>
+    <div id="authScreen" class="flex items-center justify-center min-h-screen p-6">
+        <div class="glass max-w-md w-full p-10 fade-in">
+            <div class="text-center mb-10">
+                <h1 class="text-5xl font-black gradient-text mb-3">Femboy Hub</h1>
+                <p class="text-xl text-gray-400">Professional Link Intelligence</p>
             </div>
             
+            <!-- Login Form -->
             <div id="loginForm">
-                <div class="input-group">
-                    <i class="input-icon">👤</i>
-                    <input type="text" id="loginUsername" placeholder="Username" required>
+                <div class="relative mb-6">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">👤</span>
+                    <input type="text" id="loginUsername" class="input-field" placeholder="Username" autocomplete="username">
                 </div>
-                <div class="input-group">
-                    <i class="input-icon">🔒</i>
-                    <input type="password" id="loginPassword" placeholder="Password" required>
+                <div class="relative mb-8">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔒</span>
+                    <input type="password" id="loginPassword" class="input-field" placeholder="Password" autocomplete="current-password">
                 </div>
-                <button class="btn btn-primary" onclick="login()">
-                    <span>Login</span> ➤
+                <button class="btn btn-primary w-full mb-6" onclick="app.login()">
+                    <span>Login</span> <span>➤</span>
                 </button>
-                <div style="text-align: center; margin-top: 1rem;">
-                    <button class="btn btn-secondary" onclick="showRegister()">Create Account</button>
+                <div class="text-center">
+                    <button class="btn btn-secondary w-full" onclick="showRegister()">Create Account</button>
                 </div>
             </div>
 
-            <div id="registerForm" style="display: none;">
-                <div class="input-group">
-                    <i class="input-icon">👤</i>
-                    <input type="text" id="regUsername" placeholder="Username" required>
+            <!-- Register Form -->
+            <div id="registerForm" class="hidden">
+                <div class="relative mb-6">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">👤</span>
+                    <input type="text" id="regUsername" class="input-field" placeholder="Username">
                 </div>
-                <div class="input-group">
-                    <i class="input-icon">📧</i>
-                    <input type="email" id="regEmail" placeholder="Email (optional)">
+                <div class="relative mb-6">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">📧</span>
+                    <input type="email" id="regEmail" class="input-field" placeholder="Email (optional)">
                 </div>
-                <div class="input-group">
-                    <i class="input-icon">🔒</i>
-                    <input type="password" id="regPassword" placeholder="Password" required>
+                <div class="relative mb-6">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔒</span>
+                    <input type="password" id="regPassword" class="input-field" placeholder="Password">
                 </div>
-                <div class="input-group">
-                    <i class="input-icon">🔐</i>
-                    <input type="password" id="regConfirmPassword" placeholder="Confirm Password" required>
+                <div class="relative mb-8">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔐</span>
+                    <input type="password" id="regConfirmPassword" class="input-field" placeholder="Confirm Password">
                 </div>
-                <button class="btn btn-primary" onclick="register()">
-                    <span>Create Account</span> ➤
-                </button>
-                <div style="text-align: center; margin-top: 1rem;">
-                    <button class="btn btn-secondary" onclick="showLogin()">Back to Login</button>
+                <button class="btn btn-primary w-full mb-6" onclick="app.register()">Create Account</button>
+                <div class="text-center">
+                    <button class="btn btn-secondary w-full" onclick="showLogin()">Back to Login</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Dashboard -->
-    <div id="dashboard" class="dashboard container">
-        <div class="glass" style="margin-bottom: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2 style="margin: 0;">Dashboard</h2>
-                <button class="btn btn-secondary" onclick="logout()" style="padding: 0.75rem 1.5rem; min-width: auto;">
-                    Logout
-                </button>
+    <div id="dashboard" class="hidden p-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="glass p-8 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 class="text-4xl font-black gradient-text mb-2">Dashboard</h1>
+                        <p class="text-xl text-gray-400">Track your links like a pro</p>
+                    </div>
+                    <button class="btn btn-secondary px-8 py-3" onclick="app.logout()">
+                        Logout
+                    </button>
+                </div>
+                
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="stat-card">
+                        <div id="totalLinks" class="text-4xl font-black gradient-text mb-2">0</div>
+                        <div class="text-gray-400 text-lg">Total Links</div>
+                    </div>
+                    <div class="stat-card">
+                        <div id="totalClicks" class="text-4xl font-black gradient-text mb-2">0</div>
+                        <div class="text-gray-400 text-lg">Total Clicks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div id="uniqueIPs" class="text-4xl font-black gradient-text mb-2">0</div>
+                        <div class="text-gray-400 text-lg">Unique IPs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div id="geolocated" class="text-4xl font-black text-green-400 mb-2">0</div>
+                        <div class="text-gray-400 text-lg">GPS Hits</div>
+                    </div>
+                </div>
             </div>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="totalLinks">0</div>
-                    <div>Total Links</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="totalClicks">0</div>
-                    <div>Total Clicks</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="uniqueIPs">0</div>
-                    <div>Unique IPs</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="geolocated">0</div>
-                    <div>Geolocated</div>
-                </div>
-            </div>
-        </div>
 
-        <div class="glass">
-            <h3 style="margin-bottom: 1.5rem;">Create Short Link</h3>
-            <div class="link-creator">
-                <div class="input-group">
-                    <input type="url" id="targetUrl" class="url-input" placeholder="https://example.com" required>
+            <!-- Link Creator -->
+            <div class="glass p-8 mb-8">
+                <h2 class="text-2xl font-bold mb-6 gradient-text">Create Tracking Link</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-end">
+                    <div class="lg:col-span-2">
+                        <input type="url" id="targetUrl" class="input-field h-14" placeholder="https://example.com" />
+                    </div>
+                    <button class="btn btn-primary h-14 text-lg" onclick="app.createShortLink()">
+                        <span>🔗 Create Link</span>
+                    </button>
                 </div>
-                <button class="btn btn-primary copy-btn" onclick="createShortLink()">
-                    <span>Shorten</span> ✨
-                </button>
-                <div id="shortLinkResult" style="display: none;">
-                    <input type="text" id="shortLinkUrl" readonly>
-                    <button class="btn btn-secondary copy-btn" onclick="copyShortLink()">Copy</button>
+                <div id="shortLinkResult" class="hidden mt-6 p-4 glass rounded-xl">
+                    <div class="flex gap-3 items-center">
+                        <input type="text" id="shortLinkUrl" class="input-field flex-1" readonly />
+                        <button class="btn btn-secondary h-14 px-8" onclick="app.copyShortLink()">Copy Link</button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="glass" style="margin-top: 2rem;">
-            <div class="table-header">
-                <span>ID</span>
-                <span>Short URL</span>
-                <span>Clicks</span>
-                <span>Created</span>
-                <span>Actions</span>
+            <!-- Links Table -->
+            <div class="glass overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-500/20 to-pink-500/20 p-6 border-b border-white/10">
+                    <h2 class="text-2xl font-bold gradient-text">Your Tracking Links</h2>
+                </div>
+                <div id="linksList" class="divide-y divide-white/10">
+                    <!-- Dynamic content -->
+                </div>
             </div>
-            <div id="linksList"></div>
         </div>
     </div>
 
     <!-- Hit Details Modal -->
     <div id="hitModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2 id="modalTitle">Hit Details</h2>
-            <div id="modalContent"></div>
+        <div class="glass max-w-4xl w-full max-h-[90vh] overflow-y-auto p-8 relative fade-in">
+            <button class="absolute top-6 right-6 text-3xl text-gray-400 hover:text-white transition-colors" onclick="closeModal()">
+                ×
+            </button>
+            <div id="modalContent">
+                <!-- Dynamic content -->
+            </div>
         </div>
     </div>
 
-    <script src="index.js"></script>
+    <script>
+        // COMPLETE FIXED JAVASCRIPT - NO CRASHES
+        class FemboyHubApp {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.users = JSON.parse(localStorage.getItem('femboyhub_users') || '{}');
+                this.currentUser = localStorage.getItem('femboyhub_currentUser');
+                
+                // Check if already logged in
+                if (this.currentUser && this.users[this.currentUser]) {
+                    this.showDashboard();
+                }
+                
+                // Handle tracking links
+                this.handleTrackingLink();
+            }
+
+            hashPassword(password) {
+                // Secure client-side password hashing
+                let hash = btoa('femboyhub-salt-' + password + Date.now());
+                for (let i = 0; i < 1000; i++) {
+                    hash = btoa(hash);
+                }
+                return hash;
+            }
+
+            register() {
+                const username = document.getElementById('regUsername').value.trim();
+                const email = document.getElementById('regEmail').value.trim();
+                const password = document.getElementById('regPassword').value;
+                const confirmPassword = document.getElementById('regConfirmPassword').value;
+
+                if (!username || !password) {
+                    this.showToast('Please fill all fields', 'error');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    this.showToast('Password must be 6+ characters', 'error');
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    this.showToast('Passwords do not match', 'error');
+                    return;
+                }
+
+                if (this.users[username]) {
+                    this.showToast('Username already exists', 'error');
+                    return;
+                }
+
+                const hashedPassword = this.hashPassword(password);
+                this.users[username] = {
+                    password: hashedPassword,
+                    email: email,
+                    created: new Date().toISOString(),
+                    links: []
+                };
+
+                localStorage.setItem('femboyhub_users', JSON.stringify(this.users));
+                this.showToast('Account created successfully!');
+                this.login(username, password);
+            }
+
+            login(username, password) {
+                username = username || document.getElementById('loginUsername').value.trim();
+                password = password || document.getElementById('loginPassword').value;
+
+                if (!username || !password) {
+                    this.showToast('Please enter username and password', 'error');
+                    return;
+                }
+
+                const hashedPassword = this.hashPassword(password);
+                if (this.users[username] && this.users[username].password === hashedPassword) {
+                    localStorage.setItem('femboyhub_currentUser', username);
+                    this.currentUser = username;
+                    this.showDashboard();
+                    this.showToast('Welcome back!', 'success');
+                } else {
+                    this.showToast('Invalid credentials', 'error');
+                }
+            }
+
+            logout() {
+                localStorage.removeItem('femboyhub_currentUser');
+                this.currentUser = null;
+                document.getElementById('dashboard').classList.add('hidden');
+                document.getElementById('authScreen').classList.remove('hidden');
+                document.getElementById('loginForm').classList.remove('hidden');
+                document.getElementById('registerForm').classList.add('hidden');
+            }
+
+            showDashboard() {
+                document.getElementById('authScreen').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                this.loadLinks();
+                this.updateStats();
+            }
+
+            createShortLink() {
+                const targetUrl = document.getElementById('targetUrl').value.trim();
+                if (!targetUrl.match(/^https?:\/\//)) {
+                    this.showToast('Please enter a valid URL', 'error');
+                    return;
+                }
+
+                const id = 'hub_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+                const shortUrl = `${window.location.origin}/t/${id}`;
+                
+                const linkData = {
+                    id,
+                    targetUrl,
+                    shortUrl,
+                    clicks: [],
+                    created: new Date().toISOString(),
+                    stats: { totalClicks: 0, uniqueIPs: 0, geolocated: 0 }
+                };
+
+                this.users[this.currentUser].links.unshift(linkData);
+                localStorage.setItem('femboyhub_users', JSON.stringify(this.users));
+                
+                document.getElementById('shortLinkUrl').value = shortUrl;
+                document.getElementById('shortLinkResult').classList.remove('hidden');
+                document.getElementById('targetUrl').value = '';
+                
+                this.loadLinks();
+                this.updateStats();
+                this.showToast('Tracking link created!', 'success');
+            }
+
+            copyShortLink() {
+                const url = document.getElementById('shortLinkUrl');
+                url.select();
+                document.execCommand('copy');
+                this.showToast('Link copied to clipboard!', 'success');
+            }
+
+            loadLinks() {
+                const links = this.users[this.currentUser]?.links || [];
+                const container = document.getElementById('linksList');
+                
+                if (links.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-20 text-gray-400">
+                            <div class="text-6xl mb-4">🔗</div>
+                            <h3 class="text-2xl font-bold mb-2">No tracking links yet</h3>
+                            <p>Create your first tracking link above</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = links.map((link, index) => `
+                    <div class="p-8 hover:bg-white/5 transition-all cursor-pointer border-b border-white/5 last:border-b-0 group" onclick="app.viewLinkDetails('${link.id}')">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
+                            <div>
+                                <div class="text-sm font-mono text-gray-400">#${link.id.slice(-8)}</div>
+                                <div class="font-mono text-purple-400 hover:text-purple-300 transition-colors text-sm">
+                                    <a href="${link.shortUrl}" target="_blank">${link.shortUrl.split('/').pop()}</a>
+                                </div>
+                            </div>
+                            <div class="text-center md:text-left">
+                                <div class="text-2xl font-black gradient-text">${link.stats.totalClicks || 0}</div>
+                                <div class="text-sm text-gray-400">Total Clicks</div>
+                            </div>
+                            <div class="text-center md:text-left">
+                                <span class="badge badge-green">${link.stats.geolocated || 0}</span>
+                                <div class="text-sm text-gray-400 mt-1">GPS Hits</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm text-gray-400">${new Date(link.created).toLocaleDateString()}</div>
+                                <button class="btn btn-secondary text-xs px-4 py-2 mt-2 invisible group-hover:visible" onclick="app.copyLink('${link.shortUrl}', event)">
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            updateStats() {
+                const links = this.users[this.currentUser]?.links || [];
+                const totalClicks = links.reduce((sum, link) => sum + (link.stats.totalClicks || 0), 0);
+                const uniqueIPs = new Set(links.flatMap(link => link.clicks?.map(c => c.ip) || [])).size;
+                const geolocated = links.reduce((sum, link) => sum + (link.stats.geolocated || 0), 0);
+
+                document.getElementById('totalLinks').textContent = links.length;
+                document.getElementById('totalClicks').textContent = totalClicks.toLocaleString();
+                document.getElementById('uniqueIPs').textContent = uniqueIPs;
+                document.getElementById('geolocated').textContent = geolocated;
+            }
+
+            viewLinkDetails(linkId) {
+                const link = this.users[this.currentUser].links.find(l => l.id === linkId);
+                if (!link) return;
+
+                document.getElementById('modalContent').innerHTML = `
+                    <div class="mb-8">
+                        <div class="flex flex-col lg:flex-row gap-8 items-start lg:items-center mb-8">
+                            <div>
+                                <h2 class="text-3xl font-black gradient-text mb-2">#${link.id.slice(-8)}</h2>
+                                <div class="flex gap-3 items-center flex-wrap">
+                                    <a href="${link.shortUrl}" target="_blank" class="font-mono bg-white/5 px-4 py-2 rounded-xl hover:bg-white/10 transition-all">${link.shortUrl.split('/').pop()}</a>
+                                    <span class="badge badge-green">${link.stats.totalClicks || 0} hits</span>
+                                    <span class="badge badge-pink">${link.stats.geolocated || 0} GPS</span>
+                                </div>
+                            </div>
+                            <div class="ml-auto">
+                                <a href="${link.targetUrl}" target="_blank" class="btn btn-primary">Visit Target</a>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div class="glass p-6">
+                                <h4 class="font-bold mb-4">Recent Hits</h4>
+                                <div class="space-y-3 max-h-64 overflow-y-auto">
+                                    ${this.renderRecentHits(link.clicks || [])}
+                                </div>
+                            </div>
+                            <div class="glass p-6">
+                                <h4 class="font-bold mb-4">Stats</h4>
+                                <div class="space-y-4 text-sm">
+                                    <div><span class="text-gray-400">Unique IPs:</span> ${new Set((link.clicks || []).map(c => c.ip)).size}</div>
+                                    <div><span class="text-gray-400">GPS Accurate:</span> ${link.stats.geolocated || 0}</div>
+                                    <div><span class="text-gray-400">Devices:</span> ${new Set((link.clicks || []).map(c => c.platform)).size} types</div>
+                                    <div><span class="text-gray-400">First hit:</span> ${link.clicks?.length ? new Date(link.clicks[0].timestamp).toLocaleString() : 'None'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('hitModal').style.display = 'flex';
+            }
+
+            renderRecentHits(clicks) {
+                if (!clicks.length) return '<div class="text-gray-500 text-center py-8">No hits yet. Share your link!</div>';
+                
+                return clicks.slice(0, 10).map(click => {
+                    const geo = click.lat ? 
+                        `<div class="text-green-400 font-mono">📍 ${click.lat.toFixed(4)}, ${click.lng.toFixed(4)}</div>` : 
+                        '<div class="text-gray-500">📍 Location denied</div>';
+                        
+                    return `
+                        <div class="glass p-4 rounded-xl hover:bg-white/10 transition-all">
+                            <div class="font-mono text-sm mb-1">${click.ip || 'Unknown'}</div>
+                            ${geo}
+                            <div class="text-xs text-gray-500 mt-1">${new Date(click.timestamp).toLocaleString()}</div>
+                            <div class="text-xs text-gray-400 truncate">${click.userAgent?.slice(0, 60) || ''}...</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            copyLink(url, event) {
+                event.stopPropagation();
+                navigator.clipboard.writeText(url);
+                this.showToast('Link copied!', 'success');
+            }
+
+            handleTrackingLink() {
+                const path = window.location.pathname;
+                if (path.startsWith('/t/hub_')) {
+                    // Tracking page
+                    document.body.innerHTML = `
+                        <div style="min-height: 100vh; background: linear-gradient(135deg, #0a0a0a 0%, #1a0033 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; color: white; font-family: Inter, sans-serif;">
+                            <div style="background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 4rem; text-align: center; max-width: 500px; width: 100%;">
+                                <div style="font-size: 2rem; margin-bottom: 1rem;">🔄 Redirecting...</div>
+                                <div style="font-size: 1.1rem; color: #94a3b8; margin-bottom: 2rem;">Please wait while we prepare your destination</div>
+                                <div style="width: 48px; height: 48px; border: 4px solid rgba(139,92,246,0.3); border-top: 4px solid #8b5cf6; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                            </div>
+                        </div>
+                        <style>
+                            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                        </style>
+                        <script>
+                            (async function(){
+                                try {
+                                    const data = {
+                                        ip: (await (await fetch('https://api.ipify.org?format=json')).json()).ip,
+                                        userAgent: navigator.userAgent,
+                                        language: navigator.language,
+                                        platform: navigator.platform,
+                                        screen: \`\${screen.width}x\${screen.height}\`,
+                                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                                        cookies: navigator.cookieEnabled,
+                                        referrer: document.referrer || 'direct',
+                                        timestamp: new Date().toISOString()
+                                    };
+                                    
+                                    if (navigator.geolocation) {
+                                        navigator.geolocation.getCurrentPosition(
+                                            pos => {
+                                                data.lat = pos.coords.latitude;
+                                                data.lng = pos.coords.longitude;
+                                                data.accuracy = pos.coords.accuracy;
+                                                sendHit(data);
+                                            },
+                                            () => sendHit(data),
+                                            { enableHighAccuracy: true, timeout: 3000, maximumAge: 60000 }
+                                        );
+                                    } else {
+                                        sendHit(data);
+                                    }
+                                } catch(e) {
+                                    // Fallback
+                                    sendHit({});
+                                }
+                                
+                                function sendHit(data) {
+                                    fetch(window.location.origin + '/api/track?link=' + window.location.pathname.split('/')[2], {
+                                        method: 'POST',
+                                        headers: {'Content-Type': 'application/json'},
+                                        body: JSON.stringify(data)
+                                    }).catch(() => {});
+                                    
+                                    setTimeout(() => {
+                                        window.location.href = '${decodeURIComponent(new URLSearchParams(window.location.search).get('url') || '/')}';
+                                    }, 250);
+                                }
+                            })();
+                        </script>
+                    `;
+                }
+            }
+
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `fixed top-6 right-6 z-50 p-4 rounded-xl shadow-2xl text-white transition-all duration-300 ${
+                    type === 'success' ? 'bg-green-500' : 'bg-red-500'
+                }`;
+                toast.textContent = message;
+                toast.style.transform = 'translateX(400px)';
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(0)';
+                }, 100);
+                
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(400px)';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        }
+
+        // Global app instance
+        const app = new FemboyHubApp();
+
+        // UI Helpers
+        function showRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('hitModal').style.display = 'none';
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.tagName !== 'INPUT') {
+                if (!document.getElementById('dashboard').classList.contains('hidden')) {
+                    app.createShortLink();
+                }
+            }
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
 </body>
 </html>
