@@ -3,183 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Femboy Hub - Short Link Generator</title>
+    <title>Femboy Hub - Advanced Short Link Service</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        .treeview-item { transition: all 0.3s ease; }
+        .treeview-item:hover { transform: translateX(5px); }
         .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .glass { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
-        .pulse-glow { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
+        .glass { backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-x-hidden">
+<body class="bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900 min-h-screen text-white">
     <!-- Auth Modal -->
-    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40">
-        <div class="glass p-8 rounded-3xl max-w-md w-full mx-4 pulse-glow backdrop-blur-xl">
-            <div class="text-center mb-8">
-                <i class="fas fa-link text-5xl text-purple-400 mb-4"></i>
-                <h2 id="authTitle" class="text-3xl font-bold mb-2">Welcome Back</h2>
-                <p id="authSubtitle" class="text-gray-300">Sign in to access your dashboard</p>
-            </div>
-            <form id="authForm">
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold mb-2">Username</label>
-                    <input type="text" id="username" class="w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" required>
-                </div>
-                <div class="mb-8">
-                    <label class="block text-sm font-semibold mb-2">Password</label>
-                    <input type="password" id="password" class="w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" required>
-                </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white py-4 px-8 rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-2xl">
-                    <span id="authBtnText">Sign In</span>
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden">
+        <div class="glass p-8 rounded-3xl max-w-md w-full mx-4 backdrop-blur-xl border border-white/20">
+            <div class="flex justify-end mb-6">
+                <button onclick="toggleAuth()" class="text-white hover:text-gray-200">
+                    <i class="fas fa-times text-2xl"></i>
                 </button>
-            </form>
-            <div class="mt-6 text-center">
-                <button id="toggleAuth" class="text-purple-400 hover:text-purple-300 transition-colors">Don't have an account? Register</button>
+            </div>
+            <div id="loginForm">
+                <h2 class="text-3xl font-bold mb-8 text-center gradient-text bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    <i class="fas fa-lock"></i> Login
+                </h2>
+                <form id="loginFormSubmit">
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold mb-2">Email</label>
+                        <input type="email" id="loginEmail" required class="w-full p-4 bg-white/10 border border-white/30 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-500/50 backdrop-blur-sm">
+                    </div>
+                    <div class="mb-8">
+                        <label class="block text-sm font-semibold mb-2">Password</label>
+                        <input type="password" id="loginPassword" required class="w-full p-4 bg-white/10 border border-white/30 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-500/50 backdrop-blur-sm">
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 p-4 rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-200">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </button>
+                </form>
+                <p class="text-center mt-6">
+                    <button onclick="showRegister()" class="text-purple-300 hover:text-white underline">Need an account? Register</button>
+                </p>
+            </div>
+            <div id="registerForm" class="hidden">
+                <h2 class="text-3xl font-bold mb-8 text-center gradient-text bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
+                    <i class="fas fa-user-plus"></i> Register
+                </h2>
+                <form id="registerFormSubmit">
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold mb-2">Username</label>
+                        <input type="text" id="regUsername" required class="w-full p-4 bg-white/10 border border-white/30 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500/50 backdrop-blur-sm">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold mb-2">Email</label>
+                        <input type="email" id="regEmail" required class="w-full p-4 bg-white/10 border border-white/30 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500/50 backdrop-blur-sm">
+                    </div>
+                    <div class="mb-8">
+                        <label class="block text-sm font-semibold mb-2">Password</label>
+                        <input type="password" id="regPassword" required minlength="8" class="w-full p-4 bg-white/10 border border-white/30 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500/50 backdrop-blur-sm">
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-blue-500 p-4 rounded-2xl font-bold text-lg hover:from-green-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-200">
+                        <i class="fas fa-user-plus mr-2"></i>Create Account
+                    </button>
+                </form>
+                <p class="text-center mt-6">
+                    <button onclick="showLogin()" class="text-purple-300 hover:text-white underline">Already have account? Login</button>
+                </p>
             </div>
         </div>
     </div>
 
     <!-- Main Dashboard -->
-    <div id="dashboard" class="min-h-screen hidden">
+    <div id="mainContent" class="hidden min-h-screen">
         <!-- Header -->
-        <header class="glass backdrop-blur-xl sticky top-0 z-30 p-6 border-b border-white/10">
-            <div class="max-w-7xl mx-auto flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <i class="fas fa-futuristic text-3xl text-purple-400"></i>
-                    <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                        Femboy Hub Dashboard
-                    </h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <span id="userWelcome" class="font-semibold"></span>
-                    <button id="logoutBtn" class="p-2 rounded-xl hover:bg-white/10 transition-all">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
+        <header class="glass sticky top-0 z-40 backdrop-blur-xl border-b border-white/20">
+            <div class="max-w-7xl mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <i class="fas fa-link text-3xl text-purple-400"></i>
+                        <div>
+                            <h1 class="text-2xl font-bold gradient-text bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Femboy Hub</h1>
+                            <p class="text-sm text-purple-200">Advanced Short Link Service</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div id="userStats" class="text-sm text-right hidden">
+                            <div id="statLinks" class="font-semibold">0 Links</div>
+                            <div id="statClicks" class="text-purple-300">0 Clicks</div>
+                        </div>
+                        <button onclick="logout()" class="bg-red-500/80 hover:bg-red-500 px-6 py-2 rounded-xl font-semibold transition-all duration-200 hover:scale-105">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </button>
+                    </div>
                 </div>
             </div>
         </header>
 
-        <div class="max-w-7xl mx-auto p-6">
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="glass p-6 rounded-2xl border border-white/10 hover:scale-105 transition-all duration-300">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-300">Total Links</p>
-                            <p id="totalLinks" class="text-3xl font-bold text-white">0</p>
+        <div class="max-w-7xl mx-auto px-6 py-12">
+            <div class="grid lg:grid-cols-4 gap-8">
+                <!-- Stats Cards -->
+                <div class="lg:col-span-1 space-y-4">
+                    <div class="grid grid-cols-2 lg:grid-cols-1 gap-4">
+                        <div class="glass p-6 rounded-2xl border border-white/20">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-purple-300 text-sm">Total Links</p>
+                                    <p id="totalLinks" class="text-3xl font-bold text-white">0</p>
+                                </div>
+                                <i class="fas fa-link text-4xl text-purple-400"></i>
+                            </div>
                         </div>
-                        <i class="fas fa-link text-4xl text-green-400"></i>
+                        <div class="glass p-6 rounded-2xl border border-white/20">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-pink-300 text-sm">Total Clicks</p>
+                                    <p id="totalClicks" class="text-3xl font-bold text-white">0</p>
+                                </div>
+                                <i class="fas fa-mouse-pointer text-4xl text-pink-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Link Generator -->
+                    <div class="glass p-6 rounded-2xl border border-white/20">
+                        <h3 class="text-xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-magic mr-2 text-purple-400"></i>Create Link
+                        </h3>
+                        <div class="space-y-4">
+                            <input id="customUrl" placeholder="https://example.com" class="w-full p-4 bg-white/10 border border-white/30 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-500/50">
+                            <div class="flex space-x-2">
+                                <input id="customAlias" placeholder="custom-alias" maxlength="20" class="flex-1 p-4 bg-white/10 border border-white/30 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-500/50">
+                                <button onclick="generateLink()" class="bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-4 rounded-xl font-bold hover:from-purple-600 hover:to-pink-600 transition-all duration-200 hover:scale-105">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <small class="text-purple-300">Leave alias blank for random generation</small>
+                        </div>
                     </div>
                 </div>
-                <div class="glass p-6 rounded-2xl border border-white/10 hover:scale-105 transition-all duration-300">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-300">Total Clicks</p>
-                            <p id="totalClicks" class="text-3xl font-bold text-white">0</p>
-                        </div>
-                        <i class="fas fa-mouse-pointer text-4xl text-blue-400"></i>
-                    </div>
-                </div>
-                <div class="glass p-6 rounded-2xl border border-white/10 hover:scale-105 transition-all duration-300">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-300">Today Clicks</p>
-                            <p id="todayClicks" class="text-3xl font-bold text-white">0</p>
-                        </div>
-                        <i class="fas fa-calendar-day text-4xl text-purple-400"></i>
-                    </div>
-                </div>
-                <div class="glass p-6 rounded-2xl border border-white/10 hover:scale-105 transition-all duration-300">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-300">Success Rate</p>
-                            <p id="successRate" class="text-3xl font-bold text-white">100%</p>
-                        </div>
-                        <i class="fas fa-chart-line text-4xl text-emerald-400"></i>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Create Link Form -->
-            <div class="glass p-8 rounded-3xl border border-white/10 mb-8">
-                <h2 class="text-3xl font-bold mb-6 flex items-center">
-                    <i class="fas fa-plus-circle text-purple-400 mr-3"></i>
-                    Create Short Link
-                </h2>
-                <form id="createLinkForm" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold mb-3">Destination URL</label>
-                        <input type="url" id="destinationUrl" placeholder="https://example.com" class="w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all" required>
+                <!-- Main Content -->
+                <div class="lg:col-span-3 space-y-8">
+                    <!-- Tree View -->
+                    <div class="glass p-8 rounded-3xl border border-white/20">
+                        <h2 class="text-2xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-sitemap mr-3 text-green-400"></i>Your Links Tree
+                        </h2>
+                        <div id="treeView" class="space-y-2 max-h-96 overflow-y-auto"></div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold mb-3">Custom Alias (optional)</label>
-                        <input type="text" id="customAlias" placeholder="my-cool-link" class="w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all" maxlength="20">
-                    </div>
-                    <div class="flex items-end space-x-4">
-                        <button type="button" id="generatePreview" class="flex-1 p-4 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-2xl font-semibold hover:from-gray-700 hover:to-gray-800 transition-all">
-                            <i class="fas fa-eye mr-2"></i>Preview
-                        </button>
-                        <button type="submit" class="flex-1 bg-gradient-to-r from-purple-500 to-blue-600 text-white p-4 rounded-2xl font-bold hover:from-purple-600 hover:to-blue-700 transform hover:scale-105 transition-all shadow-2xl">
-                            <i class="fas fa-magic mr-2"></i>Create Link
-                        </button>
-                    </div>
-                </form>
-                <div id="linkPreview" class="mt-6 p-4 bg-white/5 rounded-2xl hidden">
-                    <p class="font-mono text-lg">https://femboy-hub.xyz/<span id="previewCode"></span></p>
-                    <button id="copyPreview" class="mt-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 transition-all">Copy</button>
-                </div>
-            </div>
 
-            <!-- Links Table -->
-            <div class="glass rounded-3xl border border-white/10 overflow-hidden">
-                <div class="p-6 border-b border-white/10">
-                    <h2 class="text-2xl font-bold flex items-center">
-                        <i class="fas fa-list text-purple-400 mr-3"></i>
-                        Your Short Links
-                    </h2>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-white/5">
-                            <tr>
-                                <th class="p-6 text-left font-semibold">Short Code</th>
-                                <th class="p-6 text-left font-semibold">Destination</th>
-                                <th class="p-6 text-left font-semibold">Clicks</th>
-                                <th class="p-6 text-left font-semibold">Created</th>
-                                <th class="p-6 text-left font-semibold">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="linksTableBody">
-                            <!-- Links will be populated here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+                    <!-- Analytics Chart -->
+                    <div class="glass p-8 rounded-3xl border border-white/20">
+                        <h2 class="text-2xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-chart-line mr-3 text-blue-400"></i>Analytics
+                        </h2>
+                        <canvas id="clicksChart" height="200"></canvas>
+                    </div>
 
-    <!-- IP Tracker Page (for clicked links) -->
-    <div id="ipTracker" class="min-h-screen hidden">
-        <div class="max-w-4xl mx-auto p-8">
-            <div class="glass p-12 rounded-3xl text-center mb-12">
-                <i class="fas fa-fingerprint text-8xl text-purple-400 mb-8 animate-pulse"></i>
-                <h1 class="text-4xl font-bold mb-4">Link Activated</h1>
-                <p class="text-xl text-gray-300 mb-8">Your analytics are being collected...</p>
-                <div id="countdown" class="text-6xl font-bold text-blue-400 mb-8">5</div>
-                <div class="space-y-4 max-w-md mx-auto">
-                    <div class="flex justify-between text-lg">
-                        <span>Your IP:</span>
-                        <span id="trackedIP" class="font-mono bg-black/30 px-3 py-1 rounded-lg">Loading...</span>
-                    </div>
-                    <div class="flex justify-between text-lg">
-                        <span>User Agent:</span>
-                        <span id="trackedUA" class="font-mono bg-black/30 px-3 py-1 rounded-lg truncate max-w-xs">Loading...</span>
-                    </div>
-                    <div class="flex justify-between text-lg">
-                        <span>Referrer:</span>
-                        <span id="trackedReferrer" class="font-mono bg-black/30 px-3 py-1 rounded-lg truncate max-w-xs">Loading...</span>
+                    <!-- Recent Activity -->
+                    <div class="glass p-8 rounded-3xl border border-white/20">
+                        <h2 class="text-2xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-history mr-3 text-yellow-400"></i>Recent Clicks
+                        </h2>
+                        <div id="recentActivity" class="space-y-3 max-h-64 overflow-y-auto"></div>
                     </div>
                 </div>
             </div>
@@ -187,415 +172,315 @@
     </div>
 
     <script>
-        // Global state
-        const state = {
-            user: null,
-            links: [],
-            currentPreview: null,
-            headers: {} // For client-side header simulation
+        // Initialize everything
+        let currentUser = null;
+        let links = JSON.parse(localStorage.getItem('userLinks') || '[]');
+        let clicksData = JSON.parse(localStorage.getItem('clicksData') || '[]');
+        let chart = null;
+
+        // Initialize auth state
+        window.onload = function() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showDashboard();
+                loadLinks();
+                updateStats();
+                initChart();
+            } else {
+                showAuth();
+            }
         };
 
-        // Secure random ID generator
-        function generateShortCode(length = 8) {
-            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let result = '';
-            const array = new Uint32Array(length);
-            crypto.getRandomValues(array);
-            for (let i = 0; i < length; i++) {
-                result += chars[array[i] % chars.length];
-            }
-            return result;
+        // Auth functions
+        function toggleAuth() {
+            document.getElementById('authModal').classList.toggle('hidden');
         }
 
-        // Initialize app
-        async function init() {
-            await initDB();
-            await loadUserData();
-            setupEventListeners();
-            if (state.user) {
-                showDashboard();
-                await loadLinks();
-                updateStats();
-            }
-            // No loading screen to hide - auth modal shows immediately
+        function showRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
         }
 
-        // IndexedDB setup for secure local storage
-        const DB_NAME = 'FemboyHubDB';
-        const DB_VERSION = 1;
-        let db;
-
-        async function initDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    db = request.result;
-                    resolve(db);
-                };
-                request.onupgradeneeded = (e) => {
-                    db = e.target.result;
-                    if (!db.objectStoreNames.contains('users')) {
-                        db.createObjectStore('users', { keyPath: 'username' });
-                    }
-                    if (!db.objectStoreNames.contains('links')) {
-                        const linkStore = db.createObjectStore('links', { keyPath: 'code', autoIncrement: false });
-                        linkStore.createIndex('user', 'user', { unique: false });
-                    }
-                    if (!db.objectStoreNames.contains('clicks')) {
-                        const clickStore = db.createObjectStore('clicks', { keyPath: 'id', autoIncrement: true });
-                        clickStore.createIndex('linkId', 'linkId', { unique: false });
-                        clickStore.createIndex('timestamp', 'timestamp', { unique: false });
-                    }
-                };
-            });
+        function showLogin() {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
         }
 
-        // User authentication with secure hashing
+        // Secure login/register with PBKDF2 hashing
         async function hashPassword(password) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(password);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return btoa(String.fromCharCode(...hashArray)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+            const enc = new TextEncoder();
+            const key = await crypto.subtle.importKey('raw', enc.encode(password), {name: 'PBKDF2'}, false, ['deriveBits']);
+            const hash = await crypto.subtle.deriveBits({name: 'PBKDF2', salt: enc.encode('femboy-hub-salt-2026'), iterations: 100000, hash: 'SHA-256'}, key, 256);
+            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        async function registerUser(username, password) {
-            const hashedPassword = await hashPassword(password);
-            const user = { username, password: hashedPassword, created: Date.now() };
+        document.getElementById('loginFormSubmit').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = await hashPassword(document.getElementById('loginPassword').value);
             
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction('users', 'readwrite');
-                const store = tx.objectStore('users');
-                const request = store.put(user);
-                
-                request.onsuccess = () => resolve(user);
-                request.onerror = () => reject(request.error);
-            });
-        }
+            // Simulate user lookup (in production, check against backend)
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const user = users.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                toggleAuth();
+                showDashboard();
+                loadLinks();
+            } else {
+                alert('Invalid credentials');
+            }
+        });
 
-        async function loginUser(username, password) {
-            const hashedPassword = await hashPassword(password);
+        document.getElementById('registerFormSubmit').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = await hashPassword(document.getElementById('regPassword').value);
             
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction('users', 'readonly');
-                const store = tx.objectStore('users');
-                const request = store.get(username);
-                
-                request.onsuccess = async () => {
-                    const user = request.result;
-                    if (user && user.password === hashedPassword) {
-                        state.user = user;
-                        resolve(user);
-                    } else {
-                        reject(new Error('Invalid credentials'));
-                    }
-                };
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        async function loadUserData() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            
-            if (code) {
-                await handleLinkClick(code);
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            if (users.find(u => u.email === email)) {
+                alert('Email already registered');
                 return;
             }
-        }
-
-        async function loadLinks() {
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction('links', 'readonly');
-                const store = tx.objectStore('links');
-                const request = store.index('user').openCursor(IDBKeyRange.only(state.user.username));
-                
-                state.links = [];
-                request.onsuccess = (e) => {
-                    const cursor = e.target.result;
-                    if (cursor) {
-                        state.links.push(cursor.value);
-                        cursor.continue();
-                    } else {
-                        state.links.sort((a, b) => new Date(b.created) - new Date(a.created));
-                        resolve();
-                    }
-                };
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        async function createLink(destination, customAlias) {
-            const code = customAlias || generateShortCode();
-            const link = {
-                user: state.user.username,
-                code,
-                destination,
-                clicks: 0,
-                created: Date.now(),
-                customAlias
-            };
             
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction(['links'], 'readwrite');
-                const linkStore = tx.objectStore('links');
-                const request = linkStore.put(link);
-                
-                request.onsuccess = () => {
-                    state.links.unshift(link);
-                    updateStats();
-                    renderLinks();
-                    resolve(link);
-                };
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        async function recordClick(linkCode, ip, userAgent, referrer) {
-            const click = {
-                linkId: linkCode,
-                ip,
-                userAgent,
-                referrer,
-                timestamp: Date.now(),
-                forwardedFor: '',
-                vpnDetected: false
-            };
+            const newUser = { id: crypto.randomUUID(), username, email, password, created: new Date().toISOString() };
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
             
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction('clicks', 'readwrite');
-                const store = tx.objectStore('clicks');
-                const request = store.add(click);
-                
-                request.onsuccess = () => {
-                    // Update link click count
-                    const linkTx = db.transaction('links', 'readwrite');
-                    const linkStore = linkTx.objectStore('links');
-                    const linkUpdate = linkStore.get(linkCode);
-                    linkUpdate.onsuccess = () => {
-                        const link = linkUpdate.result;
-                        if (link) {
-                            link.clicks++;
-                            linkStore.put(link);
-                        }
-                    };
-                    resolve();
-                };
-                request.onerror = () => reject(request.error);
-            });
-        }
+            currentUser = newUser;
+            localStorage.setItem('currentUser', JSON.stringify(newUser));
+            toggleAuth();
+            showDashboard();
+        });
 
-        async function handleLinkClick(code) {
-            const tx = db.transaction('links', 'readonly');
-            const store = tx.objectStore('links');
-            const request = store.get(code);
-            
-            request.onsuccess = async () => {
-                const link = request.result;
-                if (link) {
-                    const ip = getClientIP();
-                    const userAgent = navigator.userAgent;
-                    const referrer = document.referrer;
-                    
-                    await recordClick(link.code, ip, userAgent, referrer);
-                    showIPTracker(ip, userAgent, referrer);
-                } else {
-                    // Invalid link, show auth
-                    showAuth();
-                }
-            };
-        }
-
-        function getClientIP() {
-            // Simulate IP detection for demo (in production use server-side headers)
-            return '127.0.0.1 (Local Demo)' || 'unknown';
-        }
-
-        // UI Functions
         function showAuth() {
             document.getElementById('authModal').classList.remove('hidden');
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('ipTracker').classList.add('hidden');
+            document.getElementById('mainContent').classList.add('hidden');
         }
-        
+
         function showDashboard() {
             document.getElementById('authModal').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            document.getElementById('ipTracker').classList.add('hidden');
-            document.getElementById('userWelcome').textContent = `Welcome, ${state.user.username}!`;
-        }
-        
-        function showIPTracker(ip, ua, referrer) {
-            document.getElementById('trackedIP').textContent = ip;
-            document.getElementById('trackedUA').textContent = ua.slice(0, 80) + (ua.length > 80 ? '...' : '');
-            document.getElementById('trackedReferrer').textContent = referrer || 'Direct';
-            
-            document.getElementById('authModal').classList.add('hidden');
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('ipTracker').classList.remove('hidden');
-            
-            let count = 5;
-            const countdown = document.getElementById('countdown');
-            const timer = setInterval(() => {
-                count--;
-                countdown.textContent = count;
-                if (count <= 0) {
-                    clearInterval(timer);
-                    showAuth(); // Back to auth after tracking
-                }
-            }, 1000);
+            document.getElementById('mainContent').classList.remove('hidden');
+            document.getElementById('userStats').classList.remove('hidden');
         }
 
-        function updateStats() {
-            const totalLinks = state.links.length;
-            const totalClicks = state.links.reduce((sum, link) => sum + link.clicks, 0);
-            const today = new Date().setHours(0,0,0,0);
-            const todayClicks = state.links.reduce((sum, link) => {
-                return sum + (link.created > today ? link.clicks : 0);
-            }, 0);
-            
-            document.getElementById('totalLinks').textContent = totalLinks;
-            document.getElementById('totalClicks').textContent = totalClicks.toLocaleString();
-            document.getElementById('todayClicks').textContent = todayClicks;
-            document.getElementById('successRate').textContent = totalLinks > 0 ? '100%' : '0%';
+        function logout() {
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            links = [];
+            showAuth();
         }
 
-        function renderLinks() {
-            const tbody = document.getElementById('linksTableBody');
-            tbody.innerHTML = state.links.map(link => `
-                <tr class="border-t border-white/5 hover:bg-white/5 transition-all">
-                    <td class="p-6 font-mono">
-                        <a href="/?code=${link.code}" class="text-purple-400 hover:text-purple-300 font-semibold">
-                            femboy-hub.xyz/${link.code}
-                        </a>
-                    </td>
-                    <td class="p-6 max-w-md truncate">
-                        <span class="text-gray-300">${link.destination}</span>
-                    </td>
-                    <td class="p-6">
-                        <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-semibold">
-                            ${link.clicks}
-                        </span>
-                    </td>
-                    <td class="p-6 text-gray-400">
-                        ${new Date(link.created).toLocaleDateString()}
-                    </td>
-                    <td class="p-6">
-                        <div class="flex space-x-2">
-                            <button onclick="copyLink('${link.code}')" class="p-2 hover:bg-white/10 rounded-lg transition-all">
-                                <i class="fas fa-copy text-green-400"></i>
-                            </button>
-                            <a href="${link.destination}" target="_blank" class="p-2 hover:bg-white/10 rounded-lg transition-all">
-                                <i class="fas fa-external-link-alt text-blue-400"></i>
-                            </a>
+        // Link management
+        function generateLink() {
+            const customUrl = document.getElementById('customUrl').value;
+            const customAlias = document.getElementById('customAlias').value.trim();
+            
+            if (!customUrl) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            const alias = customAlias || Math.random().toString(36).substring(2, 8);
+            const shortUrl = `${window.location.origin}/${alias}`;
+            const link = {
+                id: crypto.randomUUID(),
+                alias,
+                originalUrl: customUrl,
+                shortUrl,
+                clicks: 0,
+                created: new Date().toISOString(),
+                clickHistory: []
+            };
+
+            links.unshift(link);
+            localStorage.setItem('userLinks', JSON.stringify(links));
+            loadLinks();
+            updateStats();
+            document.getElementById('customUrl').value = '';
+            document.getElementById('customAlias').value = '';
+        }
+
+        function loadLinks() {
+            const treeView = document.getElementById('treeView');
+            treeView.innerHTML = '';
+
+            if (links.length === 0) {
+                treeView.innerHTML = '<div class="text-center py-12 text-gray-400"><i class="fas fa-inbox text-4xl mb-4"></i><p>No links yet. Create your first one!</p></div>';
+                return;
+            }
+
+            links.forEach(link => {
+                const linkEl = document.createElement('div');
+                linkEl.className = 'treeview-item group p-4 bg-white/5 rounded-2xl border border-white/20 hover:bg-white/10 transition-all duration-300 cursor-pointer';
+                linkEl.onclick = () => copyLink(link.shortUrl);
+                
+                linkEl.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-link text-purple-400"></i>
+                            <span class="font-mono font-bold text-lg">${link.alias}</span>
                         </div>
-                    </td>
-                </tr>
-            `).join('');
+                        <div class="flex items-center space-x-4 text-sm">
+                            <span class="bg-purple-500/30 px-3 py-1 rounded-full">${link.clicks} clicks</span>
+                            <span class="text-gray-400">${new Date(link.created).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-400 truncate">${link.originalUrl}</div>
+                    <div id="clickPreview-${link.id}" class="mt-3 text-xs space-y-1 max-h-20 overflow-y-auto hidden"></div>
+                `;
+                
+                treeView.appendChild(linkEl);
+                loadClickPreview(link);
+            });
         }
 
-        // Event Listeners
-        function setupEventListeners() {
-            // Auth form
-            document.getElementById('authForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                
-                try {
-                    const user = await loginUser(username, password);
-                    state.user = user;
-                    showDashboard();
-                    await loadLinks();
-                    updateStats();
-                    renderLinks();
-                } catch (error) {
-                    // Try register if login fails
-                    try {
-                        const user = await registerUser(username, password);
-                        state.user = user;
-                        showDashboard();
-                        await loadLinks();
-                        updateStats();
-                        renderLinks();
-                    } catch (regError) {
-                        alert('Login/Register failed! Please try again.');
-                    }
-                }
-            });
+        function loadClickPreview(link) {
+            const preview = document.getElementById(`clickPreview-${link.id}`);
+            if (link.clickHistory.length > 0) {
+                preview.classList.remove('hidden');
+                preview.innerHTML = link.clickHistory.slice(0, 3).map(click => `
+                    <div class="flex items-center justify-between p-2 bg-black/30 rounded-lg">
+                        <span class="font-mono truncate flex-1 mr-4">${click.ip}</span>
+                        <div class="text-right">
+                            <div class="font-mono text-xs">${click.userAgent.slice(0, 30)}...</div>
+                            <div class="text-xs text-gray-400">${new Date(click.timestamp).toLocaleString()}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
 
-            document.getElementById('toggleAuth').addEventListener('click', () => {
-                const title = document.getElementById('authTitle');
-                const subtitle = document.getElementById('authSubtitle');
-                const btnText = document.getElementById('authBtnText');
-                
-                if (title.textContent === 'Welcome Back') {
-                    title.textContent = 'Create Account';
-                    subtitle.textContent = 'Join Femboy Hub today';
-                    btnText.textContent = 'Register';
-                } else {
-                    title.textContent = 'Welcome Back';
-                    subtitle.textContent = 'Sign in to access your dashboard';
-                    btnText.textContent = 'Sign In';
-                }
-            });
-
-            // Create link form
-            document.getElementById('createLinkForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const destination = document.getElementById('destinationUrl').value;
-                const customAlias = document.getElementById('customAlias').value;
-                
-                await createLink(destination, customAlias);
-                document.getElementById('createLinkForm').reset();
-                document.getElementById('linkPreview').classList.add('hidden');
-            });
-
-            // Preview generator
-            document.getElementById('generatePreview').addEventListener('click', () => {
-                const code = document.getElementById('customAlias').value || generateShortCode();
-                document.getElementById('previewCode').textContent = code;
-                document.getElementById('linkPreview').classList.remove('hidden');
-            });
-
-            // Logout
-            document.getElementById('logoutBtn').addEventListener('click', () => {
-                state.user = null;
-                showAuth();
-            });
-
-            // Copy preview
-            document.getElementById('copyPreview').addEventListener('click', () => {
-                const url = `https://femboy-hub.xyz/?code=${document.getElementById('previewCode').textContent}`;
-                navigator.clipboard.writeText(url);
-                document.getElementById('copyPreview').textContent = 'Copied!';
+        function copyLink(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                // Visual feedback
+                const original = event.target.innerText;
+                event.target.innerText = 'Copied!';
+                event.target.style.background = '#10b981';
                 setTimeout(() => {
-                    document.getElementById('copyPreview').textContent = 'Copy';
+                    event.target.innerText = original;
+                    event.target.style.background = '';
                 }, 2000);
             });
         }
 
-        // Global copy function for table links
-        window.copyLink = (code) => {
-            const url = `https://femboy-hub.xyz/?code=${code}`;
-            navigator.clipboard.writeText(url);
-            // Visual feedback
-            const btn = event.target.closest('button');
-            const originalIcon = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-check text-green-400"></i>';
-            setTimeout(() => {
-                btn.innerHTML = originalIcon;
-            }, 1500);
-        };
+        // IP Geolocation & VPN Detection
+        async function trackClick(alias) {
+            try {
+                const response = await fetch(`https://ipapi.co/json`);
+                const ipData = await response.json();
+                
+                const isVPN = await detectVPN(ipData.ip);
+                
+                const clickData = {
+                    ip: ipData.ip,
+                    country: ipData.country_name,
+                    city: ipData.city,
+                    isp: ipData.org,
+                    vpn: isVPN,
+                    userAgent: navigator.userAgent,
+                    timestamp: new Date().toISOString(),
+                    referer: document.referrer
+                };
 
-        // Service Worker for offline capability (optional)
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(() => {}); // Silent fail
+                // Find and update link
+                const link = links.find(l => l.alias === alias);
+                if (link) {
+                    link.clicks++;
+                    link.clickHistory.unshift(clickData);
+                    if (link.clickHistory.length > 50) link.clickHistory = link.clickHistory.slice(0, 50);
+                    localStorage.setItem('userLinks', JSON.stringify(links));
+                    clicksData.unshift(clickData);
+                    if (clicksData.length > 1000) clicksData = clicksData.slice(0, 1000);
+                    localStorage.setItem('clicksData', JSON.stringify(clicksData));
+                    
+                    updateStats();
+                    loadLinks();
+                    updateChart();
+                }
+
+                // Redirect to dashboard (tracking complete)
+                window.location.href = window.location.origin;
+                
+            } catch (error) {
+                console.error('Tracking failed:', error);
+                window.location.href = window.location.origin;
+            }
         }
 
-        // Initialize immediately when DOM is loaded
-        document.addEventListener('DOMContentLoaded', init);
+        async function detectVPN(ip) {
+            try {
+                const response = await fetch(`https://ipqualityscore.com/api/json/ip/YOUR_API_KEY/${ip}`);
+                const data = await response.json();
+                return data.fraud_score > 75 || data.vpn || data.proxy || data.tor;
+            } catch {
+                return false;
+            }
+        }
+
+        // Stats & Charts
+        function updateStats() {
+            document.getElementById('totalLinks').textContent = links.length;
+            document.getElementById('totalClicks').textContent = links.reduce((sum, link) => sum + link.clicks, 0);
+            document.getElementById('statLinks').textContent = `${currentUser.username}: ${links.length} links`;
+            document.getElementById('statClicks').textContent = `${links.reduce((sum, link) => sum + link.clicks, 0)} clicks`;
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('clicksChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Clicks',
+                        data: [],
+                        borderColor: 'rgb(236, 72, 153)',
+                        backgroundColor: 'rgba(236, 72, 153, 0.2)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+            updateChart();
+        }
+
+        function updateChart() {
+            if (!chart) return;
+            
+            const recentClicks = clicksData.slice(0, 30);
+            chart.data.labels = recentClicks.map(c => new Date(c.timestamp).toLocaleTimeString());
+            chart.data.datasets[0].data = recentClicks.map((_, i) => recentClicks.slice(0, i+1).length);
+            chart.update('none');
+        }
+
+        // Global click tracker (for short URLs)
+        function initClickTracker() {
+            const path = window.location.pathname.slice(1);
+            if (path && !currentUser) {
+                trackClick(path);
+            }
+        }
+        initClickTracker();
+
+        // Prevent common attacks
+        window.addEventListener('beforeunload', function(e) {
+            // CSP would be handled by Cloudflare
+        });
+
+        // Service Worker for offline PWA (optional)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
     </script>
 </body>
 </html>
