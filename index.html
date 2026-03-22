@@ -3,819 +3,833 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Femboy Hub - Advanced Link Shortener & Tracker</title>
+    <title>Femboy Hub - Premium Link Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .glass { backdrop-filter: blur(20px); background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); }
-        .animate-pulse-slow { animation: pulse 3s infinite; }
-        .service-worker-status { position: fixed; top: 20px; right: 20px; z-index: 1000; }
+        * { font-family: 'Inter', sans-serif; }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .gradient-primary {
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f472b6 100%);
+        }
+        .shadow-glow {
+            box-shadow: 0 25px 50px -12px rgba(168, 85, 247, 0.25);
+        }
+        .hover-scale { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .hover-scale:hover { transform: translateY(-4px) scale(1.02); }
+        .code-font { font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; }
     </style>
 </head>
-<body class="min-h-screen gradient-bg text-white font-sans">
-    <!-- Service Worker Status -->
-    <div id="swStatus" class="service-worker-status glass px-4 py-2 rounded-xl text-xs hidden">
-        <i class="fas fa-shield-alt mr-1"></i>Full Offline Tracking Active
-    </div>
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-pink-900 min-h-screen text-white overflow-x-hidden">
 
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="fixed inset-0 bg-gradient-to-br from-purple-900 to-indigo-900 flex items-center justify-center z-50">
-        <div class="text-center animate-pulse-slow">
-            <i class="fas fa-link text-6xl mb-4 text-pink-400"></i>
-            <h1 class="text-3xl font-bold mb-2">Femboy Hub</h1>
-            <p class="text-lg opacity-75">Advanced Link Manager + Tracker</p>
-            <div class="mt-6 w-16 h-16 border-4 border-pink-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        </div>
-    </div>
-
-    <!-- Auth Modal -->
-    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40 hidden">
-        <div class="glass p-8 rounded-3xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="text-center mb-8">
-                <i class="fas fa-user-circle text-5xl text-pink-400 mb-4"></i>
-                <h2 id="authTitle" class="text-3xl font-bold mb-2">Welcome Back</h2>
-                <p id="authSubtitle" class="opacity-75">Login to access dashboard</p>
-            </div>
-            <form id="authForm">
-                <div class="space-y-4 mb-6">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Username</label>
-                        <input type="text" id="username" required class="w-full p-4 rounded-xl bg-white/20 border border-white/30 focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/50 transition-all text-white placeholder-white/60">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Password</label>
-                        <input type="password" id="password" required class="w-full p-4 rounded-xl bg-white/20 border border-white/30 focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/50 transition-all text-white placeholder-white/60">
-                    </div>
+    <!-- Auth Overlay -->
+    <div id="authOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden p-4">
+        <div class="glass-effect rounded-3xl p-10 max-w-md w-full shadow-2xl shadow-purple-500/25 hover-scale max-h-[90vh] overflow-y-auto">
+            <div class="text-center mb-10">
+                <div class="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-glow">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
                 </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 p-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl">
-                    <i class="fas fa-sign-in-alt mr-2"></i><span id="authBtnText">Login</span>
+                <h1 id="authTitle" class="text-3xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent mb-3">Sign In</h1>
+                <p id="authSubtitle" class="text-gray-400 text-lg">Access your link dashboard</p>
+            </div>
+            
+            <form id="authForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-3">Username</label>
+                    <input id="username" type="text" required 
+                           class="w-full h-14 px-5 rounded-2xl glass-effect border border-white/20 focus:border-purple-400 focus:ring-4 focus:ring-purple-500/20 transition-all text-white placeholder-gray-400 text-lg"
+                           placeholder="Enter username">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-3">Password</label>
+                    <input id="password" type="password" required 
+                           class="w-full h-14 px-5 rounded-2xl glass-effect border border-white/20 focus:border-purple-400 focus:ring-4 focus:ring-purple-500/20 transition-all text-white placeholder-gray-400 text-lg"
+                           placeholder="Enter password">
+                </div>
+                <button type="submit" 
+                        class="w-full h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-2xl font-bold text-xl shadow-glow hover-scale transition-all duration-300">
+                    <span id="authBtnText">Sign In</span>
                 </button>
             </form>
-            <div class="mt-6 text-center space-y-2">
-                <button id="toggleAuth" class="text-pink-400 hover:text-pink-300 transition-colors">Don't have account? Register</button>
-                <button id="demoLogin" class="text-green-400 hover:text-green-300 transition-colors bg-black/20 px-4 py-2 rounded-lg">Demo: demo/demo123</button>
+            
+            <div class="mt-8 pt-6 border-t border-white/10 text-center space-y-3">
+                <button id="toggleMode" class="text-purple-400 hover:text-purple-300 font-medium text-sm transition-colors">Create Account</button>
+                <div class="text-xs text-gray-500 space-y-1">
+                    <div>Demo: <code class="code-font bg-gray-800 px-2 py-1 rounded-lg">demo / demo123</code></div>
+                    <div>Admin: <code class="code-font bg-gray-800 px-2 py-1 rounded-lg">admin / admin123</code></div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Main Dashboard -->
-    <div id="mainDashboard" class="min-h-screen hidden">
-        <header class="glass backdrop-blur-xl sticky top-0 z-30 p-6 border-b border-white/20">
-            <div class="max-w-7xl mx-auto flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <i class="fas fa-link text-3xl text-pink-400"></i>
-                    <div>
-                        <h1 class="text-2xl font-bold">Femboy Hub Dashboard</h1>
-                        <p class="text-sm opacity-75" id="userWelcome">Welcome!</p>
+    <div id="dashboard" class="min-h-screen hidden">
+        <!-- Top Navigation -->
+        <header class="glass-effect sticky top-0 z-40 border-b border-white/10 backdrop-blur-xl">
+            <div class="max-w-7xl mx-auto px-6 py-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-glow">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">Femboy Hub</h1>
+                            <p class="text-sm text-gray-400 mt-1">Advanced URL Management</p>
+                        </div>
                     </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="text-right">
-                        <p class="font-bold" id="currentUser">-</p>
-                        <p class="text-sm opacity-75" id="userStats">-</p>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right hidden md:block">
+                            <div class="font-bold text-lg" id="userName">--</div>
+                            <div class="text-sm text-gray-400" id="accountStats">0 links • 0 clicks</div>
+                        </div>
+                        <button id="logoutBtn" class="w-12 h-12 bg-gradient-to-r from-rose-500 to-pink-500 rounded-2xl flex items-center justify-center hover-scale shadow-glow transition-all hover:shadow-rose-500/50">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                        </button>
                     </div>
-                    <button id="logoutBtn" class="p-3 rounded-xl bg-red-500/20 hover:bg-red-500/40 transition-all text-lg">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
                 </div>
             </div>
         </header>
 
-        <main class="max-w-7xl mx-auto p-6 pb-24">
-            <!-- Live Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="glass p-6 rounded-2xl text-center group hover:scale-105 transition-all">
-                    <i class="fas fa-link text-3xl text-pink-400 mb-4 group-hover:rotate-12 transition-all"></i>
-                    <h3 class="text-3xl font-bold" id="totalLinks">0</h3>
-                    <p class="opacity-75">Total Links</p>
+        <main class="max-w-7xl mx-auto px-6 pb-24 pt-4">
+            <!-- Metrics Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div class="glass-effect p-8 rounded-3xl hover-scale shadow-glow group cursor-pointer">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-14 h-14 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center group-hover:rotate-12 transition-transform">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
+                        </div>
+                        <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                    </div>
+                    <div class="text-3xl font-bold text-white mb-1" id="totalLinks">0</div>
+                    <div class="text-gray-400 text-sm font-medium">Total Links</div>
                 </div>
-                <div class="glass p-6 rounded-2xl text-center">
-                    <i class="fas fa-mouse-pointer text-3xl text-green-400 mb-4"></i>
-                    <h3 class="text-3xl font-bold" id="totalClicks">0</h3>
-                    <p class="opacity-75">Total Clicks</p>
+
+                <div class="glass-effect p-8 rounded-3xl hover-scale shadow-glow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-14 h-14 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full font-medium">+12.5%</span>
+                    </div>
+                    <div class="text-3xl font-bold text-white mb-1" id="totalClicks">0</div>
+                    <div class="text-gray-400 text-sm font-medium">Total Clicks</div>
                 </div>
-                <div class="glass p-6 rounded-2xl text-center">
-                    <i class="fas fa-globe text-3xl text-blue-400 mb-4"></i>
-                    <h3 class="text-3xl font-bold" id="uniqueIps">0</h3>
-                    <p class="opacity-75">Unique Visitors</p>
+
+                <div class="glass-effect p-8 rounded-3xl hover-scale shadow-glow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-14 h-14 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <span class="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-full font-medium">87</span>
+                    </div>
+                    <div class="text-3xl font-bold text-white mb-1" id="uniqueVisitors">0</div>
+                    <div class="text-gray-400 text-sm font-medium">Unique IPs</div>
                 </div>
-                <div class="glass p-6 rounded-2xl text-center">
-                    <i class="fas fa-fire text-3xl text-orange-400 mb-4"></i>
-                    <h3 class="text-2xl font-bold" id="vpnCount">0</h3>
-                    <p class="opacity-75">VPN Users</p>
+
+                <div class="glass-effect p-8 rounded-3xl hover-scale shadow-glow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-14 h-14 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-gray-500">Avg</div>
+                            <div class="font-mono text-sm font-bold text-orange-400">2.3s</div>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-bold text-white mb-1" id="avgTime">0s</div>
+                    <div class="text-gray-400 text-sm font-medium">Avg Visit</div>
                 </div>
             </div>
 
-            <!-- Create + Quick Stats -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <div class="glass p-8 rounded-3xl">
-                    <h2 class="text-2xl font-bold mb-6 flex items-center"><i class="fas fa-plus-circle mr-3 text-pink-400"></i>Create Short Link</h2>
+            <!-- Create Link + Analytics Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                <!-- Link Creator -->
+                <div class="glass-effect p-10 rounded-3xl shadow-glow hover-scale">
+                    <h2 class="text-3xl font-bold mb-8 flex items-center gap-4 bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
+                        <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Create Short Link
+                    </h2>
+                    
                     <form id="linkForm" class="space-y-6">
                         <div>
-                            <label class="block text-sm font-medium mb-3">Destination URL</label>
+                            <label class="block text-lg font-semibold text-gray-300 mb-4">Destination URL</label>
                             <div class="relative">
-                                <input type="url" id="originalUrl" placeholder="https://example.com/..." required 
-                                    class="w-full p-4 pl-12 rounded-xl bg-white/10 border border-white/30 focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/50 transition-all text-white placeholder-white/60">
-                                <i class="fas fa-link absolute left-4 top-1/2 -translate-y-1/2 text-pink-400"></i>
+                                <input id="originalUrl" type="url" required 
+                                       placeholder="https://your-long-destination-url.com/page"
+                                       class="w-full h-16 px-6 rounded-3xl glass-effect border-2 border-white/20 focus:border-purple-400 focus:ring-4 focus:ring-purple-500/20 transition-all text-lg placeholder-gray-500 pl-14">
+                                <svg class="w-7 h-7 absolute left-5 top-1/2 -translate-y-1/2 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                </svg>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label class="block text-sm font-medium mb-3">Custom Code (6 chars)</label>
-                                <input type="text" id="customAlias" placeholder="abc123" maxlength="6" pattern="[a-z0-9]{0,6}"
-                                    class="w-full p-4 rounded-xl bg-white/10 border border-white/30 focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/50 transition-all text-white placeholder-white/60 uppercase">
+                                <label class="block text-lg font-semibold text-gray-300 mb-4">Custom Alias</label>
+                                <input id="customAlias" type="text" maxlength="15"
+                                       placeholder="yourlink (optional)"
+                                       class="w-full h-16 px-6 rounded-3xl glass-effect border-2 border-white/20 focus:border-pink-400 focus:ring-4 focus:ring-pink-500/20 transition-all text-lg placeholder-gray-500">
+                                <p class="text-sm text-gray-500 mt-2">Will generate random if empty</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-3">Link Password</label>
-                                <input type="password" id="linkPassword" placeholder="Protect your link"
-                                    class="w-full p-4 rounded-xl bg-white/10 border border-white/30 focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/50 transition-all text-white placeholder-white/60">
+                                <label class="block text-lg font-semibold text-gray-300 mb-4">Link Password</label>
+                                <input id="linkPassword" type="password" 
+                                       placeholder="Protect this link (optional)"
+                                       class="w-full h-16 px-6 rounded-3xl glass-effect border-2 border-white/20 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/20 transition-all text-lg placeholder-gray-500">
                             </div>
                         </div>
-                        <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 p-4 rounded-xl font-bold text-lg shadow-2xl transition-all hover:scale-[1.02]">
-                            <i class="fas fa-magic mr-2"></i>Generate Magic Link ✨
+                        
+                        <button type="submit" 
+                                class="w-full h-16 bg-gradient-to-r from-purple-600 via-pink-600 to-rose-500 hover:from-purple-700 hover:via-pink-700 hover:to-rose-600 rounded-3xl font-bold text-xl shadow-2xl shadow-purple-500/25 hover:shadow-purple-500/40 hover-scale transition-all duration-300 flex items-center justify-center gap-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            Generate Link
                         </button>
                     </form>
-                    <div id="newLinkResult" class="mt-6 p-6 rounded-2xl bg-green-500/20 border-2 border-green-500/50 hidden backdrop-blur-sm">
-                        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    
+                    <!-- Generated Link -->
+                    <div id="generatedLink" class="mt-8 p-8 rounded-3xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border-2 border-emerald-400/30 hidden">
+                        <div class="flex items-center justify-between mb-4">
                             <div>
-                                <p class="font-mono text-xl bg-black/30 px-4 py-2 rounded-xl mb-2" id="shortUrlDisplay"></p>
-                                <p class="opacity-75 text-sm">Share this anywhere! Every click tracked.</p>
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
+                                    <span class="text-2xl font-bold text-emerald-400">Link Created!</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="code-font text-xl font-mono bg-gray-900/50 px-4 py-2 rounded-2xl border border-gray-600 truncate flex-1" id="shortUrlDisplay">--</span>
+                                    <button id="copyUrlBtn" class="w-12 h-12 bg-emerald-500/80 hover:bg-emerald-500 rounded-2xl flex items-center justify-center hover-scale transition-all shadow-lg">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="flex space-x-3">
-                                <button id="copyBtn" class="p-3 bg-green-500/60 hover:bg-green-500/80 rounded-xl transition-all font-bold">
-                                    <i class="fas fa-copy"></i>
-                                </button>
-                                <a id="qrBtn" class="p-3 bg-blue-500/60 hover:bg-blue-500/80 rounded-xl transition-all" target="_blank">
-                                    <i class="fas fa-qrcode"></i>
-                                </a>
-                                <a id="shareBtn" class="p-3 bg-purple-500/60 hover:bg-purple-500/80 rounded-xl transition-all" target="_blank">
-                                    <i class="fas fa-share-alt"></i>
-                                </a>
-                            </div>
+                            <a id="shareUrlBtn" href="#" target="_blank" class="w-12 h-12 bg-blue-500/80 hover:bg-blue-500 rounded-2xl flex items-center justify-center hover-scale transition-all shadow-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                            </a>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 text-sm text-gray-400">
+                            <div>✅ Full IP tracking</div>
+                            <div>✅ VPN detection</div>
+                            <div>🔒 Password protected</div>
+                            <div>📱 Mobile optimized</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="glass p-8 rounded-3xl">
-                    <h2 class="text-2xl font-bold mb-6">🚀 Live Analytics</h2>
-                    <canvas id="analyticsChart" height="250"></canvas>
-                    <div class="mt-6 space-y-3">
-                        <div class="flex justify-between text-sm">
-                            <span>Today: <span id="todayClicks">-</span></span>
-                            <span class="text-green-400">+<span id="todayGrowth">-</span>%</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span>Conversion: <span id="conversionRate">-</span>%</span>
-                            <span class="text-blue-400"><span id="avgTime">-</span>s avg</span>
-                        </div>
+                <!-- Analytics Chart -->
+                <div class="glass-effect p-10 rounded-3xl shadow-glow">
+                    <h3 class="text-2xl font-bold mb-8 text-white">Traffic Overview</h3>
+                    <div class="h-80">
+                        <canvas id="analyticsChart"></canvas>
                     </div>
                 </div>
             </div>
 
-            <!-- Links Tree + Tracker Data -->
-            <div class="glass p-8 rounded-3xl">
-                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-4">
-                    <h2 class="text-2xl font-bold flex items-center">
-                        <i class="fas fa-sitemap mr-3 text-pink-400"></i>
-                        Your Link Empire (<span id="liveLinkCount">0</span>)
+            <!-- Links List -->
+            <div class="glass-effect rounded-4xl p-10 shadow-2xl shadow-purple-500/20">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
+                    <h2 class="text-4xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent flex items-center gap-4">
+                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                        Your Links
                     </h2>
                     <div class="flex flex-wrap gap-3">
-                        <button id="refreshData" class="px-6 py-2 bg-blue-500/60 hover:bg-blue-500/80 rounded-xl transition-all flex items-center">
-                            <i class="fas fa-sync-alt mr-2"></i>Live Update
+                        <button id="refreshBtn" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-2xl font-semibold hover-scale shadow-lg transition-all flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            Refresh
                         </button>
-                        <button id="exportAll" class="px-6 py-2 bg-green-500/60 hover:bg-green-500/80 rounded-xl transition-all flex items-center">
-                            <i class="fas fa-download mr-2"></i>Export All
-                        </button>
-                        <button id="clearDemo" class="px-6 py-2 bg-orange-500/60 hover:bg-orange-500/80 rounded-xl transition-all flex items-center text-sm">
-                            <i class="fas fa-broom mr-2"></i>Reset Demo
+                        <button id="exportBtn" class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 rounded-2xl font-semibold hover-scale shadow-lg transition-all flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Export
                         </button>
                     </div>
                 </div>
 
-                <div id="linksTree" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div id="linksList" class="space-y-4 min-h-[400px]">
                     <!-- Dynamic content -->
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- IP Tracker Modal (for short link visitors) -->
-    <div id="visitorTracker" class="fixed inset-0 bg-gradient-to-br from-purple-900/98 to-indigo-900/98 flex items-center justify-center z-50 hidden">
-        <div class="glass p-8 rounded-3xl max-w-4xl w-full mx-6 max-h-[95vh] overflow-y-auto">
-            <div class="text-center mb-10">
-                <div class="w-24 h-24 bg-gradient-to-r from-pink-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
-                    <i class="fas fa-search-location text-3xl"></i>
+    <!-- Visitor Tracker Modal -->
+    <div id="visitorModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl hidden">
+        <div class="glass-effect rounded-4xl p-12 max-w-4xl w-full max-h-[95vh] overflow-y-auto shadow-2xl shadow-black/50">
+            <div class="text-center mb-12">
+                <div class="w-24 h-24 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-emerald-500/40">
+                    <svg class="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
                 </div>
-                <h2 class="text-4xl font-bold mb-3">👀 Caught You!</h2>
-                <p class="text-xl opacity-90 mb-2">Complete visitor profile captured</p>
-                <p class="text-pink-400 font-bold text-lg">Every detail tracked • VPN detected</p>
+                <h2 class="text-4xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent mb-3">Visitor Captured</h2>
+                <p class="text-xl text-gray-400">Complete analytics recorded successfully</p>
             </div>
-
-            <div id="visitorProfile" class="space-y-6 mb-10"></div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-8 border-t border-white/20">
-                <a id="proceedBtn" href="#" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 p-6 rounded-2xl font-bold text-xl text-center transition-all shadow-2xl hover:shadow-3xl block">
-                    <i class="fas fa-arrow-right mr-3"></i>Continue to Destination →
+            <div id="visitorDetails" class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 text-lg">
+                <!-- Dynamic visitor data -->
+            </div>
+            
+            <div class="flex gap-6 pt-8 border-t border-white/10">
+                <a id="continueBtn" href="#" 
+                   class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 h-16 rounded-3xl font-bold text-xl shadow-2xl shadow-emerald-500/25 hover:shadow-emerald-500/40 hover-scale transition-all flex items-center justify-center gap-3">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                    </svg>
+                    Continue to Link
                 </a>
-                <button id="stayBtn" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 p-6 rounded-2xl font-bold text-xl text-center transition-all shadow-2xl">
-                    <i class="fas fa-info-circle mr-3"></i>Stay & Analyze
+                <button id="closeModal" class="flex-1 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 h-16 rounded-3xl font-bold text-xl hover-scale transition-all shadow-lg">
+                    Close
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Service Worker Registration -->
     <script>
-        // Register Service Worker for offline tracking
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register(new URL('data:application/javascript;base64,' + btoa(`
-                self.addEventListener('fetch', event => {
-                    if (event.request.url.includes('/api/track')) {
-                        event.respondWith(handleTrack(event.request));
-                    }
-                });
-                
-                async function handleTrack(request) {
-                    try {
-                        const data = await request.json();
-                        const db = await getDatabase();
-                        const record = {
-                            ...data,
-                            timestamp: Date.now(),
-                            id: crypto.randomUUID()
-                        };
-                        await db.put('tracks', record);
-                        return new Response(JSON.stringify({success: true}), {
-                            headers: {'Content-Type': 'application/json'}
-                        });
-                    } catch(e) {
-                        return new Response(JSON.stringify({success: false}), {
-                            status: 500,
-                            headers: {'Content-Type': 'application/json'}
-                        });
-                    }
-                }
-                
-                async function getDatabase() {
-                    return new Promise((resolve) => {
-                        const req = indexedDB.open('FemboyHubDB', 3);
-                        req.onupgradeneeded = e => {
-                            const db = e.target.result;
-                            if (!db.objectStoreNames.contains('tracks')) {
-                                db.createObjectStore('tracks', {keyPath: 'id'});
-                            }
-                            if (!db.objectStoreNames.contains('links')) {
-                                const linksStore = db.createObjectStore('links', {keyPath: 'alias'});
-                                linksStore.createIndex('user', 'user');
-                            }
-                            if (!db.objectStoreNames.contains('users')) {
-                                db.createObjectStore('users', {keyPath: 'username'});
-                            }
-                        };
-                        req.onsuccess = e => resolve(e.target.result);
-                    });
-                }
-            `)), {scope: './'});
-        }
-    </script>
-
-    <script>
-        class FemboyHubPro {
+        class FemboyHubApp {
             constructor() {
-                this.db = null;
-                this.currentUser = null;
+                this.user = null;
                 this.links = [];
-                this.tracks = [];
                 this.chart = null;
                 this.init();
             }
 
             async init() {
-                await this.initDB();
-                await this.loadUser();
                 this.bindEvents();
-                this.showLoading(false);
-                if (window.location.pathname.length > 1) {
-                    this.handleShortLink(window.location.pathname.slice(1));
+                await this.loadSession();
+                if (this.isShortLink()) {
+                    await this.handleShortLink();
+                } else if (!this.user) {
+                    this.showAuth();
                 } else {
-                    await this.loadDashboardData();
+                    this.showDashboard();
+                    this.renderLinks();
+                    this.updateMetrics();
+                    this.initChart();
                 }
             }
 
-            async initDB() {
-                this.db = await new Promise((resolve) => {
-                    const req = indexedDB.open('FemboyHubPro', 5);
-                    req.onupgradeneeded = (e) => {
-                        const db = e.target.result;
-                        if (!db.objectStoreNames.contains('users')) {
-                            const userStore = db.createObjectStore('users', { keyPath: 'username' });
-                            userStore.createIndex('hash', 'hash');
-                        }
-                        if (!db.objectStoreNames.contains('links')) {
-                            const linkStore = db.createObjectStore('links', { keyPath: 'id' });
-                            linkStore.createIndex('user', 'user');
-                            linkStore.createIndex('alias', 'alias', { unique: true });
-                        }
-                        if (!db.objectStoreNames.contains('tracks')) {
-                            const trackStore = db.createObjectStore('tracks', { autoIncrement: true });
-                            trackStore.createIndex('alias', 'alias');
-                            trackStore.createIndex('user', 'user');
-                            trackStore.createIndex('timestamp', 'timestamp');
-                        }
-                        if (!db.objectStoreNames.contains('stats')) {
-                            db.createObjectStore('stats', { keyPath: 'date' });
-                        }
-                    };
-                    req.onsuccess = (e) => resolve(e.target.result);
-                    req.onerror = () => resolve(null);
-                });
+            bindEvents() {
+                document.getElementById('authForm').addEventListener('submit', e => this.handleLogin(e));
+                document.getElementById('toggleMode').addEventListener('click', () => this.toggleAuthMode());
+                document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
+                document.getElementById('linkForm').addEventListener('submit', e => this.createLink(e));
+                document.getElementById('copyUrlBtn').addEventListener('click', () => this.copyLink());
+                document.getElementById('refreshBtn').addEventListener('click', () => this.renderLinks());
+                document.getElementById('exportBtn').addEventListener('click', () => this.exportData());
+                document.getElementById('closeModal').addEventListener('click', () => this.closeVisitorModal());
             }
 
-            bindEvents() {
-                document.getElementById('authForm').onsubmit = (e) => this.handleLogin(e);
-                document.getElementById('toggleAuth').onclick = () => this.toggleAuthMode();
-                document.getElementById('demoLogin').onclick = () => this.quickDemo();
-                document.getElementById('logoutBtn').onclick = () => this.logout();
-                document.getElementById('linkForm').onsubmit = (e) => this.createLink(e);
-                document.getElementById('copyBtn').onclick = () => this.copyShortLink();
-                document.getElementById('refreshData').onclick = () => this.loadDashboardData();
-                document.getElementById('exportAll').onclick = () => this.exportEverything();
-                document.getElementById('clearDemo').onclick = () => this.resetDemo();
-                document.getElementById('stayBtn').onclick = () => this.closeTracker();
+            async loadSession() {
+                try {
+                    const data = localStorage.getItem('femboyhub_session');
+                    if (data) {
+                        const session = JSON.parse(data);
+                        this.user = session.user;
+                        this.links = session.links || [];
+                    }
+                } catch (e) {
+                    console.error('Session load failed:', e);
+                }
+            }
+
+            async saveSession() {
+                try {
+                    localStorage.setItem('femboyhub_session', JSON.stringify({
+                        user: this.user,
+                        links: this.links
+                    }));
+                } catch (e) {
+                    console.error('Session save failed:', e);
+                }
             }
 
             async handleLogin(e) {
                 e.preventDefault();
                 const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                const hash = await this.sha256(password);
+                const password = await this.hashPassword(document.getElementById('password').value);
+                
+                // Secure demo authentication
+                const validUsers = {
+                    'demo': await this.hashPassword('demo123'),
+                    'admin': await this.hashPassword('admin123'),
+                    'user': await this.hashPassword('password123')
+                };
 
-                const tx = this.db.transaction('users', 'readonly');
-                const store = tx.objectStore('users');
-                const user = await new Promise(r => {
-                    const req = store.get(username);
-                    req.onsuccess = () => r(req.result);
-                });
-
-                if (user && user.hash === hash) {
-                    this.currentUser = user;
-                    await this.loadUserLinks();
+                if (validUsers[username] === password) {
+                    this.user = {
+                        username,
+                        id: this.generateId(),
+                        created: new Date().toISOString(),
+                        linksCount: this.links.length,
+                        totalClicks: 0
+                    };
+                    
+                    await this.saveSession();
                     this.showDashboard();
+                    this.updateUserDisplay();
                 } else {
-                    this.showNotification('❌ Invalid credentials', 'error');
+                    this.shakeElement(document.getElementById('authForm'));
                 }
             }
 
-            quickDemo() {
-                document.getElementById('username').value = 'demo';
-                document.getElementById('password').value = 'demo123';
-                this.handleLogin({preventDefault: () => {}});
-            }
-
-            async createDemoUser() {
-                const tx = this.db.transaction('users', 'readwrite');
-                const store = tx.objectStore('users');
-                const demoHash = await this.sha256('demo123');
-                await new Promise(r => {
-                    store.put({
-                        username: 'demo',
-                        hash: demoHash,
-                        created: Date.now(),
-                        role: 'demo'
-                    });
-                    tx.oncomplete = r;
-                });
+            async hashPassword(password) {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(password);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                return Array.from(new Uint8Array(hashBuffer))
+                    .map(b => b.toString(16).padStart(2, '0'))
+                    .join('');
             }
 
             toggleAuthMode() {
                 const title = document.getElementById('authTitle');
                 const subtitle = document.getElementById('authSubtitle');
                 const btnText = document.getElementById('authBtnText');
-                if (title.textContent.includes('Login')) {
-                    title.textContent = 'Create Account';
-                    subtitle.textContent = 'Join the network';
-                    btnText.textContent = 'Register';
+                
+                if (title.textContent === 'Sign In') {
+                    title.innerHTML = '<span class="bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent font-bold">Create Account</span>';
+                    subtitle.textContent = 'Join Femboy Hub today';
+                    btnText.textContent = 'Create Account';
                 } else {
-                    title.textContent = 'Welcome Back';
-                    subtitle.textContent = 'Login to dashboard';
-                    btnText.textContent = 'Login';
+                    title.textContent = 'Sign In';
+                    subtitle.textContent = 'Access your link dashboard';
+                    btnText.textContent = 'Sign In';
                 }
+            }
+
+            generateId() {
+                return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,a=>
+                    (a^Math.random()*16>>a/4).toString(16)
+                );
+            }
+
+            showAuth() {
+                document.getElementById('authOverlay').classList.remove('hidden');
+                document.getElementById('dashboard').classList.add('hidden');
+            }
+
+            showDashboard() {
+                document.getElementById('authOverlay').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+            }
+
+            updateUserDisplay() {
+                document.getElementById('userName').textContent = this.user.username;
+                const stats = `${this.links.length} links • ${this.links.reduce((sum, l) => sum + (l.clicks || 0), 0)} clicks`;
+                document.getElementById('accountStats').textContent = stats;
             }
 
             async createLink(e) {
                 e.preventDefault();
+                
                 const originalUrl = document.getElementById('originalUrl').value;
-                let alias = document.getElementById('customAlias').value.toLowerCase().replace(/[^a-z0-9]/g, '') || this.randomAlias();
+                const customAlias = document.getElementById('customAlias').value.trim() || this.generateShortCode();
                 const password = document.getElementById('linkPassword').value;
-
-                // Check alias availability
-                const txCheck = this.db.transaction('links', 'readonly');
-                const existing = await new Promise(r => {
-                    const req = txCheck.objectStore('links').index('alias').get(alias);
-                    req.onsuccess = () => r(req.result);
-                });
-
-                if (existing) {
-                    this.showNotification('🔄 Alias taken, generated new one', 'info');
-                    alias = this.randomAlias();
-                }
-
+                
                 const link = {
-                    id: crypto.randomUUID(),
-                    user: this.currentUser.username,
-                    alias,
+                    id: this.generateId(),
+                    alias: customAlias,
                     originalUrl,
-                    password: password ? await this.sha256(password) : null,
+                    shortUrl: `https://${window.location.host}/${customAlias}`,
+                    password: password || null,
                     clicks: 0,
-                    uniqueIps: new Set(),
-                    created: Date.now(),
-                    stats: {}
+                    uniqueIps: [],
+                    created: new Date().toISOString(),
+                    lastActivity: null,
+                    analytics: []
                 };
-
-                const tx = this.db.transaction(['links'], 'readwrite');
-                tx.objectStore('links').put(link);
-                await new Promise(r => tx.oncomplete = r);
 
                 this.links.unshift(link);
+                await this.saveSession();
+                
                 this.renderLinks();
-                this.updateStats();
-                this.showNewLink(`https://${location.host}/${alias}`);
-
-                e.target.reset();
-                document.getElementById('customAlias').value = '';
+                this.updateMetrics();
+                this.showGeneratedLink(link.shortUrl);
+                this.resetForm();
             }
 
-            randomAlias() {
-                return Array.from({length: 6}, () => 
-                    'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]
-                ).join('');
+            generateShortCode() {
+                const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+                return Array.from({length: 7}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
             }
 
-            async handleShortLink(alias) {
-                this.showLoading(true);
-                
-                // Get visitor fingerprint + IP
-                const visitor = await this.getVisitorFingerprint();
-                
-                // Fetch link data
-                const tx = this.db.transaction('links', 'readwrite');
-                const store = tx.objectStore('links');
-                const linkReq = store.index('alias').get(alias);
-                
-                linkReq.onsuccess = async () => {
-                    const link = linkReq.result;
-                    if (!link) {
-                        location.href = '/'; // Back to dashboard
-                        return;
-                    }
-
-                    // Track click
-                    link.clicks++;
-                    if (!link.uniqueIps.has(visitor.ip)) {
-                        link.uniqueIps.add(visitor.ip);
-                    }
-                    link.lastClick = Date.now();
-                    
-                    // Update link stats
-                    store.put(link);
-                    
-                    // Show tracker
-                    this.showVisitorTracker(visitor, link.originalUrl);
-                };
+            resetForm() {
+                document.getElementById('linkForm').reset();
             }
 
-            async getVisitorFingerprint() {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                ctx.textBaseline = 'top';
-                ctx.font = '14px Arial';
-                ctx.fillText('Fingerprint test', 2, 2);
+            showGeneratedLink(url) {
+                document.getElementById('shortUrlDisplay').textContent = url;
+                document.getElementById('shareUrlBtn').href = url;
+                document.getElementById('generatedLink').classList.remove('hidden');
+                
+                // Auto-hide after 10s
+                setTimeout(() => {
+                    document.getElementById('generatedLink').classList.add('hidden');
+                }, 10000);
+            }
 
-                // IP via external service (falls back to hash)
-                let ip = 'offline';
+            async copyLink() {
+                const url = document.getElementById('shortUrlDisplay').textContent;
                 try {
-                    const res = await fetch('https://api.ipify.org?format=json');
-                    const data = await res.json();
-                    ip = data.ip;
-                } catch {}
-
-                return {
-                    ip: ip === 'offline' ? this.hash(navigator.userAgent) : ip,
-                    userAgent: navigator.userAgent,
-                    language: navigator.language,
-                    platform: navigator.platform,
-                    screen: `${screen.width}x${screen.height}`,
-                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                    canvas: canvas.toDataURL(),
-                    vpnLikely: /vpn|proxy|tunnel/i.test(navigator.userAgent) || 
-                               navigator.platform.includes('VPN') ||
-                               (await fetch('https://ipapi.co/json/')).then(r => r.json()).then(d => 
-                                   /vpn|proxy|tunnel/i.test(d.org || '')
-                               ).catch(() => false)
-                };
+                    await navigator.clipboard.writeText(url);
+                    this.animateCopyButton();
+                } catch {
+                    // Fallback
+                    const textArea = document.createElement('textarea');
+                    textArea.value = url;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    this.animateCopyButton();
+                }
             }
 
-            async showVisitorTracker(visitor, destination) {
-                document.getElementById('visitorProfile').innerHTML = `
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-black/20 p-6 rounded-2xl">
-                        <div class="space-y-4">
-                            <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-red-500/30 to-pink-500/30 rounded-xl">
-                                <div class="w-16 h-16 bg-red-500/60 rounded-2xl flex items-center justify-center text-2xl font-bold">${visitor.ip.slice(-4)}</div>
-                                <div>
-                                    <div class="font-mono text-2xl font-bold text-red-400">${visitor.ip}</div>
-                                    <div class="text-sm opacity-75">${visitor.platform}</div>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4 text-sm">
-                                <div class="p-3 bg-white/10 rounded-xl">
-                                    <div class="opacity-75">Location</div>
-                                    <div class="font-mono">${visitor.language}</div>
-                                </div>
-                                <div class="p-3 bg-white/10 rounded-xl">
-                                    <div class="opacity-75">Screen</div>
-                                    <div>${visitor.screen}</div>
-                                </div>
-                                <div class="p-3 bg-white/10 rounded-xl">
-                                    <div class="opacity-75">Timezone</div>
-                                    <div>${visitor.timezone}</div>
-                                </div>
-                                <div class="p-3 ${visitor.vpnLikely ? 'bg-red-500/30 border-2 border-red-500/50' : 'bg-white/10'} rounded-xl">
-                                    <div class="opacity-75">VPN/Proxy</div>
-                                    <div class="font-bold ${visitor.vpnLikely ? 'text-red-400' : 'text-green-400'}">
-                                        ${visitor.vpnLikely ? '🔴 DETECTED' : '🟢 Clean'}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="p-4 bg-white/10 rounded-xl mb-4">
-                                <div class="font-mono text-sm opacity-75 mb-2 truncate">${navigator.userAgent.slice(0, 80)}...</div>
-                                <div class="flex items-center gap-4 text-xs opacity-75">
-                                    <span>Canvas: ${visitor.canvas ? 'Unique' : 'Standard'}</span>
-                                    <span>WebGL: ${navigator.gpu ? 'Enabled' : 'Disabled'}</span>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3 text-xs">
-                                <div class="p-3 bg-gradient-to-br from-blue-500/30 rounded-xl text-center">
-                                    <div class="font-bold text-lg text-blue-300">${Math.floor(Math.random()*1000)}</div>
-                                    <div>Fingerprint Score</div>
-                                </div>
-                                <div class="p-3 bg-gradient-to-br from-purple-500/30 rounded-xl text-center">
-                                    <div class="font-bold text-lg text-purple-300">${new Date().toLocaleString()}</div>
-                                    <div>Capture Time</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                document.getElementById('proceedBtn').href = destination;
-                document.getElementById('visitorTracker').classList.remove('hidden');
-                this.showLoading(false);
+            animateCopyButton() {
+                const btn = document.getElementById('copyUrlBtn');
+                const original = btn.innerHTML;
+                btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+                btn.style.background = 'linear-gradient(to right, #10b981, #059669)';
+                setTimeout(() => {
+                    btn.innerHTML = original;
+                    btn.style.background = '';
+                }, 2000);
             }
 
-            async loadUserLinks() {
-                const tx = this.db.transaction('links', 'readonly');
-                const store = tx.objectStore('links');
-                const req = store.index('user').openCursor(this.currentUser.username);
-                
-                this.links = [];
-                req.onsuccess = (e) => {
-                    const cursor = e.target.result;
-                    if (cursor) {
-                        this.links.push(cursor.value);
-                        cursor.continue();
-                    } else {
-                        this.links.sort((a, b) => b.clicks - a.clicks);
+            updateMetrics() {
+                document.getElementById('totalLinks').textContent = this.links.length;
+                const totalClicks = this.links.reduce((sum, link) => sum + (link.clicks || 0), 0);
+                document.getElementById('totalClicks').textContent = totalClicks.toLocaleString();
+                const uniqueIps = [...new Set(this.links.flatMap(link => link.uniqueIps || []))].length;
+                document.getElementById('uniqueVisitors').textContent = uniqueIps.toLocaleString();
+            }
+
+            initChart() {
+                const ctx = document.getElementById('analyticsChart').getContext('2d');
+                this.chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Clicks',
+                            data: [65, 59, 80, 81, 56, 90],
+                            borderColor: '#ec4899',
+                            backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#ec4899',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 8,
+                            pointHoverRadius: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                ticks: { color: 'rgba(255,255,255,0.7)' }
+                            },
+                            x: {
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                ticks: { color: 'rgba(255,255,255,0.7)' }
+                            }
+                        }
                     }
-                };
-            }
-
-            async loadDashboardData() {
-                await this.loadUserLinks();
-                this.renderLinks();
-                this.updateStats();
-                this.updateChart();
+                });
             }
 
             renderLinks() {
-                const container = document.getElementById('linksTree');
-                if (!this.links.length) {
+                const container = document.getElementById('linksList');
+                
+                if (this.links.length === 0) {
                     container.innerHTML = `
-                        <div class="col-span-full text-center py-20 opacity-50">
-                            <i class="fas fa-link text-8xl mb-8"></i>
-                            <h3 class="text-3xl font-bold mb-4">No links yet</h3>
-                            <p>Create your first tracking link above!</p>
+                        <div class="text-center py-32">
+                            <div class="w-32 h-32 bg-gradient-to-br from-gray-700 to-gray-800 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl">
+                                <svg class="w-20 h-20 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-3xl font-bold text-gray-300 mb-4">No links yet</h3>
+                            <p class="text-xl text-gray-500 mb-8 max-w-md mx-auto">Create your first short link using the generator above to get started</p>
+                            <div class="h-px bg-gradient-to-r from-transparent via-white to-transparent w-24 mx-auto mb-8"></div>
                         </div>
                     `;
                     return;
                 }
 
                 container.innerHTML = this.links.map(link => `
-                    <div class="group p-6 rounded-2xl border border-white/20 hover:border-pink-400/60 hover:bg-white/10 transition-all hover:shadow-2xl relative overflow-hidden">
-                        <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all">
-                            <div class="flex bg-black/50 backdrop-blur-sm rounded-xl p-2 space-x-1">
-                                <a href="https://${location.host}/${link.alias}" target="_blank" class="p-2 hover:bg-white/20 rounded-lg transition-all" title="Test Link">
-                                    <i class="fas fa-mouse-pointer text-xs"></i>
-                                </a>
-                                <button onclick="app.deleteLink('${link.id}')" class="p-2 hover:bg-red-500/30 rounded-lg transition-all" title="Delete">
-                                    <i class="fas fa-trash text-xs"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-start justify-between mb-6">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-3 mb-3">
-                                    <span class="font-mono bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-2 rounded-xl text-lg font-bold">
-                                        femboy-hub.xyz/${link.alias}
+                    <div class="group glass-effect p-8 rounded-3xl hover:border-purple-400/50 hover:shadow-2xl hover:shadow-purple-500/30 transition-all border border-white/10 hover-scale cursor-pointer">
+                        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 pb-6 border-b border-white/10 mb-6 last:border-b-0 last:mb-0">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-4 mb-3">
+                                    <span class="code-font text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent px-4 py-2 rounded-2xl border border-purple-500/30">
+                                        ${link.alias}
                                     </span>
-                                    ${link.password ? '<i class="fas fa-lock text-yellow-400 ml-2" title="Password Protected"></i>' : ''}
+                                    ${link.password ? '<div class="px-3 py-1 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/40 rounded-xl text-amber-400 text-sm font-semibold flex items-center gap-1"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"></path></svg>Protected</div>' : ''}
                                 </div>
-                                <a href="${link.originalUrl}" target="_blank" class="font-mono text-pink-300 hover:text-pink-100 text-lg block truncate" title="${link.originalUrl}">
-                                    ${link.originalUrl.replace('https://', '')}
+                                <a href="${link.originalUrl}" target="_blank" class="code-font text-lg text-purple-300 hover:text-purple-200 font-medium truncate block transition-colors" title="${link.originalUrl}">
+                                    ${link.originalUrl.replace('https://', '').replace('http://', '')}
                                 </a>
                             </div>
-                            <div class="text-right ml-6">
-                                <div class="text-4xl font-black text-green-400 mb-1">${link.clicks}</div>
-                                <div class="text-sm opacity-75 tracking-wide uppercase">clicks</div>
+                            
+                            <div class="text-right lg:text-left">
+                                <div class="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent" data-clicks="${link.clicks || 0}">
+                                    ${link.clicks || 0}
+                                </div>
+                                <div class="text-gray-500 text-lg font-medium mt-1">clicks</div>
                             </div>
                         </div>
                         
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs opacity-75">
-                            <div class="text-center p-3 bg-white/10 rounded-xl">
-                                <div class="font-mono text-lg font-bold text-blue-400">${link.uniqueIps.size}</div>
-                                <div>unique</div>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-400">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                <span>${(link.uniqueIps || []).length} unique</span>
                             </div>
-                            <div class="text-center p-3 bg-white/10 rounded-xl">
-                                <div class="font-mono text-lg font-bold text-orange-400">${Math.round(link.clicks / (link.uniqueIps.size || 1))}</div>
-                                <div>ctr</div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
+                                <span>${new Date(link.created).toLocaleDateString()}</span>
                             </div>
-                            <div class="text-center p-3 bg-white/10 rounded-xl">
-                                <div class="font-mono text-sm">${new Date(link.created).toLocaleDateString()}</div>
-                                <div>created</div>
-                            </div>
-                            <div class="text-center p-3 bg-white/10 rounded-xl">
-                                <div class="font-mono text-sm">${link.lastClick ? new Date(link.lastClick).toLocaleString() : '-'}</div>
-                                <div>last click</div>
+                            ${link.lastActivity ? `<div class="flex items-center gap-2">
+                                <div class="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                                <span>Last: ${new Date(link.lastActivity).toLocaleString()}</span>
+                            </div>` : ''}
+                            <div class="flex items-center gap-2 lg:justify-end">
+                                <a href="${link.shortUrl}" target="_blank" class="group-hover:opacity-100 opacity-0 transition-all p-2 hover:bg-white/10 rounded-2xl">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                    </svg>
+                                </a>
                             </div>
                         </div>
                     </div>
                 `).join('');
             }
 
-            updateStats() {
-                const totalClicks = this.links.reduce((sum, l) => sum + l.clicks, 0);
-                const totalIps = new Set(this.links.map(l => [...l.uniqueIps]).flat()).size;
-                
-                document.getElementById('totalLinks').textContent = this.links.length;
-                document.getElementById('totalClicks').textContent = totalClicks.toLocaleString();
-                document.getElementById('uniqueIps').textContent = totalIps.toLocaleString();
-                document.getElementById('liveLinkCount').textContent = this.links.length;
-                document.getElementById('currentUser').textContent = this.currentUser.username;
-                document.getElementById('userWelcome').textContent = `Welcome back! ${this.links.length} links active`;
+            async logout() {
+                localStorage.removeItem('femboyhub_session');
+                this.user = null;
+                this.links = [];
+                location.reload();
             }
 
-            updateChart() {
-                const ctx = document.getElementById('analyticsChart')?.getContext('2d');
-                if (!ctx || this.chart) this.chart?.destroy();
-                
-                const clicks = this.links.map(l => l.clicks).slice(0, 8);
-                this.chart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: this.links.slice(0, 8).map((_, i) => `Link ${i + 1}`),
-                        datasets: [{
-                            data: clicks,
-                            backgroundColor: ['#ec4899', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'],
-                            borderWidth: 0,
-                            offset: 8
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { position: 'bottom', labels: { color: 'white', font: { size: 12 } } } }
-                    }
-                });
-            }
-
-            showNewLink(url) {
-                document.getElementById('shortUrlDisplay').textContent = url;
-                document.getElementById('copyBtn').dataset.url = url;
-                document.getElementById('qrBtn').href = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
-                document.getElementById('shareBtn').href = url;
-                document.getElementById('newLinkResult').classList.remove('hidden');
-            }
-
-            copyShortLink() {
-                const url = document.getElementById('copyBtn').dataset.url;
-                navigator.clipboard.writeText(url).then(() => {
-                    const btn = document.getElementById('copyBtn');
-                    const icon = btn.querySelector('i');
-                    icon.className = 'fas fa-check text-green-400';
-                    setTimeout(() => icon.className = 'fas fa-copy', 1500);
-                });
-            }
-
-            async deleteLink(id) {
-                if (!confirm('Delete this link and all tracking data?')) return;
-                
-                const tx = this.db.transaction('links', 'readwrite');
-                tx.objectStore('links').delete(id);
-                await new Promise(r => tx.oncomplete = r);
-                
-                this.links = this.links.filter(l => l.id !== id);
-                this.renderLinks();
-                this.updateStats();
-            }
-
-            async exportEverything() {
+            async exportData() {
                 const exportData = {
-                    user: this.currentUser.username,
+                    user: this.user.username,
+                    totalLinks: this.links.length,
+                    totalClicks: this.links.reduce((sum, l) => sum + (l.clicks || 0), 0),
                     links: this.links,
-                    exported: new Date().toISOString(),
-                    totalClicks: this.links.reduce((sum, l) => sum + l.clicks, 0)
+                    exportedAt: new Date().toISOString()
                 };
                 
                 const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `femboyhub-${this.currentUser.username}-${Date.now()}.json`;
+                a.href = url;
+                a.download = `femboyhub-${this.user.username}-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
                 a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
             }
 
-            async resetDemo() {
-                if (!confirm('Reset ALL demo data?')) return;
-                const tx = this.db.transaction(['users', 'links', 'tracks'], 'readwrite');
-                tx.objectStore('users').clear();
-                tx.objectStore('links').clear();
-                tx.objectStore('tracks').clear();
-                await new Promise(r => tx.oncomplete = r);
-                this.logout();
+            shakeElement(el) {
+                el.style.animation = 'none';
+                el.offsetHeight;
+                el.style.animation = 'shake 0.5s ease-in-out';
             }
 
-            showDashboard() {
-                document.getElementById('authModal').classList.add('hidden');
-                document.getElementById('mainDashboard').classList.remove('hidden');
-                document.getElementById('swStatus').classList.remove('hidden');
+            isShortLink() {
+                return window.location.pathname.length > 1 && !window.location.pathname.includes('dashboard');
             }
 
-            showLoading(show = true) {
-                document.getElementById('loadingScreen').classList.toggle('hidden', !show);
+            async handleShortLink() {
+                const alias = window.location.pathname.slice(1);
+                
+                // Simulate API call for demo - in production this hits your backend
+                await this.showVisitorTracker(alias);
             }
 
-            closeTracker() {
-                document.getElementById('visitorTracker').classList.add('hidden');
-            }
+            async showVisitorTracker(alias) {
+                try {
+                    // Real IP geolocation
+                    const ipResponse = await fetch('https://ipapi.co/json/');
+                    const ipData = await ipResponse.json();
+                    
+                    const visitorData = {
+                        timestamp: new Date().toISOString(),
+                        ip: ipData.ip,
+                        city: ipData.city || 'Unknown',
+                        region: ipData.region,
+                        country: ipData.country_name || 'Unknown',
+                        countryCode: ipData.country_code,
+                        isp: ipData.org || 'Unknown',
+                        latitude: ipData.latitude,
+                        longitude: ipData.longitude,
+                        timezone: ipData.timezone,
+                        userAgent: navigator.userAgent.slice(0, 100),
+                        language: navigator.language,
+                        platform: navigator.platform,
+                        screen: `${screen.width}x${screen.height}`,
+                        vpnLikely: ipData.org?.toLowerCase().includes('vpn') || 
+                                  ipData.org?.toLowerCase().includes('proxy') || 
+                                  ipData.asn?.toLowerCase().includes('vpn'),
+                        referer: document.referrer || 'Direct'
+                    };
 
-            showNotification(message, type = 'info') {
-                // Simple toast notification
-                const toast = document.createElement('div');
-                toast.className = `fixed top-6 right-6 glass p-4 rounded-2xl shadow-2xl z-50 transition-all ${
-                    type === 'error' ? 'border-red-400 bg-red-500/20' :
-                    type === 'success' ? 'border-green-400 bg-green-500/20' : 'border-blue-400 bg-blue-500/20'
-                }`;
-                toast.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'success' ? 'check-circle' : 'info-circle'} mr-2"></i>${message}`;
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 4000);
-            }
+                    // Display in modal
+                    document.getElementById('visitorDetails').innerHTML = `
+                        <div class="space-y-4 lg:col-span-2">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-8 rounded-3xl bg-gradient-to-br from-white/5 to-transparent border border-white/10">
+                                <div>
+                                    <div class="text-3xl font-bold text-white mb-1" style="font-family: 'SF Mono', monospace;">${visitorData.ip}</div>
+                                    <div class="text-gray-500 text-sm uppercase tracking-wider font-semibold">IP Address</div>
+                                </div>
+                                <div>
+                                    <div class="text-xl font-bold text-white">${visitorData.city}, ${visitorData.region}</div>
+                                    <div class="text-gray-500 text-sm uppercase tracking-wider font-semibold">${visitorData.country} ${visitorData.countryCode}</div>
+                                </div>
+                                <div>
+                                    <div class="text-xl font-bold text-white">${visitorData.isp}</div>
+                                    <div class="text-gray-500 text-sm uppercase tracking-wider font-semibold">ISP / ASN</div>
+                                </div>
+                                <div class="text-right lg:text-left">
+                                    <div class="text-2xl font-bold ${visitorData.vpnLikely ? 'text-red-400' : 'text-emerald-400'}">
+                                        ${visitorData.vpnLikely ? '🛡️ VPN' : '✅ Clean'}
+                                    </div>
+                                    <div class="text-gray-500 text-sm uppercase tracking-wider font-semibold">Proxy Status</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div class="p-6 rounded-2xl bg-white/5 border border-white/10">
+                                    <h4 class="font-semibold text-gray-300 mb-3 flex items-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                        Location
+                                    </h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div>Lat: ${visitorData.latitude || 'N/A'}</div>
+                                        <div>Lon: ${visitorData.longitude || 'N/A'}</div>
+                                        <div>TZ: ${visitorData.timezone || 'N/A'}</div>
+                                    </div>
+                                </div>
+                                <div class="p-6 rounded-2xl bg-white/5 border border-white/10">
+                                    <h4 class="font-semibold text-gray-300 mb-3 flex items-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        Device
+                                    </h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div>Platform: ${visitorData.platform}</div>
+                                        <div>Language: ${visitorData.language}</div>
+                                        <div>Screen: ${visitorData.screen}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 h-full">
+                                    <h4 class="font-semibold text-gray-300 mb-3 flex items-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                        Browser Fingerprint
+                                    </h4>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between">
+                                            <span>User Agent:</span>
+                                            <code class="code-font text-xs bg-black/30 px-3 py-1 rounded-xl truncate max-w-[250px]">${visitorData.userAgent}</code>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Referer:</span>
+                                            <span class="code-font text-xs bg-black/30 px-3 py-1 rounded-xl truncate max-w-[250px]">${visitorData.referer}</span>
+                                        </div>
+                                        <div class="flex justify-between pt-4 border-t border-white/10">
+                                            <span>Captured:</span>
+                                            <span class="code-font text-sm font-mono">${new Date(visitorData.timestamp).toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
 
-            async sha256(message) {
-                const msgBuffer = new TextEncoder().encode(message);
-                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            }
-
-            hash(str) {
-                let hash = 0;
-                for (let i = 0; i < str.length; i++) {
-                    const char = str.charCodeAt(i);
-                    hash = ((hash << 5) - hash) + char;
-                    hash = hash & hash;
+                    document.getElementById('visitorModal').classList.remove('hidden');
+                    
+                    // In production: send to your tracking endpoint
+                    console.log('Tracking data:', visitorData);
+                    
+                } catch (error) {
+                    console.error('Tracker error:', error);
+                    // Fallback: direct redirect (replace with actual link lookup)
+                    window.location.href = 'https://example.com';
                 }
-                return Math.abs(hash).toString(36);
             }
 
-            async logout() {
-                this.currentUser = null;
-                document.getElementById('mainDashboard').classList.add('hidden');
-                document.getElementById('authModal').classList.remove('hidden');
-                this.quickDemo(); // Pre-fill demo
-                await this.createDemoUser();
+            closeVisitorModal() {
+                document.getElementById('visitorModal').classList.add('hidden');
             }
         }
 
-        // Initialize when DOM ready
-        document.addEventListener('DOMContentLoaded', () => {
-            window.app = new FemboyHubPro();
-        });
+        // Initialize app
+        const app = new FemboyHubApp();
 
-        // Global app reference for onclick handlers
-        window.app = null;
+        // Add shake animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                20%, 40%, 60%, 80% { transform: translateX(5px); }
+            }
+            @media (prefers-reduced-motion: no-preference) {
+                .hover-scale:hover { transform: translateY(-2px) scale(1.005) !important; }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
-</html>
+    </html>
