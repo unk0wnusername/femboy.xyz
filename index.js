@@ -367,4 +367,13 @@ document.addEventListener('keydown', e => {
 });
 
 // ─── BOOT ──────────────────────────────────────────────────────────────────────
+// GitHub Pages 404 trick: if we were redirected via 404.html, restore the path
+(function () {
+  const redirect = sessionStorage.getItem('gh_redirect');
+  if (redirect && redirect !== '/') {
+    sessionStorage.removeItem('gh_redirect');
+    window.history.replaceState(null, '', redirect);
+  }
+})();
+
 route();
